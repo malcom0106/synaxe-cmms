@@ -6,7 +6,7 @@ import {
   BarChart, 
   Calendar, 
   FileText, 
-  Tool, 
+  Wrench, 
   Truck, 
   Package, 
   Menu, 
@@ -87,7 +87,7 @@ export const Sidebar: React.FC = () => {
       <nav className="flex flex-1 flex-col gap-1 p-3">
         <NavItem to="/" icon={BarChart} label="Tableau de bord" expanded={expanded} />
         <NavItem to="/preventive" icon={Calendar} label="Maintenance préventive" expanded={expanded} />
-        <NavItem to="/corrective" icon={Tool} label="Maintenance corrective" expanded={expanded} />
+        <NavItem to="/corrective" icon={Wrench} label="Maintenance corrective" expanded={expanded} />
         <NavItem to="/equipment" icon={Truck} label="Équipements" expanded={expanded} />
         <NavItem to="/inventory" icon={Package} label="Stocks" expanded={expanded} />
         <NavItem to="/documents" icon={FileText} label="Documentation" expanded={expanded} />

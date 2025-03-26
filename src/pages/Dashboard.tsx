@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { DashboardCard } from '@/components/dashboard/DashboardCard';
@@ -6,7 +5,7 @@ import { SimpleBarChart, SimplePieChart } from '@/components/dashboard/KPIChart'
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { 
-  TrendingUp, AlertTriangle, Calendar, Clock, Tool, Truck, Package,
+  TrendingUp, AlertTriangle, Calendar, Clock, Wrench, Truck, Package,
   Activity, BarChart3, Settings 
 } from 'lucide-react';
 
@@ -55,7 +54,7 @@ const Dashboard: React.FC = () => {
         <DashboardCard 
           title="Interventions en cours" 
           value="8" 
-          icon={<Tool className="h-5 w-5" />}
+          icon={<Wrench className="h-5 w-5" />}
         />
         <DashboardCard 
           title="Maintenances planifiées" 
