@@ -7,7 +7,7 @@ export const Header: React.FC<{ title?: string }> = ({ title }) => {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white/80 px-6 backdrop-blur-md">
       <div className="flex items-center">
-        <h1 className="text-xl font-semibold text-gray-800">{title || 'Airfuel GMAO'}</h1>
+        <h1 className="text-xl font-semibold text-gray-800">{title || 'Synaxe CMMS'}</h1>
       </div>
 
       <div className="flex items-center gap-4">
