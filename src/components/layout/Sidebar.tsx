@@ -66,7 +66,7 @@ export const Sidebar: React.FC = () => {
               <div className="h-8 w-8 rounded-full bg-airfuel-primary flex items-center justify-center">
                 <span className="text-white font-bold">AF</span>
               </div>
-              <span className="ml-2 font-semibold text-airfuel-dark">Synax CMMS</span>
+              <span className="ml-2 font-semibold text-airfuel-dark">Synaxe CMMS</span>
             </div>
           ) : (
             <div className="h-8 w-8 rounded-full bg-airfuel-primary flex items-center justify-center">
