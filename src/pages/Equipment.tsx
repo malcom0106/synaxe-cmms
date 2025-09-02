@@ -1,8 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Plus, 
   Truck, 
@@ -12,11 +16,23 @@ import {
   FileText,
   Settings,
   ChevronRight,
-  Search
+  Search,
+  Edit
 } from 'lucide-react';
 
-// Demo data for equipment
-const equipmentList = [
+// Equipment type
+interface Equipment {
+  id: string;
+  name: string;
+  type: string;
+  status: 'operational' | 'maintenance_required';
+  lastMaintenance: string;
+  nextMaintenance: string;
+  location: string;
+}
+
+// Initial demo data for equipment
+const initialEquipmentList: Equipment[] = [
   { 
     id: 'EQ001', 
     name: 'Oléoserveur 201', 
@@ -65,6 +81,42 @@ const equipmentList = [
 ];
 
 const Equipment: React.FC = () => {
+  const [equipmentList, setEquipmentList] = useState<Equipment[]>(initialEquipmentList);
+  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState<Equipment>({
+    id: '',
+    name: '',
+    type: '',
+    status: 'operational',
+    lastMaintenance: '',
+    nextMaintenance: '',
+    location: ''
+  });
+
+  const openEditModal = (equipment: Equipment) => {
+    setEditForm(equipment);
+    setSelectedEquipment(equipment);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    setEquipmentList(prev => 
+      prev.map(item => 
+        item.id === editForm.id ? editForm : item
+      )
+    );
+    setIsEditModalOpen(false);
+    setSelectedEquipment(null);
+  };
+
+  const handleFormChange = (field: keyof Equipment, value: string) => {
+    setEditForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto animate-fade-in">
       <PageTitle 
@@ -191,6 +243,14 @@ const Equipment: React.FC = () => {
                       <Button variant="ghost" size="sm" className="h-8 px-2">
                         <FileText className="h-4 w-4 text-gray-500" />
                       </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 px-2"
+                        onClick={() => openEditModal(equipment)}
+                      >
+                        <Edit className="h-4 w-4 text-gray-500" />
+                      </Button>
                       <Button variant="ghost" size="sm" className="h-8 px-2">
                         <ChevronRight className="h-4 w-4 text-gray-500" />
                       </Button>
@@ -213,6 +273,95 @@ const Equipment: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* Modal de modification */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Modifier l'équipement</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nom de l'équipement</Label>
+                <Input
+                  id="name"
+                  value={editForm.name}
+                  onChange={(e) => handleFormChange('name', e.target.value)}
+                  placeholder="Nom de l'équipement"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="type">Type</Label>
+                <Select value={editForm.type} onValueChange={(value) => handleFormChange('type', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Oléoserveur">Oléoserveur</SelectItem>
+                    <SelectItem value="Compteur">Compteur</SelectItem>
+                    <SelectItem value="Citerne">Citerne</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="location">Localisation</Label>
+                <Input
+                  id="location"
+                  value={editForm.location}
+                  onChange={(e) => handleFormChange('location', e.target.value)}
+                  placeholder="Localisation"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="status">Statut</Label>
+                <Select value={editForm.status} onValueChange={(value) => handleFormChange('status', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="operational">Opérationnel</SelectItem>
+                    <SelectItem value="maintenance_required">Maintenance requise</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="lastMaintenance">Dernière maintenance</Label>
+                <Input
+                  id="lastMaintenance"
+                  value={editForm.lastMaintenance}
+                  onChange={(e) => handleFormChange('lastMaintenance', e.target.value)}
+                  placeholder="DD/MM/YYYY"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="nextMaintenance">Prochaine maintenance</Label>
+                <Input
+                  id="nextMaintenance"
+                  value={editForm.nextMaintenance}
+                  onChange={(e) => handleFormChange('nextMaintenance', e.target.value)}
+                  placeholder="DD/MM/YYYY"
+                />
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={handleSaveEdit} className="btn-primary">
+              Sauvegarder
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
