@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import PreventiveMaintenance from "./pages/PreventiveMaintenance";
 import CorrectiveMaintenance from "./pages/CorrectiveMaintenance";
 import Equipment from "./pages/Equipment";
+import EquipmentDetail from "./pages/EquipmentDetail";
 import Inventory from "./pages/Inventory";
 import Documents from "./pages/Documents";
 import NotFound from "./pages/NotFound";
@@ -32,6 +33,7 @@ const App = () => (
                 <Route path="/preventive" element={<PreventiveMaintenance />} />
                 <Route path="/corrective" element={<CorrectiveMaintenance />} />
                 <Route path="/equipment" element={<Equipment />} />
+                <Route path="/equipment/:id" element={<EquipmentDetail />} />
                 <Route path="/inventory" element={<Inventory />} />
                 <Route path="/documents" element={<Documents />} />
                 <Route path="*" element={<NotFound />} />

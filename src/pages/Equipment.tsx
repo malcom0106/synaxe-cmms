@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
@@ -81,6 +82,7 @@ const initialEquipmentList: Equipment[] = [
 ];
 
 const Equipment: React.FC = () => {
+  const navigate = useNavigate();
   const [equipmentList, setEquipmentList] = useState<Equipment[]>(initialEquipmentList);
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -207,7 +209,11 @@ const Equipment: React.FC = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {equipmentList.map((equipment) => (
-                <tr key={equipment.id} className="hover:bg-gray-50 transition-colors">
+                <tr 
+                  key={equipment.id} 
+                  className="hover:bg-gray-50 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/equipment/${equipment.id}`)}
+                >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {equipment.id}
                   </td>
@@ -247,7 +253,10 @@ const Equipment: React.FC = () => {
                         variant="ghost" 
                         size="sm" 
                         className="h-8 px-2"
-                        onClick={() => openEditModal(equipment)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditModal(equipment);
+                        }}
                       >
                         <Edit className="h-4 w-4 text-gray-500" />
                       </Button>
