@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { ArrowLeft, Truck, MapPin, Calendar, Clock, User } from 'lucide-react';
+import { ArrowLeft, Truck, MapPin, Calendar, Clock, User, Upload, FileText, Download, Eye } from 'lucide-react';
 
 // Mock data - same structure as Equipment page
 const equipmentData = {
@@ -96,6 +96,31 @@ const mockChildren = [
   { id: 'EQ-CH-002', name: 'Filtre A', type: 'Filtre', status: 'operational' },
   { id: 'EQ-CH-003', name: 'Vanne de sécurité', type: 'Vanne', status: 'maintenance_required' },
   { id: 'EQ-CH-004', name: 'Capteur de pression', type: 'Capteur', status: 'operational' },
+];
+
+// Mock documents
+const mockDocuments = [
+  {
+    id: 'DOC-001',
+    name: 'Manuel_utilisation.pdf',
+    uploadedBy: 'Marie Dubois',
+    uploadedAt: '2023-05-15',
+    size: '2.4 MB'
+  },
+  {
+    id: 'DOC-002',
+    name: 'Certificat_conformité.pdf',
+    uploadedBy: 'Jean Martin',
+    uploadedAt: '2023-06-01',
+    size: '1.1 MB'
+  },
+  {
+    id: 'DOC-003',
+    name: 'Rapport_inspection.pdf',
+    uploadedBy: 'Sophie Bernard',
+    uploadedAt: '2023-06-10',
+    size: '3.8 MB'
+  },
 ];
 
 const EquipmentDetail: React.FC = () => {
@@ -201,6 +226,45 @@ const EquipmentDetail: React.FC = () => {
                     />
                   </div>
                   <div className="text-sm text-muted-foreground">{child.type} - {child.id}</div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Documents */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-foreground">Documents</h2>
+              <Button size="sm">
+                <Upload className="h-4 w-4 mr-2" />
+                Ajouter
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {mockDocuments.map((doc) => (
+                <div 
+                  key={doc.id}
+                  className="p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3 flex-1">
+                      <FileText className="h-5 w-5 text-primary mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-foreground truncate">{doc.name}</div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {doc.size} • {doc.uploadedBy} • {doc.uploadedAt}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-1 ml-2">
+                      <Button variant="ghost" size="sm">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
