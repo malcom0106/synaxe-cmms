@@ -233,7 +233,9 @@ const EquipmentDetail: React.FC = () => {
         {/* Equipment Information */}
         <Card className="p-6">
           <h2 className="text-xl font-semibold text-foreground mb-4">Informations</h2>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+          
+          {/* Premier groupe d'informations */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-6">
             <div>
               <div className="text-sm text-muted-foreground mb-1">Référence</div>
               <div className="font-medium text-foreground">{equipment.id}</div>
@@ -272,7 +274,13 @@ const EquipmentDetail: React.FC = () => {
                 <div></div>
               </>
             )}
+          </div>
 
+          {/* Séparateur */}
+          <div className="border-t border-border mb-6"></div>
+
+          {/* Deuxième groupe d'informations */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div>
               <div className="text-sm text-muted-foreground mb-1">Statut</div>
               <StatusBadge 
