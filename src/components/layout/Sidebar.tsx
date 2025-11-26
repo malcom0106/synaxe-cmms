@@ -5,13 +5,13 @@ import {
   Settings, 
   BarChart, 
   Calendar, 
-  FileText, 
   Wrench, 
-  Truck, 
-  Package, 
-  Menu, 
-  X, 
-  ChevronRight
+  Box, 
+  TriangleAlert,
+  Globe,
+  LogOut,
+  ChevronLeft,
+  Package
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -27,75 +27,86 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon: Icon, label, expanded }) =>
   <NavLink 
     to={to} 
     className={({ isActive }) => cn(
-      "group relative flex h-12 items-center overflow-hidden rounded-lg transition-all duration-300 ease-in-out",
-      expanded ? "w-full px-4" : "w-12 justify-center",
+      "flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md",
       isActive 
-        ? "bg-airfuel-primary/10 text-airfuel-primary" 
-        : "text-gray-600 hover:bg-gray-100"
+        ? "bg-primary/10 text-primary" 
+        : "text-foreground hover:bg-muted"
     )}
   >
-    <Icon className={cn("h-5 w-5 shrink-0", expanded ? "mr-3" : "")} />
-    <span className={cn(
-      "absolute left-12 whitespace-nowrap transition-all duration-300", 
-      expanded ? "opacity-100" : "opacity-0"
-    )}>
-      {label}
-    </span>
-    {!expanded && (
-      <div className="absolute left-14 z-10 ml-4 hidden w-auto min-w-[180px] rounded-md bg-white px-2 py-1 shadow-md group-hover:block">
-        <span className="block text-sm font-medium text-gray-700">{label}</span>
-      </div>
-    )}
+    <Icon className="h-5 w-5 shrink-0" />
+    <span>{label}</span>
   </NavLink>
 );
 
 export const Sidebar: React.FC = () => {
-  const [expanded, setExpanded] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <aside 
       className={cn(
-        "flex h-screen flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out",
-        expanded ? "w-64" : "w-16"
+        "flex h-screen flex-col border-r border-border bg-card transition-all duration-300",
+        collapsed ? "w-16" : "w-64"
       )}
     >
-      <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
-        <div className={cn("flex items-center", expanded ? "justify-start" : "justify-center w-full")}>
-          {expanded ? (
-            <div className="flex items-center">
-              <div className="h-8 w-8 rounded-full bg-airfuel-primary flex items-center justify-center">
-                <span className="text-white font-bold">AF</span>
-              </div>
-              <span className="ml-2 font-semibold text-airfuel-dark">Synaxe CMMS</span>
-            </div>
-          ) : (
-            <div className="h-8 w-8 rounded-full bg-airfuel-primary flex items-center justify-center">
-              <span className="text-white font-bold">AF</span>
-            </div>
-          )}
+      {/* Header with Logo */}
+      <div className="flex items-center gap-3 border-b border-border p-4">
+        <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center shrink-0">
+          <Package className="h-6 w-6 text-primary-foreground" />
         </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => setExpanded(!expanded)}
-          className={cn("hidden sm:flex", !expanded && "w-full justify-center")}
-        >
-          {expanded ? <ChevronRight className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-        </Button>
+        {!collapsed && (
+          <div className="flex-1">
+            <h1 className="text-base font-semibold text-foreground">Synaxe CMMS</h1>
+            <p className="text-xs text-muted-foreground">Gestion de maintenance</p>
+          </div>
+        )}
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1 p-3">
-        <NavItem to="/" icon={BarChart} label="Tableau de bord" expanded={expanded} />
-        <NavItem to="/preventive" icon={Calendar} label="Maintenance préventive" expanded={expanded} />
-        <NavItem to="/corrective" icon={Wrench} label="Maintenance corrective" expanded={expanded} />
-        <NavItem to="/equipment" icon={Truck} label="Équipements" expanded={expanded} />
-        <NavItem to="/inventory" icon={Package} label="Stocks" expanded={expanded} />
-        <NavItem to="/documents" icon={FileText} label="Documentation" expanded={expanded} />
+      {/* Navigation */}
+      <nav className="flex-1 p-3 space-y-1">
+        <NavItem to="/" icon={BarChart} label="Tableau de bord" expanded={!collapsed} />
+        <NavItem to="/maintenance" icon={Wrench} label="Interventions de maintenance" expanded={!collapsed} />
+        <NavItem to="/calendar" icon={Calendar} label="Calendrier" expanded={!collapsed} />
+        <NavItem to="/equipment" icon={Box} label="Équipements" expanded={!collapsed} />
+        <NavItem to="/anomalies" icon={TriangleAlert} label="Anomalies" expanded={!collapsed} />
+        <NavItem to="/settings" icon={Settings} label="Paramètres" expanded={!collapsed} />
       </nav>
 
-      <div className="mt-auto border-t border-gray-200 p-3">
-        <NavItem to="/settings" icon={Settings} label="Paramètres" expanded={expanded} />
-      </div>
+      {/* Footer */}
+      {!collapsed && (
+        <div className="border-t border-border">
+          {/* Language Selector */}
+          <button className="flex items-center gap-3 px-4 py-3 text-sm text-muted-foreground hover:bg-muted w-full transition-colors">
+            <Globe className="h-5 w-5" />
+            <span>Changer la langue</span>
+          </button>
+
+          {/* User Profile */}
+          <div className="p-4 bg-muted/30">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <span className="text-sm font-semibold text-primary">AB</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">Adélaïde BRUNIN</p>
+                <p className="text-xs text-muted-foreground truncate">abrunin@synaxe.com</p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" className="w-full justify-start gap-2">
+              <LogOut className="h-4 w-4" />
+              <span>Se déconnecter</span>
+            </Button>
+            <p className="text-xs text-muted-foreground text-center mt-3">V 1.0.1</p>
+          </div>
+        </div>
+      )}
+
+      {/* Collapse Toggle */}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-6 w-6 rounded-full bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors"
+      >
+        <ChevronLeft className={cn("h-4 w-4 transition-transform", collapsed && "rotate-180")} />
+      </button>
     </aside>
   );
 };
