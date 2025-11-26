@@ -280,7 +280,7 @@ const EquipmentDetail: React.FC = () => {
           <div className="border-t border-border mb-6"></div>
 
           {/* Deuxième groupe d'informations */}
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-6">
             <div>
               <div className="text-sm text-muted-foreground mb-1">Statut</div>
               <StatusBadge 
@@ -296,7 +296,13 @@ const EquipmentDetail: React.FC = () => {
                 label={equipment.status === 'operational' ? 'Opérationnel' : 'Maintenance requise'} 
               />
             </div>
+          </div>
 
+          {/* Séparateur */}
+          <div className="border-t border-border mb-6"></div>
+
+          {/* Troisième groupe d'informations */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div>
               <div className="text-sm text-muted-foreground mb-1">Dernière maintenance</div>
               <div className="flex items-center text-foreground">
