@@ -211,7 +211,7 @@ const EquipmentDetail: React.FC = () => {
 
           {/* Associated Children */}
           <Card className="p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Composants associés</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">Enfants</h2>
             <div className="space-y-3">
               {mockChildren.map((child) => (
                 <div 
