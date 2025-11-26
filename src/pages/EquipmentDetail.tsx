@@ -188,9 +188,9 @@ const EquipmentDetail: React.FC = () => {
       </Button>
 
       <Tabs defaultValue="equipment" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="equipment">Équipement</TabsTrigger>
-          <TabsTrigger value="interventions">Liste des interventions</TabsTrigger>
+        <TabsList className="mb-6 w-full justify-start">
+          <TabsTrigger value="equipment" className="flex-1">Équipement</TabsTrigger>
+          <TabsTrigger value="interventions" className="flex-1">Liste des interventions</TabsTrigger>
         </TabsList>
 
         <TabsContent value="equipment" className="mt-0">
