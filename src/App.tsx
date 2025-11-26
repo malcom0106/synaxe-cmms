@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import Dashboard from "./pages/Dashboard";
 import Maintenance from "./pages/Maintenance";
 import PreventiveMaintenance from "./pages/PreventiveMaintenance";
@@ -27,7 +26,6 @@ const App = () => (
         <div className="flex h-screen w-full overflow-hidden">
           <Sidebar />
           <div className="flex flex-1 flex-col overflow-hidden">
-            <Header />
             <main className="flex-1 overflow-auto bg-background">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
