@@ -230,12 +230,10 @@ const EquipmentDetail: React.FC = () => {
 
         <TabsContent value="equipment" className="mt-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Equipment Information */}
+        {/* Equipment Information - Premier encart */}
         <Card className="p-6">
           <h2 className="text-xl font-semibold text-foreground mb-4">Informations</h2>
-          
-          {/* Premier groupe d'informations */}
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-6">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div>
               <div className="text-sm text-muted-foreground mb-1">Référence</div>
               <div className="font-medium text-foreground">{equipment.id}</div>
@@ -275,9 +273,11 @@ const EquipmentDetail: React.FC = () => {
               </>
             )}
           </div>
+        </Card>
 
-          {/* Deuxième groupe d'informations */}
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-6">
+        {/* Statut - Deuxième encart */}
+        <Card className="p-6">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div>
               <div className="text-sm text-muted-foreground mb-1">Statut</div>
               <StatusBadge 
@@ -294,8 +294,10 @@ const EquipmentDetail: React.FC = () => {
               />
             </div>
           </div>
+        </Card>
 
-          {/* Troisième groupe d'informations */}
+        {/* Maintenance - Troisième encart */}
+        <Card className="p-6">
           <div className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div>
               <div className="text-sm text-muted-foreground mb-1">Dernière maintenance</div>
