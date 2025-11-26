@@ -230,6 +230,48 @@ const EquipmentDetail: React.FC = () => {
               ))}
             </div>
           </Card>
+        </div>
+
+        {/* Right column - Modification history and documents */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Modification History */}
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold text-foreground mb-6">Historique des modifications</h2>
+            <div className="space-y-3">
+              {mockHistory.map((entry) => (
+                <div 
+                  key={entry.id}
+                  className="flex items-start gap-3 p-3 hover:bg-accent/30 rounded-lg transition-colors"
+                >
+                  {/* Avatar with initials */}
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-semibold text-primary">
+                      {entry.user.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <p className="text-sm">
+                          <span className="font-semibold text-foreground">{entry.user}</span>
+                          {' '}a mis à jour{' '}
+                          <span className="font-semibold text-foreground">{entry.field}</span>
+                        </p>
+                        <div className="flex items-center gap-2 mt-1 text-sm">
+                          <span className="text-muted-foreground line-through">{entry.oldValue}</span>
+                          <span className="text-muted-foreground">→</span>
+                          <span className="text-foreground font-medium">{entry.newValue}</span>
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">{entry.date}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
 
           {/* Documents */}
           <Card className="p-6">
@@ -263,45 +305,6 @@ const EquipmentDetail: React.FC = () => {
                       <Button variant="ghost" size="sm">
                         <Download className="h-4 w-4" />
                       </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </div>
-
-        {/* Right column - Modification history */}
-        <div className="lg:col-span-2">
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-6">Historique des modifications</h2>
-            <div className="space-y-4">
-              {mockHistory.map((entry) => (
-                <div 
-                  key={entry.id}
-                  className="p-4 border border-border rounded-lg hover:bg-accent/30 transition-colors"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <User className="h-4 w-4 mr-2" />
-                      <span className="font-medium text-foreground">{entry.user}</span>
-                    </div>
-                    <div className="text-sm text-muted-foreground">{entry.date}</div>
-                  </div>
-                  
-                  <div className="bg-muted/30 p-3 rounded-md">
-                    <div className="text-sm font-medium text-foreground mb-2">
-                      Champ modifié: {entry.field}
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <div className="text-muted-foreground mb-1">Ancienne valeur</div>
-                        <div className="text-foreground line-through opacity-60">{entry.oldValue}</div>
-                      </div>
-                      <div>
-                        <div className="text-muted-foreground mb-1">Nouvelle valeur</div>
-                        <div className="text-foreground font-medium">{entry.newValue}</div>
-                      </div>
                     </div>
                   </div>
                 </div>
