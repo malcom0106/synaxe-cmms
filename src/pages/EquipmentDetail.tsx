@@ -99,6 +99,12 @@ const mockChildren = [
   { id: 'EQ-CH-002', name: 'Filtre A', type: 'Filtre', status: 'operational' },
   { id: 'EQ-CH-003', name: 'Vanne de sécurité', type: 'Vanne', status: 'maintenance_required' },
   { id: 'EQ-CH-004', name: 'Capteur de pression', type: 'Capteur', status: 'operational' },
+  { id: 'EQ-CH-005', name: 'Pompe secondaire', type: 'Pompe', status: 'operational' },
+  { id: 'EQ-CH-006', name: 'Filtre B', type: 'Filtre', status: 'maintenance_required' },
+  { id: 'EQ-CH-007', name: 'Vanne principale', type: 'Vanne', status: 'operational' },
+  { id: 'EQ-CH-008', name: 'Capteur de température', type: 'Capteur', status: 'operational' },
+  { id: 'EQ-CH-009', name: 'Régulateur de débit', type: 'Régulateur', status: 'operational' },
+  { id: 'EQ-CH-010', name: 'Manomètre', type: 'Manomètre', status: 'maintenance_required' },
 ];
 
 // Mock documents
@@ -272,23 +278,31 @@ const EquipmentDetail: React.FC = () => {
 
         {/* Associated Children */}
         <Card className="p-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Enfants</h2>
-          <div className="space-y-3">
-            {mockChildren.map((child) => (
-              <div 
-                key={child.id}
-                className="p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-medium text-foreground">{child.name}</div>
-                  <StatusBadge 
-                    status={child.status === 'operational' ? 'success' : 'warning'} 
-                    label={child.status === 'operational' ? 'OK' : 'Attention'} 
-                  />
-                </div>
-                <div className="text-sm text-muted-foreground">{child.type} - {child.id}</div>
-              </div>
-            ))}
+          <h2 className="text-xl font-semibold text-foreground mb-4">Équipements enfants</h2>
+          <div className="rounded-md border max-h-[400px] overflow-y-auto">
+            <Table>
+              <TableHeader className="sticky top-0 bg-background">
+                <TableRow>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Référence externe</TableHead>
+                  <TableHead>Statut</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mockChildren.map((child) => (
+                  <TableRow key={child.id}>
+                    <TableCell className="font-medium">{child.name}</TableCell>
+                    <TableCell>{child.id}</TableCell>
+                    <TableCell>
+                      <StatusBadge 
+                        status={child.status === 'operational' ? 'success' : 'warning'} 
+                        label={child.status === 'operational' ? 'Opérationnel' : 'Maintenance requise'} 
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </Card>
 
