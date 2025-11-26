@@ -277,7 +277,11 @@ const EquipmentDetail: React.FC = () => {
           </div>
 
           {/* Séparateur */}
-          <div className="border-t border-border mb-6"></div>
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-2 h-2 bg-primary rounded-sm"></div>
+            <div className="w-2 h-2 bg-primary/60 rounded-sm"></div>
+            <div className="w-2 h-2 bg-primary/30 rounded-sm"></div>
+          </div>
 
           {/* Deuxième groupe d'informations */}
           <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-6">
@@ -299,7 +303,11 @@ const EquipmentDetail: React.FC = () => {
           </div>
 
           {/* Séparateur */}
-          <div className="border-t border-border mb-6"></div>
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-2 h-2 bg-primary rounded-sm"></div>
+            <div className="w-2 h-2 bg-primary/60 rounded-sm"></div>
+            <div className="w-2 h-2 bg-primary/30 rounded-sm"></div>
+          </div>
 
           {/* Troisième groupe d'informations */}
           <div className="grid grid-cols-2 gap-x-6 gap-y-4">
