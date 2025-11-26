@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Truck, MapPin, Calendar, Clock, User, Upload, FileText, Download, Eye } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ArrowLeft, Truck, MapPin, Calendar, Clock, User, Upload, FileText, Download, Eye, ChevronRight } from 'lucide-react';
 
 // Mock data - same structure as Equipment page
 const equipmentData = {
@@ -128,35 +130,51 @@ const mockDocuments = [
 const mockInterventions = [
   {
     id: 'INT-001',
-    date: '2023-06-15',
-    type: 'Maintenance préventive',
-    technicien: 'Jean Martin',
-    status: 'completed',
-    description: 'Vérification générale et remplacement des filtres'
+    number: '#363',
+    equipmentName: 'Oléoserveur 201',
+    equipmentId: 'EQ001',
+    gamme: 'Maintenance préventive',
+    assignedTo: 'Jean Martin',
+    assignedEmail: 'jmartin@example.com',
+    plannedDate: '30/09/2025 04:00',
+    completedDate: '30/10/2025 15:54',
+    status: 'completed'
   },
   {
     id: 'INT-002',
-    date: '2023-06-10',
-    type: 'Réparation',
-    technicien: 'Marie Dubois',
-    status: 'completed',
-    description: 'Remplacement de la pompe défectueuse'
+    number: '#367',
+    equipmentName: 'Oléoserveur 202',
+    equipmentId: 'EQ002',
+    gamme: 'Réparation',
+    assignedTo: 'Non attribué',
+    assignedEmail: null,
+    plannedDate: '30/09/2025 04:00',
+    completedDate: '03/10/2025 16:03',
+    status: 'completed'
   },
   {
     id: 'INT-003',
-    date: '2023-05-22',
-    type: 'Inspection',
-    technicien: 'Sophie Bernard',
-    status: 'completed',
-    description: 'Inspection annuelle réglementaire'
+    number: '#364',
+    equipmentName: 'Oléoserveur 203',
+    equipmentId: 'EQ003',
+    gamme: 'Inspection',
+    assignedTo: 'Sophie Bernard',
+    assignedEmail: 'sbernard@example.com',
+    plannedDate: '30/09/2025 04:00',
+    completedDate: '03/10/2025 17:43',
+    status: 'completed'
   },
   {
     id: 'INT-004',
-    date: '2023-05-15',
-    type: 'Maintenance préventive',
-    technicien: 'Pierre Lefebvre',
-    status: 'completed',
-    description: 'Contrôle des niveaux et graissage'
+    number: '#373',
+    equipmentName: 'Compteur Zone 1',
+    equipmentId: 'EQ004',
+    gamme: 'Maintenance préventive',
+    assignedTo: 'Non attribué',
+    assignedEmail: null,
+    plannedDate: '29/10/2025 01:00',
+    completedDate: 'Non définie',
+    status: 'planned'
   },
 ];
 
@@ -354,37 +372,74 @@ const EquipmentDetail: React.FC = () => {
 
         <TabsContent value="interventions" className="mt-0">
           <Card className="p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-6">Liste des interventions</h2>
-            <div className="space-y-3">
-              {mockInterventions.map((intervention) => (
-                <div 
-                  key={intervention.id}
-                  className="p-4 border border-border rounded-lg hover:bg-accent/30 transition-colors"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="font-semibold text-foreground">{intervention.type}</span>
+            <h2 className="text-xl font-semibold text-foreground mb-6">Liste des Interventions</h2>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[50px]">
+                      <Checkbox />
+                    </TableHead>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Équipement</TableHead>
+                    <TableHead>Gamme</TableHead>
+                    <TableHead>Attribué à</TableHead>
+                    <TableHead>Date planifiée</TableHead>
+                    <TableHead>Date réalisée</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockInterventions.map((intervention) => (
+                    <TableRow key={intervention.id}>
+                      <TableCell>
+                        <Checkbox />
+                      </TableCell>
+                      <TableCell className="font-medium">{intervention.number}</TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium text-foreground">{intervention.equipmentName}</div>
+                          <div className="text-sm text-muted-foreground">ID: {intervention.equipmentId}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{intervention.gamme}</TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="text-foreground">{intervention.assignedTo}</div>
+                          {intervention.assignedEmail && (
+                            <div className="text-sm text-muted-foreground">{intervention.assignedEmail}</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          {intervention.plannedDate}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          {intervention.completedDate}
+                        </div>
+                      </TableCell>
+                      <TableCell>
                         <StatusBadge 
-                          status="success" 
-                          label="Terminée" 
+                          status={intervention.status === 'completed' ? 'success' : 'info'} 
+                          label={intervention.status === 'completed' ? 'Terminé' : 'Planifié'} 
                         />
-                      </div>
-                      <p className="text-sm text-foreground mb-2">{intervention.description}</p>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {intervention.date}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <User className="h-3 w-3" />
-                          {intervention.technicien}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="outline" size="sm">
+                          Détails
+                          <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </Card>
         </TabsContent>
