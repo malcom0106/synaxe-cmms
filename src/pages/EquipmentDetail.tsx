@@ -230,122 +230,125 @@ const EquipmentDetail: React.FC = () => {
 
         <TabsContent value="equipment" className="mt-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Equipment Information - Premier encart */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Informations</h2>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Référence</div>
-              <div className="font-medium text-foreground">{equipment.id}</div>
-            </div>
-            
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Nom</div>
-              <div className="font-medium text-foreground">{equipment.name}</div>
-            </div>
+            {/* Colonne gauche - 3 encarts empilés */}
+            <div className="space-y-6">
+              {/* Equipment Information - Premier encart */}
+              <Card className="p-6">
+                <h2 className="text-xl font-semibold text-foreground mb-4">Informations</h2>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Référence</div>
+                    <div className="font-medium text-foreground">{equipment.id}</div>
+                  </div>
+                  
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Nom</div>
+                    <div className="font-medium text-foreground">{equipment.name}</div>
+                  </div>
 
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Type</div>
-              <div className="flex items-center text-foreground">
-                <Truck className="h-4 w-4 mr-2 text-muted-foreground" />
-                {equipment.type}
-              </div>
-            </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Type</div>
+                    <div className="flex items-center text-foreground">
+                      <Truck className="h-4 w-4 mr-2 text-muted-foreground" />
+                      {equipment.type}
+                    </div>
+                  </div>
 
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Localisation</div>
-              <div className="flex items-center text-foreground">
-                <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                {equipment.location}
-              </div>
-            </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Localisation</div>
+                    <div className="flex items-center text-foreground">
+                      <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                      {equipment.location}
+                    </div>
+                  </div>
 
-            {equipment.parent && (
-              <>
-                <div>
-                  <div className="text-sm text-muted-foreground mb-1">Équipement parent</div>
-                  <div className="flex items-center text-foreground">
-                    <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                    {equipment.parent}
+                  {equipment.parent && (
+                    <>
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">Équipement parent</div>
+                        <div className="flex items-center text-foreground">
+                          <User className="h-4 w-4 mr-2 text-muted-foreground" />
+                          {equipment.parent}
+                        </div>
+                      </div>
+                      <div></div>
+                    </>
+                  )}
+                </div>
+              </Card>
+
+              {/* Statut - Deuxième encart */}
+              <Card className="p-6">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Statut</div>
+                    <StatusBadge 
+                      status={equipment.active ? 'success' : 'danger'} 
+                      label={equipment.active ? 'Actif' : 'Inactif'} 
+                    />
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">État</div>
+                    <StatusBadge 
+                      status={equipment.status === 'operational' ? 'success' : 'warning'} 
+                      label={equipment.status === 'operational' ? 'Opérationnel' : 'Maintenance requise'} 
+                    />
                   </div>
                 </div>
-                <div></div>
-              </>
-            )}
-          </div>
-        </Card>
+              </Card>
 
-        {/* Statut - Deuxième encart */}
-        <Card className="p-6">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Statut</div>
-              <StatusBadge 
-                status={equipment.active ? 'success' : 'danger'} 
-                label={equipment.active ? 'Actif' : 'Inactif'} 
-              />
+              {/* Maintenance - Troisième encart */}
+              <Card className="p-6">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Dernière maintenance</div>
+                    <div className="flex items-center text-foreground">
+                      <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                      {equipment.lastMaintenance}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Prochaine maintenance</div>
+                    <div className="flex items-center text-foreground">
+                      <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                      {equipment.nextMaintenance}
+                    </div>
+                  </div>
+                </div>
+              </Card>
             </div>
 
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">État</div>
-              <StatusBadge 
-                status={equipment.status === 'operational' ? 'success' : 'warning'} 
-                label={equipment.status === 'operational' ? 'Opérationnel' : 'Maintenance requise'} 
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* Maintenance - Troisième encart */}
-        <Card className="p-6">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Dernière maintenance</div>
-              <div className="flex items-center text-foreground">
-                <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                {equipment.lastMaintenance}
+            {/* Colonne droite - Associated Children */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold text-foreground mb-4">Équipements enfants</h2>
+              <div className="rounded-md border max-h-[400px] overflow-y-auto">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-background">
+                    <TableRow>
+                      <TableHead>Nom</TableHead>
+                      <TableHead>Référence externe</TableHead>
+                      <TableHead>Statut</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mockChildren.map((child) => (
+                      <TableRow key={child.id}>
+                        <TableCell className="font-medium">{child.name}</TableCell>
+                        <TableCell>{child.externalRef}</TableCell>
+                        <TableCell>
+                          <StatusBadge 
+                            status={child.status === 'operational' ? 'success' : 'warning'} 
+                            label={child.status === 'operational' ? 'Opérationnel' : 'Maintenance requise'} 
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
-            </div>
-
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Prochaine maintenance</div>
-              <div className="flex items-center text-foreground">
-                <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                {equipment.nextMaintenance}
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Associated Children */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Équipements enfants</h2>
-          <div className="rounded-md border max-h-[400px] overflow-y-auto">
-            <Table>
-              <TableHeader className="sticky top-0 bg-background">
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Référence externe</TableHead>
-                  <TableHead>Statut</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockChildren.map((child) => (
-                  <TableRow key={child.id}>
-                    <TableCell className="font-medium">{child.name}</TableCell>
-                    <TableCell>{child.externalRef}</TableCell>
-                    <TableCell>
-                      <StatusBadge 
-                        status={child.status === 'operational' ? 'success' : 'warning'} 
-                        label={child.status === 'operational' ? 'Opérationnel' : 'Maintenance requise'} 
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </Card>
+            </Card>
 
         {/* Documents */}
         <Card className="p-6 lg:col-span-2">
