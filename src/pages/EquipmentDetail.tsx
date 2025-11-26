@@ -2,195 +2,165 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { StatusBadge } from '@/components/ui/StatusBadge';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Truck, MapPin, Calendar, Clock, User, Upload, FileText, Download, Eye, ChevronRight } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Calendar, 
+  Clock, 
+  Download, 
+  Eye, 
+  FileText, 
+  ChevronRight 
+} from 'lucide-react';
 
-// Mock data - same structure as Equipment page
+// Mock data
 const equipmentData = {
   'EQ001': { 
-    id: 'EQ001', 
+    id: 'EQ001',
+    reference: 'EQ001',
     name: 'Oléoserveur 201', 
-    type: 'Oléoserveur', 
-    status: 'operational',
-    active: true,
+    type: 'Oléoserveur',
+    location: 'Zone A',
+    parent: 'Système principal A',
+    status: 'Actif',
+    state: 'Opérationnel',
     lastMaintenance: '15/04/2023',
-    nextMaintenance: '15/06/2023',
+    nextMaintenance: '15/06/2023'
+  },
+  '202': { 
+    id: '202',
+    reference: 'EQ001',
+    name: 'Oléoserveur 201', 
+    type: 'Oléoserveur',
     location: 'Zone A',
-    parent: 'Système principal A'
-  },
-  'EQ002': { 
-    id: 'EQ002', 
-    name: 'Oléoserveur 202', 
-    type: 'Oléoserveur', 
-    status: 'maintenance_required',
-    active: false,
-    lastMaintenance: '10/03/2023',
-    nextMaintenance: '10/05/2023',
-    location: 'Zone A',
-    parent: 'Système principal A'
-  },
-  'EQ003': { 
-    id: 'EQ003', 
-    name: 'Oléoserveur 203', 
-    type: 'Oléoserveur', 
-    status: 'operational',
-    active: true,
-    lastMaintenance: '20/04/2023',
-    nextMaintenance: '20/06/2023',
-    location: 'Zone B',
-    parent: 'Système principal B'
-  },
-  'EQ004': { 
-    id: 'EQ004', 
-    name: 'Compteur Zone 1', 
-    type: 'Compteur', 
-    status: 'operational',
-    active: true,
-    lastMaintenance: '05/05/2023',
-    nextMaintenance: '05/11/2023',
-    location: 'Zone 1',
-    parent: null
-  },
-  'EQ005': { 
-    id: 'EQ005', 
-    name: 'Citerne principale', 
-    type: 'Citerne', 
-    status: 'operational',
-    active: true,
-    lastMaintenance: '01/02/2023',
-    nextMaintenance: '01/08/2023',
-    location: 'Dépôt',
-    parent: null
+    parent: 'Système principal A',
+    status: 'Actif',
+    state: 'Opérationnel',
+    lastMaintenance: '15/04/2023',
+    nextMaintenance: '15/06/2023'
   },
 };
 
-// Mock modification history
-const mockHistory = [
-  {
-    id: 1,
-    date: '2023-06-15 14:32',
-    user: 'Marie Dubois',
-    field: 'Statut',
-    oldValue: 'Maintenance requise',
-    newValue: 'Opérationnel',
-  },
-  {
-    id: 2,
-    date: '2023-06-10 09:15',
-    user: 'Jean Martin',
-    field: 'Dernière maintenance',
-    oldValue: '10/03/2023',
-    newValue: '10/06/2023',
-  },
-  {
-    id: 3,
-    date: '2023-05-22 16:45',
-    user: 'Sophie Bernard',
-    field: 'Localisation',
-    oldValue: 'Zone B',
-    newValue: 'Zone A',
-  },
-  {
-    id: 4,
-    date: '2023-05-15 11:20',
-    user: 'Pierre Lefebvre',
-    field: 'Type',
-    oldValue: 'Compteur',
-    newValue: 'Oléoserveur',
-  },
-];
-
-// Mock children equipment
 const mockChildren = [
-  { id: 'EQ-CH-001', name: 'Pompe principale', externalRef: 'VISPOMP448', status: 'operational' },
-  { id: 'EQ-CH-002', name: 'Filtre A', externalRef: 'VISFIL001', status: 'operational' },
-  { id: 'EQ-CH-003', name: 'Vanne de sécurité', externalRef: 'VISVAN123', status: 'maintenance_required' },
-  { id: 'EQ-CH-004', name: 'Capteur de pression', externalRef: 'VISCAP789', status: 'operational' },
-  { id: 'EQ-CH-005', name: 'Pompe secondaire', externalRef: 'VISPOMP449', status: 'operational' },
-  { id: 'EQ-CH-006', name: 'Filtre B', externalRef: 'VISFIL002', status: 'maintenance_required' },
-  { id: 'EQ-CH-007', name: 'Vanne principale', externalRef: 'VISVAN124', status: 'operational' },
-  { id: 'EQ-CH-008', name: 'Capteur de température', externalRef: 'VISCAP790', status: 'operational' },
-  { id: 'EQ-CH-009', name: 'Régulateur de débit', externalRef: 'VISREG001', status: 'operational' },
-  { id: 'EQ-CH-010', name: 'Manomètre', externalRef: 'VISMAN001', status: 'maintenance_required' },
+  { name: 'Pompe principale', externalRef: 'VISPOMP448', status: 'Opérationnel' },
+  { name: 'Filtre A', externalRef: 'VISFIL001', status: 'Opérationnel' },
+  { name: 'Vanne de sécurité', externalRef: 'VISVAN123', status: 'Maintenance requise' },
+  { name: 'Capteur de pression', externalRef: 'VISCAP789', status: 'Opérationnel' },
+  { name: 'Pompe secondaire', externalRef: 'VISPOMP449', status: 'Opérationnel' },
+  { name: 'Filtre B', externalRef: 'VISFIL002', status: 'Maintenance requise' },
 ];
 
-// Mock documents
 const mockDocuments = [
   {
-    id: 'DOC-001',
     name: 'Manuel_utilisation.pdf',
-    uploadedBy: 'Marie Dubois',
-    uploadedAt: '2023-05-15',
-    size: '2.4 MB'
+    uploadedBy: 'Jean Martin',
+    uploadedAt: '2023-06-01'
   },
   {
-    id: 'DOC-002',
     name: 'Certificat_conformité.pdf',
     uploadedBy: 'Jean Martin',
-    uploadedAt: '2023-06-01',
-    size: '1.1 MB'
+    uploadedAt: '2023-06-01'
   },
   {
-    id: 'DOC-003',
     name: 'Rapport_inspection.pdf',
     uploadedBy: 'Sophie Bernard',
-    uploadedAt: '2023-06-10',
-    size: '3.8 MB'
+    uploadedAt: '2023-06-10'
   },
 ];
 
-// Mock interventions
 const mockInterventions = [
   {
-    id: 'INT-001',
-    number: '#363',
-    equipmentName: 'Oléoserveur 201',
+    id: '#363',
+    equipmentName: 'Oléoserveur',
+    equipmentCode: '202',
     equipmentId: 'EQ001',
     gamme: 'Maintenance préventive',
     assignedTo: 'Jean Martin',
     assignedEmail: 'jmartin@example.com',
-    plannedDate: '30/09/2025 04:00',
-    completedDate: '30/10/2025 15:54',
-    status: 'completed'
+    plannedDate: '30/09/2025',
+    plannedTime: '04:00',
+    completedDate: '30/10/2025',
+    completedTime: '15:54',
+    status: 'Terminé'
   },
   {
-    id: 'INT-002',
-    number: '#367',
-    equipmentName: 'Oléoserveur 202',
+    id: '#367',
+    equipmentName: 'Oléoserveur',
+    equipmentCode: '202',
     equipmentId: 'EQ002',
     gamme: 'Réparation',
     assignedTo: 'Non attribué',
     assignedEmail: null,
-    plannedDate: '30/09/2025 04:00',
-    completedDate: '03/10/2025 16:03',
-    status: 'completed'
+    plannedDate: '30/09/2025',
+    plannedTime: '04:00',
+    completedDate: '03/10/2025',
+    completedTime: '16:03',
+    status: 'Terminé'
   },
   {
-    id: 'INT-003',
-    number: '#364',
-    equipmentName: 'Oléoserveur 203',
+    id: '#364',
+    equipmentName: 'Oléoserveur',
+    equipmentCode: '203',
     equipmentId: 'EQ003',
     gamme: 'Inspection',
     assignedTo: 'Sophie Bernard',
     assignedEmail: 'sbernard@example.com',
-    plannedDate: '30/09/2025 04:00',
-    completedDate: '03/10/2025 17:43',
-    status: 'completed'
+    plannedDate: '30/09/2025',
+    plannedTime: '04:00',
+    completedDate: '03/10/2025',
+    completedTime: '17:43',
+    status: 'Terminé'
   },
   {
-    id: 'INT-004',
-    number: '#373',
-    equipmentName: 'Compteur Zone 1',
+    id: '#373',
+    equipmentName: 'Compteur Zone',
+    equipmentCode: '1',
     equipmentId: 'EQ004',
     gamme: 'Maintenance préventive',
     assignedTo: 'Non attribué',
     assignedEmail: null,
-    plannedDate: '29/10/2025 01:00',
-    completedDate: 'Non définie',
-    status: 'planned'
+    plannedDate: '29/10/2025',
+    plannedTime: '01:00',
+    completedDate: null,
+    completedTime: null,
+    status: 'Planifié'
+  },
+];
+
+const mockHistory = [
+  {
+    user: 'Marie Dubois',
+    initials: 'MD',
+    field: 'Statut',
+    oldValue: 'Maintenance requise',
+    newValue: 'Opérationnel',
+    date: '2023-06-15 14:32'
+  },
+  {
+    user: 'Jean Martin',
+    initials: 'JM',
+    field: 'Dernière maintenance',
+    oldValue: '10/03/2023',
+    newValue: '10/06/2023',
+    date: '2023-06-10 09:15'
+  },
+  {
+    user: 'Sophie Bernard',
+    initials: 'SB',
+    field: 'Localisation',
+    oldValue: 'Zone B',
+    newValue: 'Zone A',
+    date: '2023-05-22 16:45'
+  },
+  {
+    user: 'Pierre Lefebvre',
+    initials: 'PL',
+    field: 'Type',
+    oldValue: 'Compteur',
+    newValue: 'Oléoserveur',
+    date: '2023-05-15 11:20'
   },
 ];
 
@@ -201,7 +171,7 @@ const EquipmentDetail: React.FC = () => {
 
   if (!equipment) {
     return (
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-6 w-full bg-background">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-foreground mb-4">Équipement introuvable</h2>
           <Button onClick={() => navigate('/equipment')}>Retour à la liste</Button>
@@ -211,108 +181,102 @@ const EquipmentDetail: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto animate-fade-in">
+    <div className="p-6 w-full bg-background">
       <Button 
         variant="ghost" 
         onClick={() => navigate('/equipment')}
-        className="mb-6"
+        className="mb-4 gap-2"
       >
-        <ArrowLeft className="h-4 w-4 mr-2" />
+        <ArrowLeft className="h-4 w-4" />
         Retour à la liste
       </Button>
 
       <Tabs defaultValue="equipment" className="w-full">
-        <TabsList className="mb-6 w-full grid grid-cols-3">
+        <TabsList className="mb-6 w-full grid grid-cols-3 bg-muted/30">
           <TabsTrigger value="equipment">Équipement</TabsTrigger>
           <TabsTrigger value="interventions">Liste des interventions</TabsTrigger>
           <TabsTrigger value="history">Historique des modifications</TabsTrigger>
         </TabsList>
 
+        {/* Onglet Équipement */}
         <TabsContent value="equipment" className="mt-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Colonne gauche - 3 encarts empilés */}
+            {/* Colonne gauche */}
             <div className="space-y-6">
-              {/* Equipment Information - Premier encart */}
+              {/* Informations */}
               <Card className="p-6">
-                <h2 className="text-xl font-semibold text-foreground mb-4">Informations</h2>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <h2 className="text-lg font-semibold text-foreground mb-4">Informations</h2>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Référence</div>
-                    <div className="font-medium text-foreground">{equipment.id}</div>
+                    <div className="text-sm font-medium text-foreground">{equipment.reference}</div>
                   </div>
                   
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Nom</div>
-                    <div className="font-medium text-foreground">{equipment.name}</div>
+                    <div className="text-sm font-medium text-foreground">{equipment.name}</div>
                   </div>
 
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Type</div>
-                    <div className="flex items-center text-foreground">
-                      <Truck className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <div className="text-sm text-foreground flex items-center gap-1">
+                      <span className="text-muted-foreground">🔧</span>
                       {equipment.type}
                     </div>
                   </div>
 
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Localisation</div>
-                    <div className="flex items-center text-foreground">
-                      <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <div className="text-sm text-foreground flex items-center gap-1">
+                      <span className="text-muted-foreground">📍</span>
                       {equipment.location}
                     </div>
                   </div>
 
-                  {equipment.parent && (
-                    <>
-                      <div>
-                        <div className="text-sm text-muted-foreground mb-1">Équipement parent</div>
-                        <div className="flex items-center text-foreground">
-                          <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                          {equipment.parent}
-                        </div>
-                      </div>
-                      <div></div>
-                    </>
-                  )}
-                </div>
-              </Card>
-
-              {/* Statut - Deuxième encart */}
-              <Card className="p-6">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">Statut</div>
-                    <StatusBadge 
-                      status={equipment.active ? 'success' : 'danger'} 
-                      label={equipment.active ? 'Actif' : 'Inactif'} 
-                    />
-                  </div>
-
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">État</div>
-                    <StatusBadge 
-                      status={equipment.status === 'operational' ? 'success' : 'warning'} 
-                      label={equipment.status === 'operational' ? 'Opérationnel' : 'Maintenance requise'} 
-                    />
+                  <div className="col-span-2">
+                    <div className="text-sm text-muted-foreground mb-1">Équipement parent</div>
+                    <div className="text-sm text-foreground flex items-center gap-1">
+                      <span className="text-muted-foreground">👤</span>
+                      {equipment.parent}
+                    </div>
                   </div>
                 </div>
               </Card>
 
-              {/* Maintenance - Troisième encart */}
+              {/* Statut */}
               <Card className="p-6">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-2">Statut</div>
+                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                      {equipment.status}
+                    </Badge>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-2">État</div>
+                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                      {equipment.state}
+                    </Badge>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Maintenance */}
+              <Card className="p-6">
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Dernière maintenance</div>
-                    <div className="flex items-center text-foreground">
-                      <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <div className="text-sm text-foreground flex items-center gap-1">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
                       {equipment.lastMaintenance}
                     </div>
                   </div>
 
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Prochaine maintenance</div>
-                    <div className="flex items-center text-foreground">
-                      <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <div className="text-sm text-foreground flex items-center gap-1">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
                       {equipment.nextMaintenance}
                     </div>
                   </div>
@@ -320,94 +284,195 @@ const EquipmentDetail: React.FC = () => {
               </Card>
             </div>
 
-            {/* Colonne droite - Associated Children */}
+            {/* Colonne droite - Équipements enfants */}
             <Card className="p-6">
-              <h2 className="text-xl font-semibold text-foreground mb-4">Équipements enfants</h2>
-              <div className="rounded-md border max-h-[400px] overflow-y-auto">
-                <Table>
-                  <TableHeader className="sticky top-0 bg-background">
-                    <TableRow>
-                      <TableHead>Nom</TableHead>
-                      <TableHead>Référence externe</TableHead>
-                      <TableHead>Statut</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockChildren.map((child) => (
-                      <TableRow key={child.id}>
-                        <TableCell className="font-medium">{child.name}</TableCell>
-                        <TableCell>{child.externalRef}</TableCell>
-                        <TableCell>
-                          <StatusBadge 
-                            status={child.status === 'operational' ? 'success' : 'warning'} 
-                            label={child.status === 'operational' ? 'Opérationnel' : 'Maintenance requise'} 
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </Card>
-
-        {/* Documents */}
-        <Card className="p-6 lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-foreground">Documents additionnels</h2>
-            <Button size="sm">
-              Ajouter
-            </Button>
-          </div>
-          <div className="space-y-2">
-            {mockDocuments.map((doc) => (
-              <div 
-                key={doc.id}
-                className="flex items-center justify-between p-3 hover:bg-accent/30 rounded-lg transition-colors"
-              >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <FileText className="h-5 w-5 text-foreground flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm text-foreground truncate">{doc.name}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      {doc.uploadedBy} • {doc.uploadedAt}
+              <h2 className="text-lg font-semibold text-foreground mb-4">Équipements enfants</h2>
+              <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                {/* Header */}
+                <div className="grid grid-cols-3 gap-4 pb-2 border-b border-border text-xs font-medium text-muted-foreground">
+                  <div>Nom</div>
+                  <div>Référence externe</div>
+                  <div>Statut</div>
+                </div>
+                {/* Rows */}
+                {mockChildren.map((child, index) => (
+                  <div key={index} className="grid grid-cols-3 gap-4 py-2 text-sm border-b border-border last:border-0">
+                    <div className="font-medium text-foreground">{child.name}</div>
+                    <div className="text-muted-foreground">{child.externalRef}</div>
+                    <div>
+                      <Badge 
+                        className={
+                          child.status === 'Opérationnel'
+                            ? 'bg-green-100 text-green-800 hover:bg-green-100'
+                            : 'bg-orange-100 text-orange-800 hover:bg-orange-100'
+                        }
+                      >
+                        {child.status}
+                      </Badge>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 ml-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Download className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                </div>
+                ))}
               </div>
-            ))}
+            </Card>
           </div>
-        </Card>
-      </div>
+
+          {/* Documents additionnels - Pleine largeur */}
+          <Card className="p-6 mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">Documents additionnels</h2>
+              <Button size="sm" className="bg-primary hover:bg-primary/90">
+                Ajouter
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {mockDocuments.map((doc, index) => (
+                <div 
+                  key={index}
+                  className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg transition-colors border border-border"
+                >
+                  <div className="flex items-center gap-3 flex-1">
+                    <FileText className="h-5 w-5 text-foreground flex-shrink-0" />
+                    <div>
+                      <div className="text-sm font-medium text-foreground">{doc.name}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {doc.uploadedBy} • {doc.uploadedAt}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
         </TabsContent>
 
+        {/* Onglet Liste des interventions */}
+        <TabsContent value="interventions" className="mt-0">
+          <Card className="p-6">
+            <h2 className="text-lg font-semibold text-foreground mb-6">Liste des Interventions</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="px-4 py-3 text-left w-12">
+                      <Checkbox />
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                      ID
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                      Équipement
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                      Gamme
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                      Attribué à
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                      Date planifiée
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                      Date réalisée
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                      Statut
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {mockInterventions.map((intervention) => (
+                    <tr key={intervention.id} className="hover:bg-muted/50 transition-colors">
+                      <td className="px-4 py-3">
+                        <Checkbox />
+                      </td>
+                      <td className="px-4 py-3 text-sm font-medium text-foreground">
+                        {intervention.id}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="text-sm font-medium text-foreground">{intervention.equipmentName}</div>
+                        <div className="text-sm font-medium text-foreground">{intervention.equipmentCode}</div>
+                        <div className="text-xs text-muted-foreground">ID: {intervention.equipmentId}</div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-primary">
+                        {intervention.gamme}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="text-sm text-foreground">{intervention.assignedTo}</div>
+                        {intervention.assignedEmail && (
+                          <div className="text-xs text-muted-foreground">{intervention.assignedEmail}</div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Calendar className="h-3 w-3" />
+                          {intervention.plannedDate} {intervention.plannedTime}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        {intervention.completedDate ? (
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Calendar className="h-3 w-3" />
+                            {intervention.completedDate} {intervention.completedTime}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">Non définie</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge 
+                          className={
+                            intervention.status === 'Terminé'
+                              ? 'bg-green-100 text-green-800 hover:bg-green-100'
+                              : 'bg-blue-100 text-blue-800 hover:bg-blue-100'
+                          }
+                        >
+                          {intervention.status}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Button variant="outline" size="sm" className="gap-1">
+                          Détails
+                          <ChevronRight className="h-3 w-3" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* Onglet Historique des modifications */}
         <TabsContent value="history" className="mt-0">
           <Card className="p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-6">Historique des modifications</h2>
-            <div className="space-y-3">
-              {mockHistory.map((entry) => (
+            <h2 className="text-lg font-semibold text-foreground mb-6">Historique des modifications</h2>
+            <div className="space-y-4">
+              {mockHistory.map((entry, index) => (
                 <div 
-                  key={entry.id}
-                  className="flex items-start gap-3 p-3 hover:bg-accent/30 rounded-lg transition-colors"
+                  key={index}
+                  className="flex items-start gap-3 pb-4 border-b border-border last:border-0"
                 >
-                  {/* Avatar with initials */}
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                     <span className="text-sm font-semibold text-primary">
-                      {entry.user.split(' ').map(n => n[0]).join('')}
+                      {entry.initials}
                     </span>
                   </div>
                   
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
+                      <div>
                         <p className="text-sm">
                           <span className="font-semibold text-foreground">{entry.user}</span>
                           {' '}a mis à jour{' '}
@@ -416,88 +481,16 @@ const EquipmentDetail: React.FC = () => {
                         <div className="flex items-center gap-2 mt-1 text-sm">
                           <span className="text-muted-foreground line-through">{entry.oldValue}</span>
                           <span className="text-muted-foreground">→</span>
-                          <span className="text-foreground font-medium">{entry.newValue}</span>
+                          <span className="text-foreground">{entry.newValue}</span>
                         </div>
                       </div>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">{entry.date}</span>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {entry.date}
+                      </span>
                     </div>
                   </div>
                 </div>
               ))}
-            </div>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="interventions" className="mt-0">
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-6">Liste des Interventions</h2>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]">
-                      <Checkbox />
-                    </TableHead>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Équipement</TableHead>
-                    <TableHead>Gamme</TableHead>
-                    <TableHead>Attribué à</TableHead>
-                    <TableHead>Date planifiée</TableHead>
-                    <TableHead>Date réalisée</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockInterventions.map((intervention) => (
-                    <TableRow key={intervention.id}>
-                      <TableCell>
-                        <Checkbox />
-                      </TableCell>
-                      <TableCell className="font-medium">{intervention.number}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium text-foreground">{intervention.equipmentName}</div>
-                          <div className="text-sm text-muted-foreground">ID: {intervention.equipmentId}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{intervention.gamme}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="text-foreground">{intervention.assignedTo}</div>
-                          {intervention.assignedEmail && (
-                            <div className="text-sm text-muted-foreground">{intervention.assignedEmail}</div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          {intervention.plannedDate}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          {intervention.completedDate}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge 
-                          status={intervention.status === 'completed' ? 'success' : 'info'} 
-                          label={intervention.status === 'completed' ? 'Terminé' : 'Planifié'} 
-                        />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline" size="sm">
-                          Détails
-                          <ChevronRight className="h-4 w-4 ml-1" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
             </div>
           </Card>
         </TabsContent>
