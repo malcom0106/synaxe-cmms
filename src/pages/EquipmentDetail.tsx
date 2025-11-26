@@ -261,28 +261,31 @@ const EquipmentDetail: React.FC = () => {
             </div>
 
             {equipment.parent && (
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">Équipement parent</div>
-                <div className="flex items-center text-foreground">
-                  <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                  {equipment.parent}
+              <>
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">Équipement parent</div>
+                  <div className="flex items-center text-foreground">
+                    <User className="h-4 w-4 mr-2 text-muted-foreground" />
+                    {equipment.parent}
+                  </div>
                 </div>
-              </div>
+                <div></div>
+              </>
             )}
-
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">État</div>
-              <StatusBadge 
-                status={equipment.status === 'operational' ? 'success' : 'warning'} 
-                label={equipment.status === 'operational' ? 'Opérationnel' : 'Maintenance requise'} 
-              />
-            </div>
 
             <div>
               <div className="text-sm text-muted-foreground mb-1">Statut</div>
               <StatusBadge 
                 status={equipment.active ? 'success' : 'danger'} 
                 label={equipment.active ? 'Actif' : 'Inactif'} 
+              />
+            </div>
+
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">État</div>
+              <StatusBadge 
+                status={equipment.status === 'operational' ? 'success' : 'warning'} 
+                label={equipment.status === 'operational' ? 'Opérationnel' : 'Maintenance requise'} 
               />
             </div>
 
