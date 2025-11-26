@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Truck, MapPin, Calendar, Clock, User, Upload, FileText, Download, Eye } from 'lucide-react';
 
 // Mock data - same structure as Equipment page
@@ -123,6 +124,42 @@ const mockDocuments = [
   },
 ];
 
+// Mock interventions
+const mockInterventions = [
+  {
+    id: 'INT-001',
+    date: '2023-06-15',
+    type: 'Maintenance préventive',
+    technicien: 'Jean Martin',
+    status: 'completed',
+    description: 'Vérification générale et remplacement des filtres'
+  },
+  {
+    id: 'INT-002',
+    date: '2023-06-10',
+    type: 'Réparation',
+    technicien: 'Marie Dubois',
+    status: 'completed',
+    description: 'Remplacement de la pompe défectueuse'
+  },
+  {
+    id: 'INT-003',
+    date: '2023-05-22',
+    type: 'Inspection',
+    technicien: 'Sophie Bernard',
+    status: 'completed',
+    description: 'Inspection annuelle réglementaire'
+  },
+  {
+    id: 'INT-004',
+    date: '2023-05-15',
+    type: 'Maintenance préventive',
+    technicien: 'Pierre Lefebvre',
+    status: 'completed',
+    description: 'Contrôle des niveaux et graissage'
+  },
+];
+
 const EquipmentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -150,7 +187,14 @@ const EquipmentDetail: React.FC = () => {
         Retour à la liste
       </Button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Tabs defaultValue="equipment" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="equipment">Équipement</TabsTrigger>
+          <TabsTrigger value="interventions">Liste des interventions</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="equipment" className="mt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Equipment Information */}
         <Card className="p-6">
           <h2 className="text-xl font-semibold text-foreground mb-4">Informations</h2>
@@ -304,6 +348,45 @@ const EquipmentDetail: React.FC = () => {
           </div>
         </Card>
       </div>
+        </TabsContent>
+
+        <TabsContent value="interventions" className="mt-0">
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold text-foreground mb-6">Liste des interventions</h2>
+            <div className="space-y-3">
+              {mockInterventions.map((intervention) => (
+                <div 
+                  key={intervention.id}
+                  className="p-4 border border-border rounded-lg hover:bg-accent/30 transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="font-semibold text-foreground">{intervention.type}</span>
+                        <StatusBadge 
+                          status="success" 
+                          label="Terminée" 
+                        />
+                      </div>
+                      <p className="text-sm text-foreground mb-2">{intervention.description}</p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {intervention.date}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          {intervention.technicien}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
