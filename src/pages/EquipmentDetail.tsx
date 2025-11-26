@@ -95,16 +95,16 @@ const mockHistory = [
 
 // Mock children equipment
 const mockChildren = [
-  { id: 'EQ-CH-001', name: 'Pompe principale', type: 'Pompe', status: 'operational' },
-  { id: 'EQ-CH-002', name: 'Filtre A', type: 'Filtre', status: 'operational' },
-  { id: 'EQ-CH-003', name: 'Vanne de sécurité', type: 'Vanne', status: 'maintenance_required' },
-  { id: 'EQ-CH-004', name: 'Capteur de pression', type: 'Capteur', status: 'operational' },
-  { id: 'EQ-CH-005', name: 'Pompe secondaire', type: 'Pompe', status: 'operational' },
-  { id: 'EQ-CH-006', name: 'Filtre B', type: 'Filtre', status: 'maintenance_required' },
-  { id: 'EQ-CH-007', name: 'Vanne principale', type: 'Vanne', status: 'operational' },
-  { id: 'EQ-CH-008', name: 'Capteur de température', type: 'Capteur', status: 'operational' },
-  { id: 'EQ-CH-009', name: 'Régulateur de débit', type: 'Régulateur', status: 'operational' },
-  { id: 'EQ-CH-010', name: 'Manomètre', type: 'Manomètre', status: 'maintenance_required' },
+  { id: 'EQ-CH-001', name: 'Pompe principale', externalRef: 'VISPOMP448', type: 'Pompe' },
+  { id: 'EQ-CH-002', name: 'Filtre A', externalRef: 'VISFIL001', type: 'Filtre' },
+  { id: 'EQ-CH-003', name: 'Vanne de sécurité', externalRef: 'VISVAN123', type: 'Vanne' },
+  { id: 'EQ-CH-004', name: 'Capteur de pression', externalRef: 'VISCAP789', type: 'Capteur' },
+  { id: 'EQ-CH-005', name: 'Pompe secondaire', externalRef: 'VISPOMP449', type: 'Pompe' },
+  { id: 'EQ-CH-006', name: 'Filtre B', externalRef: 'VISFIL002', type: 'Filtre' },
+  { id: 'EQ-CH-007', name: 'Vanne principale', externalRef: 'VISVAN124', type: 'Vanne' },
+  { id: 'EQ-CH-008', name: 'Capteur de température', externalRef: 'VISCAP790', type: 'Capteur' },
+  { id: 'EQ-CH-009', name: 'Régulateur de débit', externalRef: 'VISREG001', type: 'Régulateur' },
+  { id: 'EQ-CH-010', name: 'Manomètre', externalRef: 'VISMAN001', type: 'Manomètre' },
 ];
 
 // Mock documents
@@ -285,19 +285,19 @@ const EquipmentDetail: React.FC = () => {
                 <TableRow>
                   <TableHead>Nom</TableHead>
                   <TableHead>Référence externe</TableHead>
-                  <TableHead>Statut</TableHead>
+                  <TableHead>Type</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {mockChildren.map((child) => (
                   <TableRow key={child.id}>
                     <TableCell className="font-medium">{child.name}</TableCell>
-                    <TableCell>{child.id}</TableCell>
+                    <TableCell>{child.externalRef}</TableCell>
                     <TableCell>
-                      <StatusBadge 
-                        status={child.status === 'operational' ? 'success' : 'warning'} 
-                        label={child.status === 'operational' ? 'Opérationnel' : 'Maintenance requise'} 
-                      />
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <span>{child.type}</span>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
