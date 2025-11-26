@@ -2,268 +2,223 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageTitle } from '@/components/ui/PageTitle';
-import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { 
   Plus, 
   Truck, 
-  Filter,
   Clock,
-  Calendar,
-  FileText,
-  Settings,
-  ChevronRight,
+  Edit,
   Search,
-  Edit
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
-// Equipment type
 interface Equipment {
   id: string;
   name: string;
+  referenceExterne: string;
   type: string;
-  status: 'operational' | 'maintenance_required';
   lastMaintenance: string;
-  nextMaintenance: string;
-  location: string;
+  statut: 'Opérationnel' | 'Maintenance';
+  etat: 'Actif' | 'Inactif';
 }
 
-// Initial demo data for equipment
 const initialEquipmentList: Equipment[] = [
   { 
-    id: 'EQ001', 
-    name: 'Oléoserveur 201', 
+    id: '202', 
+    name: '202', 
+    referenceExterne: 'camion 202 oléo',
     type: 'Oléoserveur', 
-    status: 'operational',
-    lastMaintenance: '15/04/2023',
-    nextMaintenance: '15/06/2023',
-    location: 'Zone A'
+    lastMaintenance: '26/11/2025',
+    statut: 'Opérationnel',
+    etat: 'Actif'
   },
   { 
-    id: 'EQ002', 
-    name: 'Oléoserveur 202', 
-    type: 'Oléoserveur', 
-    status: 'maintenance_required',
-    lastMaintenance: '10/03/2023',
-    nextMaintenance: '10/05/2023',
-    location: 'Zone A'
-  },
-  { 
-    id: 'EQ003', 
-    name: 'Oléoserveur 203', 
-    type: 'Oléoserveur', 
-    status: 'operational',
-    lastMaintenance: '20/04/2023',
-    nextMaintenance: '20/06/2023',
-    location: 'Zone B'
-  },
-  { 
-    id: 'EQ004', 
-    name: 'Compteur Zone 1', 
-    type: 'Compteur', 
-    status: 'operational',
-    lastMaintenance: '05/05/2023',
-    nextMaintenance: '05/11/2023',
-    location: 'Zone 1'
-  },
-  { 
-    id: 'EQ005', 
-    name: 'Citerne principale', 
+    id: '215', 
+    name: '215', 
+    referenceExterne: 'camion 215 Citerne',
     type: 'Citerne', 
-    status: 'operational',
-    lastMaintenance: '01/02/2023',
-    nextMaintenance: '01/08/2023',
-    location: 'Dépôt'
+    lastMaintenance: '26/11/2025',
+    statut: 'Opérationnel',
+    etat: 'Actif'
+  },
+  { 
+    id: 'Cuve 108', 
+    name: 'Cuve 108', 
+    referenceExterne: 'cuve banc de test',
+    type: 'Cuve', 
+    lastMaintenance: '26/11/2025',
+    statut: 'Opérationnel',
+    etat: 'Actif'
   },
 ];
 
 const Equipment: React.FC = () => {
   const navigate = useNavigate();
-  const [equipmentList, setEquipmentList] = useState<Equipment[]>(initialEquipmentList);
-  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editForm, setEditForm] = useState<Equipment>({
-    id: '',
-    name: '',
-    type: '',
-    status: 'operational',
-    lastMaintenance: '',
-    nextMaintenance: '',
-    location: ''
-  });
+  const [equipmentList] = useState<Equipment[]>(initialEquipmentList);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const openEditModal = (equipment: Equipment) => {
-    setEditForm(equipment);
-    setSelectedEquipment(equipment);
-    setIsEditModalOpen(true);
-  };
-
-  const handleSaveEdit = () => {
-    setEquipmentList(prev => 
-      prev.map(item => 
-        item.id === editForm.id ? editForm : item
-      )
-    );
-    setIsEditModalOpen(false);
-    setSelectedEquipment(null);
-  };
-
-  const handleFormChange = (field: keyof Equipment, value: string) => {
-    setEditForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  const totalPages = Math.ceil(equipmentList.length / itemsPerPage);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto animate-fade-in">
+    <div className="p-6 w-full bg-background">
       <PageTitle 
-        title="Équipements et Infrastructures" 
-        subtitle="Gérer et suivre les équipements"
+        title="Équipements" 
+        subtitle="Gestion du parc d'équipements"
         action={
-          <Button className="btn-primary">
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
             <Plus className="h-4 w-4 mr-2" />
             Nouvel équipement
           </Button>
         }
       />
       
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="relative flex-1">
+      {/* Barre de recherche */}
+      <div className="mb-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Rechercher un équipement..."
-            className="h-10 w-full rounded-md border border-gray-200 pl-4 pr-10 text-sm focus:border-airfuel-primary focus:outline-none focus:ring-1 focus:ring-airfuel-primary"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-10 w-full rounded-md border border-input bg-background pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
-        <Button variant="outline" size="sm" className="flex items-center">
-          <Filter className="h-4 w-4 mr-2" />
-          Filtrer
-        </Button>
+      </div>
+
+      {/* Filtres */}
+      <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <Select>
+          <SelectTrigger className="bg-background">
+            <SelectValue placeholder="Filtrer par famille" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="famille1">Famille 1</SelectItem>
+            <SelectItem value="famille2">Famille 2</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select>
+          <SelectTrigger className="bg-background">
+            <SelectValue placeholder="Filtrer par sous-famille" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sous-famille1">Sous-famille 1</SelectItem>
+            <SelectItem value="sous-famille2">Sous-famille 2</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select>
+          <SelectTrigger className="bg-background">
+            <SelectValue placeholder="Filtrer par parent" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="parent1">Parent 1</SelectItem>
+            <SelectItem value="parent2">Parent 2</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select>
+          <SelectTrigger className="bg-background">
+            <SelectValue placeholder="Filtrer par statut" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="operationnel">Opérationnel</SelectItem>
+            <SelectItem value="maintenance">Maintenance</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select>
+          <SelectTrigger className="bg-background">
+            <SelectValue placeholder="Filtrer par état" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="actif">Actif</SelectItem>
+            <SelectItem value="inactif">Inactif</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6">
-        <div className="card-dashboard card-hover">
-          <div className="flex justify-between mb-3">
-            <div className="rounded-lg bg-blue-100 p-2">
-              <Truck className="h-5 w-5 text-airfuel-primary" />
-            </div>
-            <StatusBadge status="info" label="5 équipements" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900">Oléoserveurs</h3>
-          <p className="text-sm text-gray-500 mt-1">3 équipements</p>
-        </div>
-        <div className="card-dashboard card-hover">
-          <div className="flex justify-between mb-3">
-            <div className="rounded-lg bg-green-100 p-2">
-              <Settings className="h-5 w-5 text-airfuel-success" />
-            </div>
-            <StatusBadge status="success" label="Tous opérationnels" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900">Compteurs</h3>
-          <p className="text-sm text-gray-500 mt-1">1 équipement</p>
-        </div>
-        <div className="card-dashboard card-hover">
-          <div className="flex justify-between mb-3">
-            <div className="rounded-lg bg-purple-100 p-2">
-              <Settings className="h-5 w-5 text-purple-600" />
-            </div>
-            <StatusBadge status="success" label="Tous opérationnels" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900">Citerne</h3>
-          <p className="text-sm text-gray-500 mt-1">1 équipement</p>
-        </div>
-      </div>
-      
-      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+      {/* Tableau */}
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="w-full">
+            <thead className="bg-muted/50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Référence
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                  Nom
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Équipement
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                  Référence externe
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Type
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Localisation
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Dernière maintenance
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Statut
                 </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                  État
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {equipmentList.map((equipment) => (
                 <tr 
                   key={equipment.id} 
-                  className="hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="hover:bg-muted/50 transition-colors cursor-pointer"
                   onClick={() => navigate(`/equipment/${equipment.id}`)}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {equipment.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-4 py-3 text-sm font-medium text-foreground">
                     {equipment.name}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                    {equipment.referenceExterne}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-primary">
                     <div className="flex items-center">
-                      <Truck className="h-4 w-4 mr-2 text-gray-400" />
+                      <Truck className="h-4 w-4 mr-2" />
                       {equipment.type}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {equipment.location}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
                     <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-2 text-gray-400" />
+                      <Clock className="h-4 w-4 mr-2" />
                       {equipment.lastMaintenance}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <StatusBadge 
-                      status={equipment.status === 'operational' ? 'success' : 'warning'} 
-                      label={equipment.status === 'operational' ? 'Opérationnel' : 'Maintenance requise'} 
-                    />
+                  <td className="px-4 py-3">
+                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                      {equipment.statut}
+                    </Badge>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                    <div className="flex justify-end space-x-2">
-                      <Button variant="ghost" size="sm" className="h-8 px-2">
-                        <Calendar className="h-4 w-4 text-gray-500" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-8 px-2">
-                        <FileText className="h-4 w-4 text-gray-500" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-8 px-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openEditModal(equipment);
-                        }}
-                      >
-                        <Edit className="h-4 w-4 text-gray-500" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-8 px-2">
-                        <ChevronRight className="h-4 w-4 text-gray-500" />
-                      </Button>
-                    </div>
+                  <td className="px-4 py-3">
+                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                      {equipment.etat}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 w-8 p-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
+                      <Edit className="h-4 w-4 text-muted-foreground" />
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -271,106 +226,51 @@ const Equipment: React.FC = () => {
           </table>
         </div>
       </div>
-      
-      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Scanner un équipement</h3>
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
-          <Search className="h-12 w-12 mx-auto text-gray-400 mb-3" />
-          <p className="text-gray-700 mb-3">Scannez un code QR pour accéder rapidement aux informations d'un équipement</p>
-          <Button className="btn-primary">
-            Scanner un QR Code
+
+      {/* Pagination */}
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>Par page</span>
+          <Select value={String(itemsPerPage)} onValueChange={(value) => setItemsPerPage(Number(value))}>
+            <SelectTrigger className="h-8 w-16">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="text-sm text-muted-foreground">
+          Affichage de 1-{equipmentList.length} sur {equipmentList.length} équipement(s)
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className="h-8 w-8 p-0"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {currentPage} sur {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages}
+            className="h-8 w-8 p-0"
+          >
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
-
-      {/* Modal de modification */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Modifier l'équipement</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nom de l'équipement</Label>
-                <Input
-                  id="name"
-                  value={editForm.name}
-                  onChange={(e) => handleFormChange('name', e.target.value)}
-                  placeholder="Nom de l'équipement"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="type">Type</Label>
-                <Select value={editForm.type} onValueChange={(value) => handleFormChange('type', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner un type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Oléoserveur">Oléoserveur</SelectItem>
-                    <SelectItem value="Compteur">Compteur</SelectItem>
-                    <SelectItem value="Citerne">Citerne</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="location">Localisation</Label>
-                <Input
-                  id="location"
-                  value={editForm.location}
-                  onChange={(e) => handleFormChange('location', e.target.value)}
-                  placeholder="Localisation"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">Statut</Label>
-                <Select value={editForm.status} onValueChange={(value) => handleFormChange('status', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner un statut" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="operational">Opérationnel</SelectItem>
-                    <SelectItem value="maintenance_required">Maintenance requise</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="lastMaintenance">Dernière maintenance</Label>
-                <Input
-                  id="lastMaintenance"
-                  value={editForm.lastMaintenance}
-                  onChange={(e) => handleFormChange('lastMaintenance', e.target.value)}
-                  placeholder="DD/MM/YYYY"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="nextMaintenance">Prochaine maintenance</Label>
-                <Input
-                  id="nextMaintenance"
-                  value={editForm.nextMaintenance}
-                  onChange={(e) => handleFormChange('nextMaintenance', e.target.value)}
-                  placeholder="DD/MM/YYYY"
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
-              Annuler
-            </Button>
-            <Button onClick={handleSaveEdit} className="btn-primary">
-              Sauvegarder
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
