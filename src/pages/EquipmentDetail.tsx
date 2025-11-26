@@ -15,45 +15,55 @@ const equipmentData = {
     name: 'Oléoserveur 201', 
     type: 'Oléoserveur', 
     status: 'operational',
+    active: true,
     lastMaintenance: '15/04/2023',
     nextMaintenance: '15/06/2023',
-    location: 'Zone A'
+    location: 'Zone A',
+    parent: 'Système principal A'
   },
   'EQ002': { 
     id: 'EQ002', 
     name: 'Oléoserveur 202', 
     type: 'Oléoserveur', 
     status: 'maintenance_required',
+    active: false,
     lastMaintenance: '10/03/2023',
     nextMaintenance: '10/05/2023',
-    location: 'Zone A'
+    location: 'Zone A',
+    parent: 'Système principal A'
   },
   'EQ003': { 
     id: 'EQ003', 
     name: 'Oléoserveur 203', 
     type: 'Oléoserveur', 
     status: 'operational',
+    active: true,
     lastMaintenance: '20/04/2023',
     nextMaintenance: '20/06/2023',
-    location: 'Zone B'
+    location: 'Zone B',
+    parent: 'Système principal B'
   },
   'EQ004': { 
     id: 'EQ004', 
     name: 'Compteur Zone 1', 
     type: 'Compteur', 
     status: 'operational',
+    active: true,
     lastMaintenance: '05/05/2023',
     nextMaintenance: '05/11/2023',
-    location: 'Zone 1'
+    location: 'Zone 1',
+    parent: null
   },
   'EQ005': { 
     id: 'EQ005', 
     name: 'Citerne principale', 
     type: 'Citerne', 
     status: 'operational',
+    active: true,
     lastMaintenance: '01/02/2023',
     nextMaintenance: '01/08/2023',
-    location: 'Dépôt'
+    location: 'Dépôt',
+    parent: null
   },
 };
 
@@ -223,7 +233,7 @@ const EquipmentDetail: React.FC = () => {
         {/* Equipment Information */}
         <Card className="p-6">
           <h2 className="text-xl font-semibold text-foreground mb-4">Informations</h2>
-          <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
             <div>
               <div className="text-sm text-muted-foreground mb-1">Référence</div>
               <div className="font-medium text-foreground">{equipment.id}</div>
@@ -250,6 +260,32 @@ const EquipmentDetail: React.FC = () => {
               </div>
             </div>
 
+            {equipment.parent && (
+              <div>
+                <div className="text-sm text-muted-foreground mb-1">Équipement parent</div>
+                <div className="flex items-center text-foreground">
+                  <User className="h-4 w-4 mr-2 text-muted-foreground" />
+                  {equipment.parent}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">État</div>
+              <StatusBadge 
+                status={equipment.status === 'operational' ? 'success' : 'warning'} 
+                label={equipment.status === 'operational' ? 'Opérationnel' : 'Maintenance requise'} 
+              />
+            </div>
+
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">Statut</div>
+              <StatusBadge 
+                status={equipment.active ? 'success' : 'danger'} 
+                label={equipment.active ? 'Actif' : 'Inactif'} 
+              />
+            </div>
+
             <div>
               <div className="text-sm text-muted-foreground mb-1">Dernière maintenance</div>
               <div className="flex items-center text-foreground">
@@ -264,14 +300,6 @@ const EquipmentDetail: React.FC = () => {
                 <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                 {equipment.nextMaintenance}
               </div>
-            </div>
-
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Statut</div>
-              <StatusBadge 
-                status={equipment.status === 'operational' ? 'success' : 'warning'} 
-                label={equipment.status === 'operational' ? 'Opérationnel' : 'Maintenance requise'} 
-              />
             </div>
           </div>
         </Card>
