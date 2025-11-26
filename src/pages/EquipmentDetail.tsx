@@ -271,9 +271,8 @@ const EquipmentDetail: React.FC = () => {
         {/* Documents */}
         <Card className="p-6 lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-foreground">Documents</h2>
+            <h2 className="text-xl font-semibold text-foreground">Documents additionnels</h2>
             <Button size="sm">
-              <Upload className="h-4 w-4 mr-2" />
               Ajouter
             </Button>
           </div>
@@ -281,26 +280,19 @@ const EquipmentDetail: React.FC = () => {
             {mockDocuments.map((doc) => (
               <div 
                 key={doc.id}
-                className="p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors"
+                className="flex items-center justify-between p-3 hover:bg-accent/30 rounded-lg transition-colors"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3 flex-1">
-                    <FileText className="h-5 w-5 text-primary mt-0.5" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-foreground truncate">{doc.name}</div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {doc.size} • {doc.uploadedBy} • {doc.uploadedAt}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-1 ml-2">
-                    <Button variant="ghost" size="sm">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <FileText className="h-5 w-5 text-foreground flex-shrink-0" />
+                  <span className="text-sm text-foreground truncate">{doc.name}</span>
+                </div>
+                <div className="flex items-center gap-2 ml-2">
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Eye className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             ))}
