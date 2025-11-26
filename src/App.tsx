@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import Dashboard from "./pages/Dashboard";
+import Maintenance from "./pages/Maintenance";
 import PreventiveMaintenance from "./pages/PreventiveMaintenance";
 import CorrectiveMaintenance from "./pages/CorrectiveMaintenance";
 import Equipment from "./pages/Equipment";
@@ -30,6 +31,7 @@ const App = () => (
             <main className="flex-1 overflow-auto bg-background">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
+                <Route path="/maintenance" element={<Maintenance />} />
                 <Route path="/preventive" element={<PreventiveMaintenance />} />
                 <Route path="/corrective" element={<CorrectiveMaintenance />} />
                 <Route path="/equipment" element={<Equipment />} />
