@@ -33,6 +33,9 @@ const MaintenanceRangeDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedActions, setSelectedActions] = useState<number[]>([]);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Mock data - remplacer par de vraies données plus tard
   const range = {
@@ -66,6 +69,26 @@ const MaintenanceRangeDetail: React.FC = () => {
       }
     ]
   };
+
+  const handleActionToggle = (actionId: number) => {
+    setSelectedActions(prev => {
+      const newSelection = prev.includes(actionId)
+        ? prev.filter(id => id !== actionId)
+        : [...prev, actionId];
+      setHasChanges(true);
+      return newSelection;
+    });
+  };
+
+  const handleSaveChanges = () => {
+    // Logique de sauvegarde
+    setHasChanges(false);
+  };
+
+  const filteredActions = range.actions.filter(action =>
+    action.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    action.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="p-6 w-full bg-background">
@@ -179,18 +202,46 @@ const MaintenanceRangeDetail: React.FC = () => {
             <div className="space-y-4">
               <Card className="flex flex-col h-full">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Wrench className="h-4 w-4" />
-                    Actions de maintenance
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Wrench className="h-4 w-4" />
+                      Actions de maintenance
+                    </CardTitle>
+                    <Button 
+                      size="sm" 
+                      className="bg-primary hover:bg-primary/90"
+                    >
+                      Créer une action
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col min-h-[400px]">
+                  {/* Barre de recherche */}
+                  <div className="mb-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <input
+                        type="text"
+                        placeholder="Rechercher une action..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="h-10 w-full rounded-md border border-input bg-background pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Liste des actions avec coches */}
                   <div className="border border-border rounded-lg p-4 space-y-3 overflow-y-auto flex-1">
-                    {range.actions.map((action) => (
+                    {filteredActions.map((action) => (
                       <div 
                         key={action.id}
                         className="flex items-start gap-3 p-4 rounded-lg bg-blue-50 border border-blue-100"
                       >
+                        <Checkbox
+                          checked={selectedActions.includes(action.id)}
+                          onCheckedChange={() => handleActionToggle(action.id)}
+                          className="mt-1"
+                        />
                         <div className="p-2 bg-blue-100 rounded-lg mt-1">
                           <Wrench className="h-4 w-4 text-blue-600" />
                         </div>
@@ -205,9 +256,21 @@ const MaintenanceRangeDetail: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-4">
-                    {range.actions.length} action(s) configurée(s)
-                  </p>
+
+                  {/* Footer avec stats et bouton enregistrer */}
+                  <div className="flex items-center justify-between mt-4">
+                    <p className="text-xs text-muted-foreground">
+                      {range.actions.length} action(s) configurée(s)
+                    </p>
+                    <Button 
+                      size="sm"
+                      disabled={!hasChanges}
+                      onClick={handleSaveChanges}
+                      className="bg-primary hover:bg-primary/90 disabled:opacity-50"
+                    >
+                      Enregistrer
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
