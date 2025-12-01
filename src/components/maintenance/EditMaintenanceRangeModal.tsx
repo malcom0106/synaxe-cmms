@@ -110,10 +110,10 @@ export const EditMaintenanceRangeModal: React.FC<EditMaintenanceRangeModalProps>
         <div className="space-y-6 mt-4">
           {/* Général */}
           <div>
-            {/* Nom du programme */}
+            {/* Nom de la gamme */}
             <div className="space-y-2 mb-4">
               <Label htmlFor="name">
-                Nom du programme <span className="text-red-500">*</span>
+                Nom de la gamme <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="name"
@@ -161,14 +161,13 @@ export const EditMaintenanceRangeModal: React.FC<EditMaintenanceRangeModalProps>
               </div>
             </div>
 
-            {/* Description */}
             <div className="space-y-2 mb-4">
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Description détaillée du programme (optionnel)"
+                placeholder="Description détaillée de la gamme (optionnel)"
                 rows={3}
                 maxLength={500}
               />
@@ -227,7 +226,7 @@ export const EditMaintenanceRangeModal: React.FC<EditMaintenanceRangeModalProps>
             <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
               <p className="text-xs text-blue-900">
-                Si aucune famille n'est sélectionnée, ce programme s'appliquera à tous les équipements
+                Si aucune famille n'est sélectionnée, cette gamme s'appliquera à tous les équipements
               </p>
             </div>
           </div>
