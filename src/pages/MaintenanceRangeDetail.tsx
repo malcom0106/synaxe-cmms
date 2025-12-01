@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { 
   Edit, 
-  Trash2, 
   Settings, 
   Wrench,
   Calendar,
@@ -67,14 +68,20 @@ const MaintenanceRangeDetail: React.FC = () => {
               {range.type}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="active-status" className="text-sm font-medium">
+                Actif
+              </Label>
+              <Switch id="active-status" defaultChecked />
+            </div>
             <Button variant="outline" className="bg-card">
               <Edit className="h-4 w-4 mr-2" />
               Modifier
             </Button>
-            <Button variant="destructive">
-              <Trash2 className="h-4 w-4 mr-2" />
-              Supprimer
+            <Button className="bg-primary hover:bg-primary/90">
+              <Play className="h-4 w-4 mr-2" />
+              Générer un plan
             </Button>
           </div>
         </div>
