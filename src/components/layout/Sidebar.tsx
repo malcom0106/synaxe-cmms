@@ -11,6 +11,7 @@ import {
   Globe,
   LogOut,
   ChevronLeft,
+  ChevronDown,
   Package
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -40,6 +41,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon: Icon, label, expanded }) =>
 
 export const Sidebar: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [maintenanceOpen, setMaintenanceOpen] = useState(true);
 
   return (
     <aside 
@@ -64,7 +66,29 @@ export const Sidebar: React.FC = () => {
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1">
         <NavItem to="/" icon={BarChart} label="Tableau de bord" expanded={!collapsed} />
-        <NavItem to="/maintenance" icon={Wrench} label="Interventions de maintenance" expanded={!collapsed} />
+        
+        {/* Maintenance with submenu */}
+        <div>
+          <button
+            onClick={() => setMaintenanceOpen(!maintenanceOpen)}
+            className="flex items-center justify-between w-full gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md text-foreground hover:bg-muted"
+          >
+            <div className="flex items-center gap-3">
+              <Wrench className="h-5 w-5 shrink-0" />
+              <span>Maintenance</span>
+            </div>
+            <ChevronDown className={cn("h-4 w-4 transition-transform", maintenanceOpen && "rotate-180")} />
+          </button>
+          
+          {maintenanceOpen && (
+            <div className="ml-4 mt-1 space-y-1 border-l-2 border-border pl-4">
+              <NavItem to="/maintenance" icon={Wrench} label="Liste des Interventions" expanded={!collapsed} />
+              <NavItem to="/maintenance/ranges" icon={Calendar} label="Gamme de maintenance" expanded={!collapsed} />
+              <NavItem to="/maintenance/actions" icon={Wrench} label="Actions de maintenance" expanded={!collapsed} />
+            </div>
+          )}
+        </div>
+
         <NavItem to="/calendar" icon={Calendar} label="Calendrier" expanded={!collapsed} />
         <NavItem to="/equipment" icon={Box} label="Équipements" expanded={!collapsed} />
         <NavItem to="/anomalies" icon={TriangleAlert} label="Anomalies" expanded={!collapsed} />
