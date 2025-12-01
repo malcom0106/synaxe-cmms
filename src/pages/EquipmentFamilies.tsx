@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,7 +6,6 @@ import {
   Plus, 
   Search,
   Edit,
-  ArrowLeft,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -50,16 +48,7 @@ const EquipmentFamilies: React.FC = () => {
 
   return (
     <div className="p-6 w-full bg-background">
-      {/* Back Link */}
-      <Link 
-        to="/settings" 
-        className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 mb-4"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Retour aux paramètres
-      </Link>
-
-      <PageTitle 
+      <PageTitle
         title="Familles d'Équipements" 
         subtitle="Gérer les familles d'équipements"
         action={
