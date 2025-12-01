@@ -31,7 +31,7 @@ import {
   FileText,
   Plus
 } from 'lucide-react';
-import { EditMaintenanceRangeModal } from '@/components/maintenance/EditMaintenanceRangeModal';
+import { EditGeneralInfoModal } from '@/components/maintenance/EditGeneralInfoModal';
 
 const MaintenanceRangeDetail: React.FC = () => {
   const { id } = useParams();
@@ -722,7 +722,7 @@ const MaintenanceRangeDetail: React.FC = () => {
       </Tabs>
 
       {/* Edit Modal */}
-      <EditMaintenanceRangeModal
+      <EditGeneralInfoModal
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         rangeData={range}
