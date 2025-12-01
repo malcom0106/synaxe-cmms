@@ -25,7 +25,11 @@ import {
   Search,
   User,
   Truck,
-  Clock
+  Clock,
+  ChevronUp,
+  ChevronDown,
+  FileText,
+  Plus
 } from 'lucide-react';
 import { EditMaintenanceRangeModal } from '@/components/maintenance/EditMaintenanceRangeModal';
 
@@ -36,6 +40,7 @@ const MaintenanceRangeDetail: React.FC = () => {
   const [selectedActions, setSelectedActions] = useState<number[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [documentsExpanded, setDocumentsExpanded] = useState(true);
 
   // Mock data - remplacer par de vraies données plus tard
   const range = {
@@ -195,6 +200,45 @@ const MaintenanceRangeDetail: React.FC = () => {
                     </div>
                   </div>
                 </CardContent>
+              </Card>
+
+              {/* Documents additionnels */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <FileText className="h-4 w-4" />
+                      Documents additionnels
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        size="sm" 
+                        className="bg-primary hover:bg-primary/90"
+                      >
+                        Ajouter
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setDocumentsExpanded(!documentsExpanded)}
+                        className="h-8 w-8 p-0"
+                      >
+                        {documentsExpanded ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                {documentsExpanded && (
+                  <CardContent>
+                    <div className="text-center py-8 text-sm text-muted-foreground">
+                      Aucun document trouvé
+                    </div>
+                  </CardContent>
+                )}
               </Card>
             </div>
 
