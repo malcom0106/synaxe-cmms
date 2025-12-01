@@ -21,8 +21,6 @@ import {
   Clock,
   Monitor,
   Play,
-  Copy,
-  Edit,
   ChevronRight,
   BarChart3
 } from 'lucide-react';
@@ -39,6 +37,7 @@ interface MaintenanceRange {
     details: string[];
   };
   interventions: number;
+  status: 'Actif' | 'Inactif';
 }
 
 const maintenanceRanges: MaintenanceRange[] = [
@@ -53,7 +52,8 @@ const maintenanceRanges: MaintenanceRange[] = [
       total: 3,
       details: ['Étape 1 check', 'Étape 2 check', '+1 autres']
     },
-    interventions: 0
+    interventions: 0,
+    status: 'Actif'
   },
 ];
 
@@ -151,7 +151,7 @@ const MaintenanceRanges: React.FC = () => {
                   Interventions
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
-                  Actions
+                  État
                 </th>
               </tr>
             </thead>
@@ -204,25 +204,15 @@ const MaintenanceRanges: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-4 py-4">
-                    <div className="flex items-center gap-1">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-8 w-8 p-0"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleGeneratePlan(range);
-                        }}
-                      >
-                        <Play className="h-4 w-4 text-primary" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <Copy className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <Edit className="h-4 w-4 text-primary" />
-                      </Button>
-                    </div>
+                    <Badge 
+                      className={
+                        range.status === 'Actif' 
+                          ? "bg-green-600 text-white hover:bg-green-600" 
+                          : "bg-gray-500 text-white hover:bg-gray-500"
+                      }
+                    >
+                      {range.status}
+                    </Badge>
                   </td>
                 </tr>
               ))}
