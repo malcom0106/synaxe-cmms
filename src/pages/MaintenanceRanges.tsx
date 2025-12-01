@@ -17,7 +17,6 @@ import {
   Plus, 
   Search,
   Filter,
-  Calendar,
   Clock,
   Monitor,
   Play,
@@ -117,10 +116,6 @@ const MaintenanceRanges: React.FC = () => {
         <Button variant="outline" className="bg-card">
           <Filter className="h-4 w-4 mr-2" />
           Filter
-        </Button>
-        <Button variant="outline" className="bg-card">
-          <Calendar className="h-4 w-4 mr-2" />
-          Calendrier
         </Button>
       </div>
 
