@@ -155,45 +155,39 @@ const MaintenanceRangeDetail: React.FC = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-6">
-                    {/* Colonne gauche */}
-                    <div className="space-y-6">
-                      {/* Nom de la gamme */}
+                  <div className="space-y-6">
+                    {/* Ligne 1 : Nom / Type */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <p className="text-sm text-muted-foreground mb-2">Nom de la gamme</p>
                         <p className="text-sm font-medium text-foreground">{range.name}</p>
                       </div>
-
-                      {/* Type d'intervention */}
                       <div>
                         <p className="text-sm text-muted-foreground mb-2">Type d'intervention</p>
                         <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/10 border-0">
                           {range.operationType}
                         </Badge>
                       </div>
+                    </div>
 
-                      {/* Durée estimée */}
+                    {/* Ligne 2 : Périodicité / Durée */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Périodicité</p>
+                        <p className="text-sm font-medium text-foreground">{range.frequency}</p>
+                      </div>
                       <div>
                         <p className="text-sm text-muted-foreground mb-2">Durée estimée</p>
                         <p className="text-sm font-medium text-foreground">{range.estimatedDuration}</p>
                       </div>
                     </div>
 
-                    {/* Colonne droite */}
-                    <div className="space-y-6">
-                      {/* Périodicité */}
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">Périodicité</p>
-                        <p className="text-sm font-medium text-foreground">{range.frequency}</p>
-                      </div>
-
-                      {/* Famille d'équipement */}
+                    {/* Ligne 3 : Famille / Sous-famille */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <p className="text-sm text-muted-foreground mb-2">Famille d'équipement</p>
                         <p className="text-sm font-medium text-foreground">{range.familyEquipment}</p>
                       </div>
-
-                      {/* Sous-famille */}
                       <div>
                         <p className="text-sm text-muted-foreground mb-2">Sous-famille</p>
                         <p className="text-sm font-medium text-foreground">{range.subFamily}</p>
