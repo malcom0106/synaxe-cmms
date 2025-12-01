@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Info, Search, Wrench } from 'lucide-react';
+import { Info, Search, Wrench, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface MaintenanceAction {
@@ -100,17 +100,17 @@ export const EditMaintenanceRangeModal: React.FC<EditMaintenanceRangeModalProps>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
             <Wrench className="h-5 w-5 text-primary" />
-            Modifier le programme de maintenance
+            Modifier la gamme de maintenance
           </DialogTitle>
           <p className="text-sm text-muted-foreground mt-2">
-            Modifiez les informations pour mettre à jour ce programme de maintenance dans le système.
+            Modifiez les informations pour mettre à jour cette gamme de maintenance dans le système.
           </p>
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
-          {/* Informations générales */}
+          {/* Général */}
           <div>
-            <h3 className="text-sm font-medium text-foreground mb-4">Informations générales</h3>
+            <h3 className="text-sm font-medium text-foreground mb-4">Général</h3>
             
             {/* Nom du programme */}
             <div className="space-y-2 mb-4">
@@ -237,18 +237,24 @@ export const EditMaintenanceRangeModal: React.FC<EditMaintenanceRangeModalProps>
           {/* Actions de maintenance */}
           <div>
             <h3 className="text-sm font-medium text-foreground mb-4">
-              Actions de maintenance (optionnel)
+              Actions de maintenance
             </h3>
 
             <div className="space-y-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Sélectionner les actions à effectuer :"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Sélectionner les actions à effectuer :"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Button type="button" size="sm" className="flex-shrink-0">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Créer une action
+                </Button>
               </div>
 
               <div className="border border-border rounded-lg p-4 space-y-3 max-h-64 overflow-y-auto">
