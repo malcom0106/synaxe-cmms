@@ -1,78 +1,59 @@
 import React, { useState } from 'react';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Plus, 
   Search,
+  Filter,
   Calendar,
+  Clock,
+  Monitor,
+  Play,
+  Copy,
   Edit,
-  Trash2
+  ChevronRight,
+  BarChart3
 } from 'lucide-react';
 
 interface MaintenanceRange {
-  id: string;
+  id: number;
   name: string;
-  description: string;
+  type: 'Maintenance Préventive' | 'Maintenance Corrective';
   frequency: string;
-  duration: string;
-  active: boolean;
+  familyEquipment: string;
+  subFamily: string;
+  actions: {
+    total: number;
+    details: string[];
+  };
+  interventions: number;
 }
 
 const maintenanceRanges: MaintenanceRange[] = [
   {
-    id: '1',
+    id: 1,
     name: 'Check Quotidienne Oléoserveur',
-    description: 'Vérification quotidienne des niveaux et de l\'état général',
-    frequency: 'Quotidienne',
-    duration: '30 min',
-    active: true
-  },
-  {
-    id: '2',
-    name: 'Test Maintenance',
-    description: 'Tests périodiques de maintenance préventive',
-    frequency: 'Hebdomadaire',
-    duration: '1h',
-    active: true
-  },
-  {
-    id: '3',
-    name: 'Maintenance Trimestrielle',
-    description: 'Maintenance complète tous les 3 mois',
-    frequency: 'Trimestrielle',
-    duration: '4h',
-    active: true
+    type: 'Maintenance Préventive',
+    frequency: 'Quotidien',
+    familyEquipment: 'Camion',
+    subFamily: 'Oléoserveur',
+    actions: {
+      total: 3,
+      details: ['Étape 1 check', 'Étape 2 check', '+1 autres']
+    },
+    interventions: 0
   },
 ];
 
 const MaintenanceRanges: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRanges, setSelectedRanges] = useState<string[]>([]);
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedRanges(maintenanceRanges.map(r => r.id));
-    } else {
-      setSelectedRanges([]);
-    }
-  };
-
-  const handleSelectRange = (id: string, checked: boolean) => {
-    if (checked) {
-      setSelectedRanges([...selectedRanges, id]);
-    } else {
-      setSelectedRanges(selectedRanges.filter(r => r !== id));
-    }
-  };
 
   return (
     <div className="p-6 w-full bg-background">
       <PageTitle 
-        title="Gammes de Maintenance" 
-        subtitle="Gérer les gammes de maintenance préventive"
+        title="Gamme de Maintenance" 
+        subtitle="Planifier et gérer les gammes de maintenance"
         action={
           <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
             <Plus className="h-4 w-4 mr-2" />
@@ -81,63 +62,125 @@ const MaintenanceRanges: React.FC = () => {
         }
       />
       
-      {/* Barre de recherche */}
-      <div className="mb-6">
-        <div className="relative">
+      {/* Barre de recherche avec filtres */}
+      <div className="mb-6 flex items-center gap-3">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Rechercher une gamme..."
+            placeholder="Rechercher une gamme de maintenance..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-10 w-full rounded-md border border-input bg-card pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
+        <Button variant="outline" className="bg-card">
+          <Filter className="h-4 w-4 mr-2" />
+          Filter
+        </Button>
+        <Button variant="outline" className="bg-card">
+          <Calendar className="h-4 w-4 mr-2" />
+          Calendrier
+        </Button>
       </div>
 
-      {/* Grille de cartes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {maintenanceRanges.map((range) => (
-          <Card key={range.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <Checkbox 
-                  checked={selectedRanges.includes(range.id)}
-                  onCheckedChange={(checked) => handleSelectRange(range.id, checked as boolean)}
-                />
-                <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/10 border-0">
-                  {range.active ? 'Actif' : 'Inactif'}
-                </Badge>
-              </div>
-
-              <h3 className="text-lg font-semibold text-foreground mb-2">{range.name}</h3>
-              <p className="text-sm text-muted-foreground mb-4">{range.description}</p>
-
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Fréquence:</span>
-                  <span className="text-foreground font-medium">{range.frequency}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Durée:</span>
-                  <span className="text-foreground font-medium">{range.duration}</span>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Modifier
-                </Button>
-                <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Table */}
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-muted/30 border-b border-border">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                  ID
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                  Gamme de maintenance
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                  Type
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                  Périodicité
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                  Famille équipement
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                  Actions
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                  Interventions
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-card">
+              {maintenanceRanges.map((range) => (
+                <tr 
+                  key={range.id} 
+                  className="border-b border-border hover:bg-muted/30 transition-colors"
+                >
+                  <td className="px-4 py-4 text-sm font-medium text-foreground">
+                    {range.id}
+                  </td>
+                  <td className="px-4 py-4 text-sm font-medium text-foreground">
+                    {range.name}
+                  </td>
+                  <td className="px-4 py-4">
+                    <Badge className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/10 border-0">
+                      {range.type}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-2 text-sm text-foreground">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      {range.frequency}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-2 text-sm text-foreground">
+                      <Monitor className="h-4 w-4 text-muted-foreground" />
+                      <span>{range.familyEquipment}</span>
+                      <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                      <span>{range.subFamily}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="text-sm">
+                      <div className="font-medium text-foreground mb-1">
+                        {range.actions.total} action(s)
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {range.actions.details.join(', ')}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-2 text-sm text-foreground">
+                      <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                      {range.interventions} intervention(s)
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <Play className="h-4 w-4 text-primary" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <Copy className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <Edit className="h-4 w-4 text-primary" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
