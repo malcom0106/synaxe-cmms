@@ -87,10 +87,6 @@ const MaintenanceRangeDetail: React.FC = () => {
               </Label>
               <Switch id="active-status" defaultChecked />
             </div>
-            <Button variant="outline" className="bg-card" onClick={() => setIsEditModalOpen(true)}>
-              <Edit className="h-4 w-4 mr-2" />
-              Modifier
-            </Button>
             <Button className="bg-primary hover:bg-primary/90">
               <Play className="h-4 w-4 mr-2" />
               Générer un plan
