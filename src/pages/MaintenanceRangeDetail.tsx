@@ -13,9 +13,7 @@ import {
   Calendar,
   CheckCircle2,
   Package,
-  Play,
-  Users,
-  BarChart3
+  Play
 } from 'lucide-react';
 
 const MaintenanceRangeDetail: React.FC = () => {
@@ -140,25 +138,6 @@ const MaintenanceRangeDetail: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
-
-          {/* Actions rapides */}
-          <div>
-            <h3 className="text-sm font-medium text-foreground mb-3">Actions rapides</h3>
-            <div className="flex items-center gap-3">
-              <Button className="bg-green-600 hover:bg-green-700 text-white">
-                <Play className="h-4 w-4 mr-2" />
-                Générer des interventions
-              </Button>
-              <Button variant="outline" className="bg-card">
-                <Users className="h-4 w-4 mr-2" />
-                Affecter des opérateurs
-              </Button>
-              <Button variant="outline" className="bg-card">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Voir les statistiques
-              </Button>
-            </div>
           </div>
 
           {/* Informations du programme */}
