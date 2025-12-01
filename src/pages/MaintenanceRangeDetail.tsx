@@ -166,7 +166,7 @@ const MaintenanceRangeDetail: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Type d'opération</p>
+                    <p className="text-sm text-muted-foreground mb-2">Type d'intervention</p>
                     <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/10 border-0">
                       {range.operationType}
                     </Badge>
