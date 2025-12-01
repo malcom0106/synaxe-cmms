@@ -52,6 +52,7 @@ const MaintenanceRangeDetail: React.FC = () => {
     estimatedDuration: '0h 6min',
     familyEquipment: 'Camion',
     subFamily: 'Oléoserveur',
+    description: 'Contrôle quotidien des éléments essentiels de l\'oléoserveur pour garantir son bon fonctionnement et prévenir les pannes.',
     createdDate: 'Date inconnue',
     interventionsPlanned: 94,
     interventionsCompleted: 2,
@@ -199,6 +200,14 @@ const MaintenanceRangeDetail: React.FC = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Description - pleine largeur */}
+                  {range.description && (
+                    <div className="pt-4 border-t">
+                      <p className="text-sm text-muted-foreground mb-2">Description</p>
+                      <p className="text-sm text-foreground">{range.description}</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
