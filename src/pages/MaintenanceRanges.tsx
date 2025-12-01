@@ -3,6 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { 
   Plus, 
   Search,
@@ -49,7 +59,25 @@ const maintenanceRanges: MaintenanceRange[] = [
 
 const MaintenanceRanges: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false);
+  const [selectedRange, setSelectedRange] = useState<MaintenanceRange | null>(null);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const navigate = useNavigate();
+
+  const handleGeneratePlan = (range: MaintenanceRange) => {
+    setSelectedRange(range);
+    setIsGenerateDialogOpen(true);
+  };
+
+  const handleConfirmGeneration = () => {
+    // TODO: Implémenter la logique de génération
+    console.log('Génération du plan pour:', selectedRange?.name);
+    console.log('Période:', startDate, 'à', endDate);
+    setIsGenerateDialogOpen(false);
+    setStartDate('');
+    setEndDate('');
+  };
 
   return (
     <div className="p-6 w-full bg-background">
@@ -57,10 +85,19 @@ const MaintenanceRanges: React.FC = () => {
         title="Gamme de Maintenance" 
         subtitle="Planifier et gérer les gammes de maintenance"
         action={
-          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-            <Plus className="h-4 w-4 mr-2" />
-            Nouvelle gamme
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => handleGeneratePlan(maintenanceRanges[0])}
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Génération d'un plan de maintenance
+            </Button>
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Plus className="h-4 w-4 mr-2" />
+              Nouvelle gamme
+            </Button>
+          </div>
         }
       />
       
@@ -168,7 +205,15 @@ const MaintenanceRanges: React.FC = () => {
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleGeneratePlan(range);
+                        }}
+                      >
                         <Play className="h-4 w-4 text-primary" />
                       </Button>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -185,6 +230,94 @@ const MaintenanceRanges: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Dialog de génération de plan */}
+      <Dialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Play className="h-5 w-5 text-green-600" />
+              Génération d'un plan de maintenance
+            </DialogTitle>
+            <DialogDescription>
+              Sélectionnez la période pour générer les interventions planifiées
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedRange && (
+            <div className="space-y-4 py-4">
+              {/* Nom de la gamme */}
+              <div>
+                <Label className="text-sm font-medium text-foreground">Gamme de maintenance</Label>
+                <div className="mt-2 p-3 rounded-lg bg-muted/50 border border-border">
+                  <p className="text-sm font-medium text-foreground">{selectedRange.name}</p>
+                </div>
+              </div>
+
+              {/* Périodicité */}
+              <div>
+                <Label className="text-sm font-medium text-foreground">Périodicité</Label>
+                <div className="mt-2 p-3 rounded-lg bg-blue-50 border border-blue-100">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-blue-600" />
+                    <p className="text-sm font-medium text-blue-600">{selectedRange.frequency}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Période de génération */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-foreground">Période de génération</Label>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="start-date" className="text-xs text-muted-foreground">
+                      Date de début
+                    </Label>
+                    <Input
+                      id="start-date"
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="end-date" className="text-xs text-muted-foreground">
+                      Date de fin
+                    </Label>
+                    <Input
+                      id="end-date"
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsGenerateDialogOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={handleConfirmGeneration}
+              disabled={!startDate || !endDate}
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Générer le plan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
