@@ -29,18 +29,22 @@ import {
   ChevronUp,
   ChevronDown,
   FileText,
-  Plus
+  Plus,
+  Pencil
 } from 'lucide-react';
 import { EditGeneralInfoModal } from '@/components/maintenance/EditGeneralInfoModal';
+import { useToast } from '@/hooks/use-toast';
 
 const MaintenanceRangeDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedActions, setSelectedActions] = useState<number[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [documentsExpanded, setDocumentsExpanded] = useState(true);
+  const [isEditingActions, setIsEditingActions] = useState(false);
 
   // Mock data - remplacer par de vraies données plus tard
   const range = {
@@ -87,8 +91,12 @@ const MaintenanceRangeDetail: React.FC = () => {
   };
 
   const handleSaveChanges = () => {
-    // Logique de sauvegarde
+    toast({
+      title: "Modifications enregistrées",
+      description: "Les actions de maintenance ont été mises à jour avec succès.",
+    });
     setHasChanges(false);
+    setIsEditingActions(false);
   };
 
   const filteredActions = range.actions.filter(action =>
@@ -254,41 +262,56 @@ const MaintenanceRangeDetail: React.FC = () => {
                       <Wrench className="h-4 w-4" />
                       Actions de maintenance
                     </CardTitle>
-                    <Button 
-                      size="sm" 
-                      className="bg-primary hover:bg-primary/90"
-                    >
-                      Créer une action
-                    </Button>
+                    {!isEditingActions ? (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => setIsEditingActions(true)}
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Modifier
+                      </Button>
+                    ) : (
+                      <Button 
+                        size="sm" 
+                        className="bg-primary hover:bg-primary/90"
+                      >
+                        Créer une action
+                      </Button>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col min-h-[400px]">
-                  {/* Barre de recherche */}
-                  <div className="mb-4">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <input
-                        type="text"
-                        placeholder="Rechercher une action..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="h-10 w-full rounded-md border border-input bg-background pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                      />
+                  {/* Barre de recherche - visible uniquement en mode édition */}
+                  {isEditingActions && (
+                    <div className="mb-4">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <input
+                          type="text"
+                          placeholder="Rechercher une action..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="h-10 w-full rounded-md border border-input bg-background pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Liste des actions avec coches */}
+                  {/* Liste des actions */}
                   <div className="border border-border rounded-lg p-4 space-y-3 overflow-y-auto flex-1">
                     {filteredActions.map((action) => (
                       <div 
                         key={action.id}
                         className="flex items-start gap-3 p-4 rounded-lg bg-blue-50 border border-blue-100"
                       >
-                        <Checkbox
-                          checked={selectedActions.includes(action.id)}
-                          onCheckedChange={() => handleActionToggle(action.id)}
-                          className="mt-1"
-                        />
+                        {isEditingActions && (
+                          <Checkbox
+                            checked={selectedActions.includes(action.id)}
+                            onCheckedChange={() => handleActionToggle(action.id)}
+                            className="mt-1"
+                          />
+                        )}
                         <div className="p-2 bg-blue-100 rounded-lg mt-1">
                           <Wrench className="h-4 w-4 text-blue-600" />
                         </div>
@@ -304,19 +327,21 @@ const MaintenanceRangeDetail: React.FC = () => {
                     ))}
                   </div>
 
-                  {/* Footer avec stats et bouton enregistrer */}
+                  {/* Footer */}
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-xs text-muted-foreground">
                       {range.actions.length} action(s) configurée(s)
                     </p>
-                    <Button 
-                      size="sm"
-                      disabled={!hasChanges}
-                      onClick={handleSaveChanges}
-                      className="bg-primary hover:bg-primary/90 disabled:opacity-50"
-                    >
-                      Enregistrer
-                    </Button>
+                    {isEditingActions && (
+                      <Button 
+                        size="sm"
+                        disabled={!hasChanges}
+                        onClick={handleSaveChanges}
+                        className="bg-primary hover:bg-primary/90 disabled:opacity-50"
+                      >
+                        Enregistrer
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
