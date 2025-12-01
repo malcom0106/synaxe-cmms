@@ -103,8 +103,8 @@ const MaintenanceRangeDetail: React.FC = () => {
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="mb-6 w-full grid grid-cols-2 md:grid-cols-4 h-auto">
           <TabsTrigger value="overview" className="py-3">Vue d'ensemble</TabsTrigger>
-          <TabsTrigger value="interventions" className="py-3">Interventions ({range.interventionsPlanned})</TabsTrigger>
-          <TabsTrigger value="equipment" className="py-3">Équipements ({range.equipmentConcerned})</TabsTrigger>
+          <TabsTrigger value="interventions" className="py-3">Interventions</TabsTrigger>
+          <TabsTrigger value="equipment" className="py-3">Équipements</TabsTrigger>
           <TabsTrigger value="history" className="py-3">Historique</TabsTrigger>
         </TabsList>
 
