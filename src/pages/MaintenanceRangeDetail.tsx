@@ -6,6 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   Edit, 
   Settings, 
@@ -13,7 +21,11 @@ import {
   Calendar,
   CheckCircle2,
   Package,
-  Play
+  Play,
+  Search,
+  User,
+  Truck,
+  Clock
 } from 'lucide-react';
 import { EditMaintenanceRangeModal } from '@/components/maintenance/EditMaintenanceRangeModal';
 
@@ -221,26 +233,401 @@ const MaintenanceRangeDetail: React.FC = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="interventions">
+        <TabsContent value="interventions" className="space-y-4">
+          {/* Barre de recherche */}
+          <div className="mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Rechercher une intervention..."
+                className="h-10 w-full rounded-md border border-input bg-card pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+          </div>
+
+          {/* Filtres */}
+          <div className="mb-6 flex flex-wrap gap-3">
+            <Select>
+              <SelectTrigger className="w-[200px] bg-card">
+                <User className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Sélectionner un opérateur" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="operateur1">Opérateur 1</SelectItem>
+                <SelectItem value="operateur2">Opérateur 2</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button variant="outline" className="bg-card">
+              <Calendar className="h-4 w-4 mr-2" />
+              27 Nov 2025 - 28 Nov 2025
+            </Button>
+
+            <Select>
+              <SelectTrigger className="w-[200px] bg-card">
+                <SelectValue placeholder="Sélectionner un statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="termine">Terminé</SelectItem>
+                <SelectItem value="planifie">Planifié</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Table */}
           <Card>
-            <CardContent className="pt-6">
-              <p className="text-muted-foreground">Liste des interventions à venir...</p>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-muted/30 border-b border-border">
+                    <tr>
+                      <th className="px-4 py-3 text-left w-12">
+                        <Checkbox />
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
+                        ID
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
+                        Équipement
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
+                        Opérateur
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
+                        Date planifiée
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
+                        Date réalisée
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
+                        Statut
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-card">
+                    <tr className="border-b border-border hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-3">
+                        <Checkbox />
+                      </td>
+                      <td className="px-4 py-3 text-sm font-medium text-foreground">
+                        #1
+                      </td>
+                      <td className="px-4 py-3 text-sm text-foreground">
+                        Oléoserveur 202
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
+                        Non attribué
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5 text-sm text-red-600">
+                          <Calendar className="h-3.5 w-3.5" />
+                          26/11/2025 01:00
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
+                        26/11/2025 11:29
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/10 border-0">
+                          Terminé
+                        </Badge>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-border hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-3">
+                        <Checkbox />
+                      </td>
+                      <td className="px-4 py-3 text-sm font-medium text-foreground">
+                        #2
+                      </td>
+                      <td className="px-4 py-3 text-sm text-foreground">
+                        Oléoserveur 202
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
+                        Non attribué
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5 text-sm text-red-600">
+                          <Calendar className="h-3.5 w-3.5" />
+                          28/11/2025 01:00
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
+                        -
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/10 border-0">
+                          Planifié
+                        </Badge>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="equipment">
+        <TabsContent value="equipment" className="space-y-4">
+          {/* Barre de recherche */}
+          <div className="mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Rechercher un équipement..."
+                className="h-10 w-full rounded-md border border-input bg-background pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+          </div>
+
+          {/* Filtres */}
+          <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <Select>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="Filtrer par famille" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="famille1">Famille 1</SelectItem>
+                <SelectItem value="famille2">Famille 2</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="Filtrer par sous-famille" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="sous-famille1">Sous-famille 1</SelectItem>
+                <SelectItem value="sous-famille2">Sous-famille 2</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="Filtrer par parent" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="parent1">Parent 1</SelectItem>
+                <SelectItem value="parent2">Parent 2</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="Filtrer par statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="operationnel">Opérationnel</SelectItem>
+                <SelectItem value="maintenance">Maintenance</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="Filtrer par état" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="actif">Actif</SelectItem>
+                <SelectItem value="inactif">Inactif</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Tableau */}
           <Card>
-            <CardContent className="pt-6">
-              <p className="text-muted-foreground">Liste des équipements concernés...</p>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                        Nom
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                        Référence externe
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                        Type
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                        Dernière maintenance
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                        Statut
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                        État
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    <tr className="hover:bg-muted/50 transition-colors cursor-pointer">
+                      <td className="px-4 py-3 text-sm font-medium text-foreground">
+                        202
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
+                        camion 202 oléo
+                      </td>
+                      <td className="px-4 py-3 text-sm text-primary">
+                        <div className="flex items-center">
+                          <Truck className="h-4 w-4 mr-2" />
+                          Oléoserveur
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
+                        <div className="flex items-center">
+                          <Clock className="h-4 w-4 mr-2" />
+                          26/11/2025
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                          Opérationnel
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                          Actif
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Edit className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-muted/50 transition-colors cursor-pointer">
+                      <td className="px-4 py-3 text-sm font-medium text-foreground">
+                        215
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
+                        camion 215 Citerne
+                      </td>
+                      <td className="px-4 py-3 text-sm text-primary">
+                        <div className="flex items-center">
+                          <Truck className="h-4 w-4 mr-2" />
+                          Citerne
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
+                        <div className="flex items-center">
+                          <Clock className="h-4 w-4 mr-2" />
+                          26/11/2025
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                          Opérationnel
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                          Actif
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Edit className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="history">
+        <TabsContent value="history" className="space-y-4">
           <Card>
-            <CardContent className="pt-6">
-              <p className="text-muted-foreground">Historique des modifications...</p>
+            <CardHeader>
+              <CardTitle className="text-base">Historique des modifications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 pb-4 border-b border-border last:border-0 last:pb-0">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-semibold text-primary">MD</span>
+                  </div>
+                  
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm">
+                          <span className="font-semibold text-foreground">Marie Dubois</span>
+                          {' '}a mis à jour{' '}
+                          <span className="font-semibold text-foreground">Statut</span>
+                        </p>
+                        <div className="flex items-center gap-2 mt-1 text-sm">
+                          <span className="text-muted-foreground line-through">Inactif</span>
+                          <span className="text-muted-foreground">→</span>
+                          <span className="text-foreground">Actif</span>
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        2023-06-15 14:32
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 pb-4 border-b border-border last:border-0 last:pb-0">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-semibold text-primary">JM</span>
+                  </div>
+                  
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm">
+                          <span className="font-semibold text-foreground">Jean Martin</span>
+                          {' '}a mis à jour{' '}
+                          <span className="font-semibold text-foreground">Périodicité</span>
+                        </p>
+                        <div className="flex items-center gap-2 mt-1 text-sm">
+                          <span className="text-muted-foreground line-through">Hebdomadaire</span>
+                          <span className="text-muted-foreground">→</span>
+                          <span className="text-foreground">Quotidien</span>
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        2023-06-10 09:15
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 pb-4 border-b border-border last:border-0 last:pb-0">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-semibold text-primary">SB</span>
+                  </div>
+                  
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm">
+                          <span className="font-semibold text-foreground">Sophie Bernard</span>
+                          {' '}a mis à jour{' '}
+                          <span className="font-semibold text-foreground">Famille d'équipement</span>
+                        </p>
+                        <div className="flex items-center gap-2 mt-1 text-sm">
+                          <span className="text-muted-foreground line-through">Véhicule</span>
+                          <span className="text-muted-foreground">→</span>
+                          <span className="text-foreground">Camion</span>
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        2023-05-22 16:45
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
