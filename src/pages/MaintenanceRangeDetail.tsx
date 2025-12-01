@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,10 +15,12 @@ import {
   Package,
   Play
 } from 'lucide-react';
+import { EditMaintenanceRangeModal } from '@/components/maintenance/EditMaintenanceRangeModal';
 
 const MaintenanceRangeDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Mock data - remplacer par de vraies données plus tard
   const range = {
@@ -73,7 +75,7 @@ const MaintenanceRangeDetail: React.FC = () => {
               </Label>
               <Switch id="active-status" defaultChecked />
             </div>
-            <Button variant="outline" className="bg-card">
+            <Button variant="outline" className="bg-card" onClick={() => setIsEditModalOpen(true)}>
               <Edit className="h-4 w-4 mr-2" />
               Modifier
             </Button>
@@ -237,6 +239,13 @@ const MaintenanceRangeDetail: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Modal */}
+      <EditMaintenanceRangeModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        rangeData={range}
+      />
     </div>
   );
 };
