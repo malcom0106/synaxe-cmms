@@ -96,7 +96,7 @@ export const EditMaintenanceRangeModal: React.FC<EditMaintenanceRangeModalProps>
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
             <Wrench className="h-5 w-5 text-primary" />
@@ -107,11 +107,11 @@ export const EditMaintenanceRangeModal: React.FC<EditMaintenanceRangeModalProps>
           </p>
         </DialogHeader>
 
-        <div className="space-y-6 mt-4">
-          {/* Général */}
-          <div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+          {/* Colonne gauche - Informations */}
+          <div className="space-y-6">
             {/* Nom de la gamme */}
-            <div className="space-y-2 mb-4">
+            <div className="space-y-2">
               <Label htmlFor="name">
                 Nom de la gamme <span className="text-red-500">*</span>
               </Label>
@@ -124,7 +124,7 @@ export const EditMaintenanceRangeModal: React.FC<EditMaintenanceRangeModalProps>
             </div>
 
             {/* Type d'intervention et Périodicité */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="operation-type">
                   Type d'intervention <span className="text-red-500">*</span>
@@ -161,7 +161,8 @@ export const EditMaintenanceRangeModal: React.FC<EditMaintenanceRangeModalProps>
               </div>
             </div>
 
-            <div className="space-y-2 mb-4">
+            {/* Description */}
+            <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
@@ -186,113 +187,111 @@ export const EditMaintenanceRangeModal: React.FC<EditMaintenanceRangeModalProps>
               />
               <p className="text-xs text-muted-foreground">Optionnel</p>
             </div>
-          </div>
 
-          {/* Équipements concernés */}
-          <div>
-            <h3 className="text-sm font-medium text-foreground mb-4">Équipements concernés</h3>
-            
-            <div className="grid grid-cols-2 gap-4 mb-3">
-              <div className="space-y-2">
-                <Label htmlFor="family">Famille d'équipement</Label>
-                <Select value={formData.familyEquipment} onValueChange={(value) => setFormData({ ...formData, familyEquipment: value })}>
-                  <SelectTrigger id="family">
-                    <SelectValue placeholder="Sélectionner une famille" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Camion">Camion</SelectItem>
-                    <SelectItem value="Pompe">Pompe</SelectItem>
-                    <SelectItem value="Compresseur">Compresseur</SelectItem>
-                    <SelectItem value="Générateur">Générateur</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="subfamily">Sous-famille</Label>
-                <Select value={formData.subFamily} onValueChange={(value) => setFormData({ ...formData, subFamily: value })}>
-                  <SelectTrigger id="subfamily">
-                    <SelectValue placeholder="Sélectionner une sous-famille" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Oléoserveur">Oléoserveur</SelectItem>
-                    <SelectItem value="Benne">Benne</SelectItem>
-                    <SelectItem value="Citerne">Citerne</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-blue-900">
-                Si aucune famille n'est sélectionnée, cette gamme s'appliquera à tous les équipements
-              </p>
-            </div>
-          </div>
-
-          {/* Actions de maintenance */}
-          <div>
-            <h3 className="text-sm font-medium text-foreground mb-4">
-              Actions de maintenance
-            </h3>
-
-            <div className="space-y-3">
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Sélectionner les actions à effectuer :"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
+            {/* Équipements concernés */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-foreground">Équipements concernés</h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="family">Famille d'équipement</Label>
+                  <Select value={formData.familyEquipment} onValueChange={(value) => setFormData({ ...formData, familyEquipment: value })}>
+                    <SelectTrigger id="family">
+                      <SelectValue placeholder="Sélectionner une famille" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Camion">Camion</SelectItem>
+                      <SelectItem value="Pompe">Pompe</SelectItem>
+                      <SelectItem value="Compresseur">Compresseur</SelectItem>
+                      <SelectItem value="Générateur">Générateur</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Button type="button" size="sm" className="flex-shrink-0">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Créer une action
-                </Button>
-              </div>
 
-              <div className="border border-border rounded-lg p-4 space-y-3 max-h-64 overflow-y-auto">
-                {filteredActions.map((action) => (
-                  <div key={action.id} className="flex items-start gap-3">
-                    <Checkbox
-                      id={`action-${action.id}`}
-                      checked={action.checked}
-                      onCheckedChange={(checked) => {
-                        setActions(
-                          actions.map((a) =>
-                            a.id === action.id ? { ...a, checked: checked as boolean } : a
-                          )
-                        );
-                      }}
-                    />
-                    <div className="flex-1">
-                      <Label
-                        htmlFor={`action-${action.id}`}
-                        className="text-sm font-medium cursor-pointer"
-                      >
-                        {action.title}
-                      </Label>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {action.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                <div className="space-y-2">
+                  <Label htmlFor="subfamily">Sous-famille</Label>
+                  <Select value={formData.subFamily} onValueChange={(value) => setFormData({ ...formData, subFamily: value })}>
+                    <SelectTrigger id="subfamily">
+                      <SelectValue placeholder="Sélectionner une sous-famille" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Oléoserveur">Oléoserveur</SelectItem>
+                      <SelectItem value="Benne">Benne</SelectItem>
+                      <SelectItem value="Citerne">Citerne</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-
-              <p className="text-xs text-muted-foreground">
-                {selectedActionsCount} action(s) sélectionnée(s)
-              </p>
 
               <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                 <p className="text-xs text-blue-900">
-                  Les actions sélectionnées seront automatiquement ajoutées aux interventions générées
+                  Si aucune famille n'est sélectionnée, cette gamme s'appliquera à tous les équipements
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* Colonne droite - Actions de maintenance */}
+          <div className="space-y-4 flex flex-col">
+            <h3 className="text-sm font-medium text-foreground">
+              Actions de maintenance
+            </h3>
+
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Sélectionner les actions à effectuer :"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button type="button" size="sm" className="flex-shrink-0">
+                <Plus className="h-4 w-4 mr-2" />
+                Créer une action
+              </Button>
+            </div>
+
+            <div className="border border-border rounded-lg p-4 space-y-3 overflow-y-auto flex-1 min-h-[400px]">
+              {filteredActions.map((action) => (
+                <div key={action.id} className="flex items-start gap-3">
+                  <Checkbox
+                    id={`action-${action.id}`}
+                    checked={action.checked}
+                    onCheckedChange={(checked) => {
+                      setActions(
+                        actions.map((a) =>
+                          a.id === action.id ? { ...a, checked: checked as boolean } : a
+                        )
+                      );
+                    }}
+                  />
+                  <div className="flex-1">
+                    <Label
+                      htmlFor={`action-${action.id}`}
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      {action.title}
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {action.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              {selectedActionsCount} action(s) sélectionnée(s)
+            </p>
+
+            <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-blue-900">
+                Les actions sélectionnées seront automatiquement ajoutées aux interventions générées
+              </p>
             </div>
           </div>
         </div>
