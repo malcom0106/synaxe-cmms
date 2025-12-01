@@ -123,11 +123,11 @@ export const EditMaintenanceRangeModal: React.FC<EditMaintenanceRangeModalProps>
               />
             </div>
 
-            {/* Type d'opération et Périodicité */}
+            {/* Type d'intervention et Périodicité */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="space-y-2">
                 <Label htmlFor="operation-type">
-                  Type d'opération <span className="text-red-500">*</span>
+                  Type d'intervention <span className="text-red-500">*</span>
                 </Label>
                 <Select value={formData.operationType} onValueChange={(value) => setFormData({ ...formData, operationType: value })}>
                   <SelectTrigger id="operation-type">
