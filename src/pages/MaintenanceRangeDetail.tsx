@@ -154,83 +154,106 @@ const MaintenanceRangeDetail: React.FC = () => {
             </Card>
           </div>
 
-          {/* Général */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Settings className="h-4 w-4" />
-                Général
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-4">
+          {/* Deux colonnes : Informations + Actions */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Colonne gauche - Informations */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Settings className="h-4 w-4" />
+                    Général
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Nom de la gamme */}
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Type d'intervention</p>
-                    <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/10 border-0">
-                      {range.operationType}
-                    </Badge>
+                    <p className="text-sm text-muted-foreground mb-2">Nom de la gamme</p>
+                    <p className="text-sm font-medium text-foreground">{range.name}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-2">Périodicité</p>
-                    <p className="text-sm font-medium text-foreground">{range.frequency}</p>
+
+                  {/* Type d'intervention et Périodicité */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Type d'intervention</p>
+                      <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/10 border-0">
+                        {range.operationType}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Périodicité</p>
+                      <p className="text-sm font-medium text-foreground">{range.frequency}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-2">Famille d'équipement</p>
-                    <p className="text-sm font-medium text-foreground">{range.familyEquipment}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-2">Sous-famille</p>
-                    <p className="text-sm font-medium text-foreground">{range.subFamily}</p>
-                  </div>
-                </div>
-                <div className="space-y-4">
+
+                  {/* Durée estimée */}
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">Durée estimée</p>
                     <p className="text-sm font-medium text-foreground">{range.estimatedDuration}</p>
                   </div>
+
+                  {/* Équipements concernés */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-medium text-foreground">Équipements concernés</h3>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Famille d'équipement</p>
+                        <p className="text-sm font-medium text-foreground">{range.familyEquipment}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Sous-famille</p>
+                        <p className="text-sm font-medium text-foreground">{range.subFamily}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Date de création */}
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">Créé le</p>
                     <p className="text-sm font-medium text-foreground">{range.createdDate}</p>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </div>
 
-          {/* Actions de maintenance */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Wrench className="h-4 w-4" />
-                Actions de maintenance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {range.actions.map((action) => (
-                  <div 
-                    key={action.id}
-                    className="flex items-start gap-3 p-4 rounded-lg bg-blue-50 border border-blue-100"
-                  >
-                    <div className="p-2 bg-blue-100 rounded-lg mt-1">
-                      <Wrench className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="text-sm font-medium text-foreground mb-1">
-                        {action.title}
-                      </h4>
-                      <p className="text-sm text-muted-foreground">
-                        {action.description}
-                      </p>
-                    </div>
+            {/* Colonne droite - Actions de maintenance */}
+            <div className="space-y-4">
+              <Card className="flex flex-col h-full">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Wrench className="h-4 w-4" />
+                    Actions de maintenance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col min-h-[400px]">
+                  <div className="border border-border rounded-lg p-4 space-y-3 overflow-y-auto flex-1">
+                    {range.actions.map((action) => (
+                      <div 
+                        key={action.id}
+                        className="flex items-start gap-3 p-4 rounded-lg bg-blue-50 border border-blue-100"
+                      >
+                        <div className="p-2 bg-blue-100 rounded-lg mt-1">
+                          <Wrench className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium text-foreground mb-1">
+                            {action.title}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {action.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <p className="text-xs text-muted-foreground mt-4">
+                    {range.actions.length} action(s) configurée(s)
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="interventions" className="space-y-4">
