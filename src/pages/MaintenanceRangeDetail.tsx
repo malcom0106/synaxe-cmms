@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  ArrowLeft, 
   Edit, 
   Trash2, 
   Settings, 
@@ -69,14 +68,6 @@ const MaintenanceRangeDetail: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/maintenance/ranges')}
-              className="bg-card"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour
-            </Button>
             <Button variant="outline" className="bg-card">
               <Edit className="h-4 w-4 mr-2" />
               Modifier

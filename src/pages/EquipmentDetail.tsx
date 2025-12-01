@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { 
-  ArrowLeft, 
   Calendar, 
   Clock, 
   Download, 
@@ -182,15 +181,6 @@ const EquipmentDetail: React.FC = () => {
 
   return (
     <div className="p-6 w-full bg-background">
-      <Button 
-        variant="ghost" 
-        onClick={() => navigate('/equipment')}
-        className="mb-4 gap-2"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Retour à la liste
-      </Button>
-
       <Tabs defaultValue="equipment" className="w-full">
         <TabsList className="mb-6 w-full grid grid-cols-3 bg-muted/30">
           <TabsTrigger value="equipment">Équipement</TabsTrigger>
