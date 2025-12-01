@@ -52,6 +52,42 @@ const interventions: Intervention[] = [
     dateRealisee: null,
     statut: 'Planifié'
   },
+  {
+    id: '#1',
+    equipment: 'Oléoserveur 202',
+    gamme: 'Check Quotidienne Oléoserveur',
+    operateur: 'Non attribué',
+    datePlanifiee: '26/11/2025 01:00',
+    dateRealisee: '26/11/2025 11:29',
+    statut: 'Terminé'
+  },
+  {
+    id: '#2',
+    equipment: 'Oléoserveur 202',
+    gamme: 'Check Quotidienne Oléoserveur',
+    operateur: 'Non attribué',
+    datePlanifiee: '28/11/2025 01:00',
+    dateRealisee: null,
+    statut: 'Planifié'
+  },
+  {
+    id: '#3',
+    equipment: 'Oléoserveur 202',
+    gamme: 'Check Quotidienne Oléoserveur',
+    operateur: 'Non attribué',
+    datePlanifiee: '29/11/2025 01:00',
+    dateRealisee: null,
+    statut: 'Planifié'
+  },
+  {
+    id: '#4',
+    equipment: 'Oléoserveur 202',
+    gamme: 'Check Quotidienne Oléoserveur',
+    operateur: 'Non attribué',
+    datePlanifiee: '30/11/2025 01:00',
+    dateRealisee: null,
+    statut: 'Planifié'
+  },
 ];
 
 const Maintenance: React.FC = () => {
