@@ -16,6 +16,7 @@ import Documents from "./pages/Documents";
 import Settings from "./pages/Settings";
 import MaintenanceRanges from "./pages/MaintenanceRanges";
 import MaintenanceActions from "./pages/MaintenanceActions";
+import EquipmentFamilies from "./pages/EquipmentFamilies";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
                 <Route path="/inventory" element={<Inventory />} />
                 <Route path="/documents" element={<Documents />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/settings/equipment-families" element={<EquipmentFamilies />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
