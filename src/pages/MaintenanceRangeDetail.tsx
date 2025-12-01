@@ -115,10 +115,19 @@ const MaintenanceRangeDetail: React.FC = () => {
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Settings className="h-4 w-4" />
-                    Général
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Settings className="h-4 w-4" />
+                      Général
+                    </CardTitle>
+                    <Button 
+                      size="sm" 
+                      className="bg-primary hover:bg-primary/90"
+                      onClick={() => setIsEditModalOpen(true)}
+                    >
+                      Modifier
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-6">
