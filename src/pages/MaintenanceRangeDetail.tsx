@@ -142,41 +142,47 @@ const MaintenanceRangeDetail: React.FC = () => {
             </Card>
           </div>
 
-          {/* Informations du programme */}
+          {/* Général */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Settings className="h-4 w-4" />
-                Informations du programme
+                Général
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Type d'opération</p>
-                  <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/10 border-0">
-                    {range.operationType}
-                  </Badge>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Type d'opération</p>
+                    <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/10 border-0">
+                      {range.operationType}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Périodicité</p>
+                    <p className="text-sm font-medium text-foreground">{range.frequency}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Famille d'équipement</p>
-                  <p className="text-sm font-medium text-foreground">{range.familyEquipment}</p>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Famille d'équipement</p>
+                    <p className="text-sm font-medium text-foreground">{range.familyEquipment}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Sous-famille</p>
+                    <p className="text-sm font-medium text-foreground">{range.subFamily}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Périodicité</p>
-                  <p className="text-sm font-medium text-foreground">{range.frequency}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Sous-famille</p>
-                  <p className="text-sm font-medium text-foreground">{range.subFamily}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Durée estimée</p>
-                  <p className="text-sm font-medium text-foreground">{range.estimatedDuration}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Créé le</p>
-                  <p className="text-sm font-medium text-foreground">{range.createdDate}</p>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Durée estimée</p>
+                    <p className="text-sm font-medium text-foreground">{range.estimatedDuration}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Créé le</p>
+                    <p className="text-sm font-medium text-foreground">{range.createdDate}</p>
+                  </div>
                 </div>
               </div>
             </CardContent>
