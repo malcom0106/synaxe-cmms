@@ -110,8 +110,6 @@ export const EditMaintenanceRangeModal: React.FC<EditMaintenanceRangeModalProps>
         <div className="space-y-6 mt-4">
           {/* Général */}
           <div>
-            <h3 className="text-sm font-medium text-foreground mb-4">Général</h3>
-            
             {/* Nom du programme */}
             <div className="space-y-2 mb-4">
               <Label htmlFor="name">
