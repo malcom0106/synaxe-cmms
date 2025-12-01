@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -48,6 +49,7 @@ const maintenanceRanges: MaintenanceRange[] = [
 
 const MaintenanceRanges: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
   return (
     <div className="p-6 w-full bg-background">
@@ -120,7 +122,8 @@ const MaintenanceRanges: React.FC = () => {
               {maintenanceRanges.map((range) => (
                 <tr 
                   key={range.id} 
-                  className="border-b border-border hover:bg-muted/30 transition-colors"
+                  className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/maintenance/ranges/${range.id}`)}
                 >
                   <td className="px-4 py-4 text-sm font-medium text-foreground">
                     {range.id}
