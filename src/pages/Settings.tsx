@@ -74,31 +74,6 @@ const Settings: React.FC = () => {
         </div>
       </div>
 
-      {/* Maintenance */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <Wrench className="h-6 w-6 text-foreground" />
-          <div>
-            <h2 className="text-lg font-semibold text-foreground">Maintenance</h2>
-            <p className="text-sm text-muted-foreground">Configuration des actions et procédures de maintenance</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SettingCard
-            icon={<Calendar className="h-5 w-5" />}
-            title="Gamme de maintenance"
-            description="Gérer les gammes de maintenance préventive"
-            to="/settings/maintenance-ranges"
-          />
-          <SettingCard
-            icon={<Wrench className="h-5 w-5" />}
-            title="Actions de Maintenance"
-            description="Gérer les types d'actions de maintenance"
-            to="/settings/maintenance-actions"
-          />
-        </div>
-      </div>
-
       {/* Utilisateurs et Permissions */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
