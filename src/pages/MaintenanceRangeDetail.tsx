@@ -30,7 +30,9 @@ import {
   ChevronDown,
   FileText,
   Plus,
-  Pencil
+  Pencil,
+  X,
+  GripVertical
 } from 'lucide-react';
 import { EditGeneralInfoModal } from '@/components/maintenance/EditGeneralInfoModal';
 import { useToast } from '@/hooks/use-toast';
@@ -40,13 +42,32 @@ const MaintenanceRangeDetail: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedActions, setSelectedActions] = useState<number[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [documentsExpanded, setDocumentsExpanded] = useState(true);
   const [isEditingActions, setIsEditingActions] = useState(false);
 
   // Mock data - remplacer par de vraies données plus tard
+  const initialActions = [
+    {
+      id: 1,
+      title: 'Étape 1 check',
+      description: 'Contrôle visuel 360 ° autour de l\'oléoserveur Détection d\'anomalie (Tuyaux, câbles électriques, ...)'
+    },
+    {
+      id: 2,
+      title: 'Étape 2 check',
+      description: 'Contrôler les niveaux et vérifier l\'absence de fuites : huile moteur, liquide hydrauliques, liquide de refroidissement, niveau de gasoil, fuite d\'air ...'
+    },
+    {
+      id: 3,
+      title: 'Étape 3 check',
+      description: 'Vérifier la présence du scellé intact sur la commande de neutralisation des interlocks'
+    }
+  ];
+
+  const [actions, setActions] = useState(initialActions);
+
   const range = {
     id: 1,
     name: 'Check Quotidienne Oléoserveur',
@@ -61,33 +82,20 @@ const MaintenanceRangeDetail: React.FC = () => {
     interventionsPlanned: 94,
     interventionsCompleted: 2,
     equipmentConcerned: 2,
-    actions: [
-      {
-        id: 1,
-        title: 'Étape 1 check',
-        description: 'Contrôle visuel 360 ° autour de l\'oléoserveur Détection d\'anomalie (Tuyaux, câbles électriques, ...)'
-      },
-      {
-        id: 2,
-        title: 'Étape 2 check',
-        description: 'Contrôler les niveaux et vérifier l\'absence de fuites : huile moteur, liquide hydrauliques, liquide de refroidissement, niveau de gasoil, fuite d\'air ...'
-      },
-      {
-        id: 3,
-        title: 'Étape 3 check',
-        description: 'Vérifier la présence du scellé intact sur la commande de neutralisation des interlocks'
-      }
-    ]
   };
 
-  const handleActionToggle = (actionId: number) => {
-    setSelectedActions(prev => {
-      const newSelection = prev.includes(actionId)
-        ? prev.filter(id => id !== actionId)
-        : [...prev, actionId];
-      setHasChanges(true);
-      return newSelection;
-    });
+  const handleDeleteAction = (actionId: number) => {
+    setActions(prev => prev.filter(action => action.id !== actionId));
+    setHasChanges(true);
+  };
+
+  const handleMoveAction = (index: number, direction: 'up' | 'down') => {
+    const newActions = [...actions];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= newActions.length) return;
+    [newActions[index], newActions[newIndex]] = [newActions[newIndex], newActions[index]];
+    setActions(newActions);
+    setHasChanges(true);
   };
 
   const handleSaveChanges = () => {
@@ -99,7 +107,7 @@ const MaintenanceRangeDetail: React.FC = () => {
     setIsEditingActions(false);
   };
 
-  const filteredActions = range.actions.filter(action =>
+  const filteredActions = actions.filter(action =>
     action.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     action.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -300,17 +308,32 @@ const MaintenanceRangeDetail: React.FC = () => {
 
                   {/* Liste des actions */}
                   <div className="border border-border rounded-lg p-4 space-y-3 overflow-y-auto flex-1">
-                    {filteredActions.map((action) => (
+                    {filteredActions.map((action, index) => (
                       <div 
                         key={action.id}
                         className="flex items-start gap-3 p-4 rounded-lg bg-blue-50 border border-blue-100"
                       >
                         {isEditingActions && (
-                          <Checkbox
-                            checked={selectedActions.includes(action.id)}
-                            onCheckedChange={() => handleActionToggle(action.id)}
-                            className="mt-1"
-                          />
+                          <div className="flex flex-col gap-1 mt-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0"
+                              onClick={() => handleMoveAction(index, 'up')}
+                              disabled={index === 0}
+                            >
+                              <ChevronUp className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0"
+                              onClick={() => handleMoveAction(index, 'down')}
+                              disabled={index === filteredActions.length - 1}
+                            >
+                              <ChevronDown className="h-4 w-4" />
+                            </Button>
+                          </div>
                         )}
                         <div className="p-2 bg-blue-100 rounded-lg mt-1">
                           <Wrench className="h-4 w-4 text-blue-600" />
@@ -323,6 +346,16 @@ const MaintenanceRangeDetail: React.FC = () => {
                             {action.description}
                           </p>
                         </div>
+                        {isEditingActions && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDeleteAction(action.id)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -330,7 +363,7 @@ const MaintenanceRangeDetail: React.FC = () => {
                   {/* Footer */}
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-xs text-muted-foreground">
-                      {range.actions.length} action(s) configurée(s)
+                      {actions.length} action(s) configurée(s)
                     </p>
                     {isEditingActions && (
                       <Button 
