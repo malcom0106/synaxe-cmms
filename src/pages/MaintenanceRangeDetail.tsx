@@ -366,14 +366,27 @@ const MaintenanceRangeDetail: React.FC = () => {
                       {actions.length} action(s) configurée(s)
                     </p>
                     {isEditingActions && (
-                      <Button 
-                        size="sm"
-                        disabled={!hasChanges}
-                        onClick={handleSaveChanges}
-                        className="bg-primary hover:bg-primary/90 disabled:opacity-50"
-                      >
-                        Enregistrer
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setActions(initialActions);
+                            setHasChanges(false);
+                            setIsEditingActions(false);
+                          }}
+                        >
+                          Annuler
+                        </Button>
+                        <Button 
+                          size="sm"
+                          disabled={!hasChanges}
+                          onClick={handleSaveChanges}
+                          className="bg-primary hover:bg-primary/90 disabled:opacity-50"
+                        >
+                          Enregistrer
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </CardContent>
