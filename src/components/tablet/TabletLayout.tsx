@@ -11,7 +11,9 @@ import {
   Package,
   History,
   Wifi,
-  WifiOff
+  WifiOff,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -40,10 +42,10 @@ const navItems: NavItem[] = [
 
 export const TabletLayout: React.FC = () => {
   const [isOnline, setIsOnline] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Vérifier si on est sur une page d'intervention (pour masquer le menu)
   const isInterventionPage = location.pathname.includes('/tablet/intervention/');
 
   const handleNavigation = (path: string) => {
@@ -67,7 +69,6 @@ export const TabletLayout: React.FC = () => {
     };
   }, []);
 
-  // Layout spécial pour les interventions (plein écran)
   if (isInterventionPage) {
     return (
       <div className="min-h-screen bg-muted/30">
@@ -79,33 +80,65 @@ export const TabletLayout: React.FC = () => {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background flex">
-        {/* Sidebar permanente avec icônes carrées */}
-        <aside className="w-16 bg-primary flex flex-col items-center py-3 gap-1 shrink-0">
-          {/* Logo/Accueil */}
-          <div className="w-10 h-10 rounded-lg bg-primary-foreground/20 flex items-center justify-center mb-2">
-            <span className="text-primary-foreground font-bold text-sm">GM</span>
+        {/* Sidebar avec toggle */}
+        <aside className={cn(
+          "bg-primary flex flex-col py-3 shrink-0 transition-all duration-300",
+          expanded ? "w-48 px-3" : "w-16 items-center"
+        )}>
+          {/* Logo + Toggle */}
+          <div className={cn(
+            "flex items-center mb-2",
+            expanded ? "justify-between px-1" : "justify-center"
+          )}>
+            <div className={cn(
+              "rounded-lg bg-primary-foreground/20 flex items-center justify-center",
+              expanded ? "w-8 h-8" : "w-10 h-10"
+            )}>
+              <span className="text-primary-foreground font-bold text-sm">GM</span>
+            </div>
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className={cn(
+                "w-7 h-7 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/70 hover:bg-primary-foreground/20 hover:text-primary-foreground transition-all",
+                !expanded && "absolute left-12 top-3 z-10"
+              )}
+            >
+              {expanded ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            </button>
           </div>
 
           {/* Navigation items */}
-          <nav className="flex-1 flex flex-col items-center gap-1">
+          <nav className="flex-1 flex flex-col gap-1">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path || 
                 (item.path !== '/tablet' && location.pathname.startsWith(item.path));
               
+              const navButton = (
+                <button
+                  onClick={() => handleNavigation(item.path)}
+                  className={cn(
+                    "rounded-lg flex items-center transition-all",
+                    expanded 
+                      ? "w-full h-10 px-3 gap-3 justify-start" 
+                      : "w-11 h-11 justify-center",
+                    isActive
+                      ? "bg-primary-foreground text-primary"
+                      : "text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                  )}
+                >
+                  <item.icon className="h-5 w-5 shrink-0" />
+                  {expanded && <span className="text-sm font-medium truncate">{item.label}</span>}
+                </button>
+              );
+
+              if (expanded) {
+                return <div key={item.path}>{navButton}</div>;
+              }
+
               return (
                 <Tooltip key={item.path} delayDuration={0}>
                   <TooltipTrigger asChild>
-                    <button
-                      onClick={() => handleNavigation(item.path)}
-                      className={cn(
-                        "w-11 h-11 rounded-lg flex items-center justify-center transition-all",
-                        isActive
-                          ? "bg-primary-foreground text-primary"
-                          : "text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground"
-                      )}
-                    >
-                      <item.icon className="h-5 w-5" />
-                    </button>
+                    {navButton}
                   </TooltipTrigger>
                   <TooltipContent side="right" className="font-medium">
                     {item.label}
@@ -117,26 +150,38 @@ export const TabletLayout: React.FC = () => {
 
           {/* Statut connexion */}
           <div className={cn(
-            "w-11 h-11 rounded-lg flex items-center justify-center",
+            "rounded-lg flex items-center",
+            expanded ? "w-full h-10 px-3 gap-3" : "w-11 h-11 justify-center",
             isOnline ? "text-green-300" : "text-red-300"
           )}>
-            {isOnline ? <Wifi className="h-5 w-5" /> : <WifiOff className="h-5 w-5" />}
+            {isOnline ? <Wifi className="h-5 w-5 shrink-0" /> : <WifiOff className="h-5 w-5 shrink-0" />}
+            {expanded && <span className="text-sm">{isOnline ? 'En ligne' : 'Hors ligne'}</span>}
           </div>
 
           {/* Déconnexion */}
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleLogout}
-                className="w-11 h-11 rounded-lg flex items-center justify-center text-primary-foreground/70 hover:bg-red-500/20 hover:text-red-300 transition-all"
-              >
-                <LogOut className="h-5 w-5" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right" className="font-medium">
-              Déconnexion
-            </TooltipContent>
-          </Tooltip>
+          {expanded ? (
+            <button
+              onClick={handleLogout}
+              className="w-full h-10 rounded-lg flex items-center px-3 gap-3 text-primary-foreground/70 hover:bg-red-500/20 hover:text-red-300 transition-all"
+            >
+              <LogOut className="h-5 w-5 shrink-0" />
+              <span className="text-sm font-medium">Déconnexion</span>
+            </button>
+          ) : (
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleLogout}
+                  className="w-11 h-11 rounded-lg flex items-center justify-center text-primary-foreground/70 hover:bg-red-500/20 hover:text-red-300 transition-all"
+                >
+                  <LogOut className="h-5 w-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="font-medium">
+                Déconnexion
+              </TooltipContent>
+            </Tooltip>
+          )}
         </aside>
 
         {/* Main content area */}
