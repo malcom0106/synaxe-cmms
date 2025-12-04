@@ -51,6 +51,8 @@ const App = () => (
             <Route path="plan" element={<TabletMaintenancePlan />} />
             <Route path="requests" element={<TabletInterventionRequests />} />
             <Route path="diagnostic" element={<TabletDiagnostic />} />
+            <Route path="inventory" element={<TabletInventory />} />
+            <Route path="history" element={<TabletHistory />} />
           </Route>
 
           {/* Desktop routes */}
