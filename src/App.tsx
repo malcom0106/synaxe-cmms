@@ -30,6 +30,8 @@ import TabletMaintenanceRanges from "./pages/tablet/TabletMaintenanceRanges";
 import TabletMaintenancePlan from "./pages/tablet/TabletMaintenancePlan";
 import TabletInterventionRequests from "./pages/tablet/TabletInterventionRequests";
 import TabletDiagnostic from "./pages/tablet/TabletDiagnostic";
+import TabletInventory from "./pages/tablet/TabletInventory";
+import TabletHistory from "./pages/tablet/TabletHistory";
 
 const queryClient = new QueryClient();
 
