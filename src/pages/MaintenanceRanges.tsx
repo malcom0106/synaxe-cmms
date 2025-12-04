@@ -448,8 +448,8 @@ const MaintenanceRanges: React.FC = () => {
             <span className="font-medium">{allowedFamiliesAndSubFamilies.subFamilies.join(', ')}</span>
           </div>
           
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
+          <div className="space-y-2">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher un équipement..."
@@ -458,35 +458,33 @@ const MaintenanceRanges: React.FC = () => {
                 className="pl-10"
               />
             </div>
-            {families.length > 1 && (
+            <div className="flex items-center gap-2">
               <Select value={familyFilter} onValueChange={(value) => {
                 setFamilyFilter(value);
                 setSubFamilyFilter('all');
               }}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Famille" />
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Filtrer par famille" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Toutes</SelectItem>
+                  <SelectItem value="all">Toutes les familles</SelectItem>
                   {families.map(family => (
                     <SelectItem key={family} value={family}>{family}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            )}
-            {subFamilies.length > 1 && (
               <Select value={subFamilyFilter} onValueChange={setSubFamilyFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Sous-famille" />
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Filtrer par sous-famille" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Toutes</SelectItem>
+                  <SelectItem value="all">Toutes les sous-familles</SelectItem>
                   {subFamilies.map(subFamily => (
                     <SelectItem key={subFamily} value={subFamily}>{subFamily}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            )}
+            </div>
           </div>
 
           <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
