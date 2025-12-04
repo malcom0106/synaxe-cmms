@@ -9,9 +9,14 @@ import {
   AlertTriangle, 
   Stethoscope,
   LogOut,
-  User
+  User,
+  Package,
+  History,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -25,11 +30,14 @@ const navItems: NavItem[] = [
   { icon: Wrench, label: 'Gammes de maintenance', path: '/tablet/ranges' },
   { icon: Calendar, label: 'Plan de maintenance', path: '/tablet/plan' },
   { icon: AlertTriangle, label: "Demandes d'intervention", path: '/tablet/requests' },
-  { icon: Stethoscope, label: 'Diagnostic', path: '/tablet/diagnostic' },
+  { icon: Package, label: 'Inventaire', path: '/tablet/inventory' },
+  { icon: History, label: 'Historique', path: '/tablet/history' },
+  { icon: Stethoscope, label: 'Nouveau diagnostic', path: '/tablet/diagnostic' },
 ];
 
 export const TabletLayout: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(true); // Simulation état réseau
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -41,6 +49,20 @@ export const TabletLayout: React.FC = () => {
   const handleLogout = () => {
     navigate('/tablet/login');
   };
+
+  // Simulation de changement d'état réseau
+  React.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -59,13 +81,39 @@ export const TabletLayout: React.FC = () => {
           <h1 className="text-xl font-semibold">GMAO Tablette</h1>
           
           <div className="flex items-center gap-2">
+            {/* Indicateur de connexion */}
+            <div className={cn(
+              "flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
+              isOnline ? "bg-green-500/20 text-green-100" : "bg-red-500/20 text-red-100"
+            )}>
+              {isOnline ? (
+                <>
+                  <Wifi className="h-3 w-3" />
+                  <span className="hidden sm:inline">En ligne</span>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="h-3 w-3" />
+                  <span className="hidden sm:inline">Hors ligne</span>
+                </>
+              )}
+            </div>
+            
             <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-full px-3 py-1">
               <User className="h-5 w-5" />
-              <span className="text-sm font-medium">Jean Martin</span>
+              <span className="text-sm font-medium hidden sm:inline">Jean Martin</span>
             </div>
           </div>
         </div>
       </header>
+
+      {/* Barre hors ligne */}
+      {!isOnline && (
+        <div className="bg-orange-500 text-white px-4 py-2 text-sm text-center">
+          <WifiOff className="h-4 w-4 inline mr-2" />
+          Mode hors ligne - Les données seront synchronisées à la reconnexion
+        </div>
+      )}
 
       {/* Menu Drawer */}
       {menuOpen && (
@@ -86,8 +134,21 @@ export const TabletLayout: React.FC = () => {
                 <X className="h-6 w-6" />
               </Button>
             </div>
+
+            {/* Info utilisateur */}
+            <div className="p-4 border-b border-border bg-muted/30">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <div className="font-semibold text-foreground">Jean Martin</div>
+                  <div className="text-sm text-muted-foreground">Mécanicien</div>
+                </div>
+              </div>
+            </div>
             
-            <nav className="p-4 space-y-2">
+            <nav className="p-4 space-y-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
               {navItems.map((item) => (
                 <button
                   key={item.path}
@@ -105,7 +166,17 @@ export const TabletLayout: React.FC = () => {
               ))}
             </nav>
 
-            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
+            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-card">
+              {/* Indicateur de synchronisation */}
+              <div className="mb-3 p-3 bg-muted/30 rounded-lg">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">État de synchronisation</span>
+                  <Badge variant={isOnline ? "default" : "secondary"} className="text-xs">
+                    {isOnline ? "Synchronisé" : "En attente"}
+                  </Badge>
+                </div>
+              </div>
+              
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-4 px-4 py-4 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all active:scale-95"
