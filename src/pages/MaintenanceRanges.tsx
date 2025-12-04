@@ -1,10 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Dialog,
   DialogContent,
@@ -22,8 +30,11 @@ import {
   Play,
   Edit,
   ChevronRight,
-  BarChart3
+  BarChart3,
+  CalendarIcon,
+  X
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface MaintenanceRange {
   id: number;
@@ -38,6 +49,13 @@ interface MaintenanceRange {
   };
   interventions: number;
   status: 'Actif' | 'Inactif';
+}
+
+interface Equipment {
+  id: string;
+  name: string;
+  family: string;
+  subFamily: string;
 }
 
 const maintenanceRanges: MaintenanceRange[] = [
@@ -57,27 +75,105 @@ const maintenanceRanges: MaintenanceRange[] = [
   },
 ];
 
+// Liste des équipements
+const equipmentList: Equipment[] = [
+  { id: '202', name: 'Camion 202', family: 'Camion', subFamily: 'Oléoserveur' },
+  { id: '215', name: 'Camion 215', family: 'Camion', subFamily: 'Citerne' },
+  { id: '220', name: 'Camion 220', family: 'Camion', subFamily: 'Oléoserveur' },
+  { id: 'Cuve108', name: 'Cuve 108', family: 'Cuve', subFamily: 'Stockage' },
+  { id: 'Cuve109', name: 'Cuve 109', family: 'Cuve', subFamily: 'Stockage' },
+  { id: 'Pompe01', name: 'Pompe 01', family: 'Pompe', subFamily: 'Distribution' },
+  { id: 'Pompe02', name: 'Pompe 02', family: 'Pompe', subFamily: 'Distribution' },
+];
+
 const MaintenanceRanges: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false);
   const [selectedRange, setSelectedRange] = useState<MaintenanceRange | null>(null);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
   const navigate = useNavigate();
+
+  // États pour les équipements
+  const [equipmentSearchQuery, setEquipmentSearchQuery] = useState('');
+  const [selectedEquipments, setSelectedEquipments] = useState<string[]>([]);
+  const [familyFilter, setFamilyFilter] = useState<string>('all');
+  const [subFamilyFilter, setSubFamilyFilter] = useState<string>('all');
+
+  // États pour les options d'exclusion
+  const [excludeWeekends, setExcludeWeekends] = useState(false);
+  const [excludePeriod, setExcludePeriod] = useState(false);
+  const [excludeStartDate, setExcludeStartDate] = useState<Date | undefined>();
+  const [excludeEndDate, setExcludeEndDate] = useState<Date | undefined>();
+
+  // Extraire les familles et sous-familles uniques
+  const families = useMemo(() => {
+    return [...new Set(equipmentList.map(e => e.family))];
+  }, []);
+
+  const subFamilies = useMemo(() => {
+    if (familyFilter === 'all') {
+      return [...new Set(equipmentList.map(e => e.subFamily))];
+    }
+    return [...new Set(equipmentList.filter(e => e.family === familyFilter).map(e => e.subFamily))];
+  }, [familyFilter]);
+
+  // Filtrer les équipements
+  const filteredEquipments = useMemo(() => {
+    return equipmentList.filter(equipment => {
+      const matchesSearch = equipment.name.toLowerCase().includes(equipmentSearchQuery.toLowerCase());
+      const matchesFamily = familyFilter === 'all' || equipment.family === familyFilter;
+      const matchesSubFamily = subFamilyFilter === 'all' || equipment.subFamily === subFamilyFilter;
+      return matchesSearch && matchesFamily && matchesSubFamily;
+    });
+  }, [equipmentSearchQuery, familyFilter, subFamilyFilter]);
 
   const handleGeneratePlan = (range: MaintenanceRange) => {
     setSelectedRange(range);
     setIsGenerateDialogOpen(true);
   };
 
+  const handleSelectAllEquipments = (checked: boolean) => {
+    if (checked) {
+      setSelectedEquipments(filteredEquipments.map(e => e.id));
+    } else {
+      setSelectedEquipments([]);
+    }
+  };
+
+  const handleToggleEquipment = (equipmentId: string) => {
+    setSelectedEquipments(prev => 
+      prev.includes(equipmentId) 
+        ? prev.filter(id => id !== equipmentId)
+        : [...prev, equipmentId]
+    );
+  };
+
+  const handleCloseDialog = () => {
+    setIsGenerateDialogOpen(false);
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setSelectedEquipments([]);
+    setEquipmentSearchQuery('');
+    setFamilyFilter('all');
+    setSubFamilyFilter('all');
+    setExcludeWeekends(false);
+    setExcludePeriod(false);
+    setExcludeStartDate(undefined);
+    setExcludeEndDate(undefined);
+  };
+
   const handleConfirmGeneration = () => {
-    // TODO: Implémenter la logique de génération
     console.log('Génération du plan pour:', selectedRange?.name);
     console.log('Période:', startDate, 'à', endDate);
-    setIsGenerateDialogOpen(false);
-    setStartDate('');
-    setEndDate('');
+    console.log('Équipements sélectionnés:', selectedEquipments);
+    console.log('Exclure week-ends:', excludeWeekends);
+    console.log('Exclure période:', excludePeriod, excludeStartDate, excludeEndDate);
+    handleCloseDialog();
   };
+
+  const allFilteredSelected = filteredEquipments.length > 0 && 
+    filteredEquipments.every(e => selectedEquipments.includes(e.id));
 
   return (
     <div className="p-6 w-full bg-background">
@@ -244,20 +340,20 @@ const MaintenanceRanges: React.FC = () => {
       </div>
 
       {/* Dialog de génération de plan */}
-      <Dialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+      <Dialog open={isGenerateDialogOpen} onOpenChange={(open) => !open && handleCloseDialog()}>
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Play className="h-5 w-5 text-green-600" />
               Génération d'un plan de maintenance
             </DialogTitle>
             <DialogDescription>
-              Sélectionnez la période pour générer les interventions planifiées
+              Sélectionnez les équipements et la période pour générer les interventions planifiées
             </DialogDescription>
           </DialogHeader>
           
           {selectedRange && (
-            <div className="space-y-4 py-4">
+            <div className="space-y-6 py-4">
               {/* Nom de la gamme */}
               <div>
                 <Label className="text-sm font-medium text-foreground">Gamme de maintenance</Label>
@@ -277,36 +373,240 @@ const MaintenanceRanges: React.FC = () => {
                 </div>
               </div>
 
+              {/* Sélection des équipements */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-foreground">Équipements</Label>
+                
+                {/* Filtres et recherche */}
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Rechercher un équipement..."
+                      value={equipmentSearchQuery}
+                      onChange={(e) => setEquipmentSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Select value={familyFilter} onValueChange={(value) => {
+                    setFamilyFilter(value);
+                    setSubFamilyFilter('all');
+                  }}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Famille" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes</SelectItem>
+                      {families.map(family => (
+                        <SelectItem key={family} value={family}>{family}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={subFamilyFilter} onValueChange={setSubFamilyFilter}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Sous-famille" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes</SelectItem>
+                      {subFamilies.map(subFamily => (
+                        <SelectItem key={subFamily} value={subFamily}>{subFamily}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Tout cocher */}
+                <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
+                  <Checkbox 
+                    id="select-all"
+                    checked={allFilteredSelected}
+                    onCheckedChange={handleSelectAllEquipments}
+                  />
+                  <Label htmlFor="select-all" className="text-sm cursor-pointer">
+                    Tout sélectionner ({filteredEquipments.length} équipement(s))
+                  </Label>
+                </div>
+
+                {/* Liste des équipements */}
+                <ScrollArea className="h-[150px] border border-border rounded-lg">
+                  <div className="p-2 space-y-1">
+                    {filteredEquipments.map(equipment => (
+                      <div 
+                        key={equipment.id}
+                        className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 transition-colors"
+                      >
+                        <Checkbox 
+                          id={`equipment-${equipment.id}`}
+                          checked={selectedEquipments.includes(equipment.id)}
+                          onCheckedChange={() => handleToggleEquipment(equipment.id)}
+                        />
+                        <Label htmlFor={`equipment-${equipment.id}`} className="flex-1 cursor-pointer">
+                          <span className="text-sm font-medium">{equipment.name}</span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            {equipment.family} &gt; {equipment.subFamily}
+                          </span>
+                        </Label>
+                      </div>
+                    ))}
+                    {filteredEquipments.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        Aucun équipement trouvé
+                      </p>
+                    )}
+                  </div>
+                </ScrollArea>
+
+                <p className="text-xs text-muted-foreground">
+                  {selectedEquipments.length} équipement(s) sélectionné(s)
+                </p>
+              </div>
+
               {/* Période de génération */}
               <div className="space-y-3">
                 <Label className="text-sm font-medium text-foreground">Période de génération</Label>
                 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label htmlFor="start-date" className="text-xs text-muted-foreground">
-                      Date de début
-                    </Label>
-                    <Input
-                      id="start-date"
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="mt-1"
-                    />
+                    <Label className="text-xs text-muted-foreground">Date de début</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal mt-1",
+                            !startDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {startDate ? format(startDate, "PPP", { locale: fr }) : "Sélectionner"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={startDate}
+                          onSelect={setStartDate}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   
                   <div>
-                    <Label htmlFor="end-date" className="text-xs text-muted-foreground">
-                      Date de fin
-                    </Label>
-                    <Input
-                      id="end-date"
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="mt-1"
+                    <Label className="text-xs text-muted-foreground">Date de fin</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal mt-1",
+                            !endDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {endDate ? format(endDate, "PPP", { locale: fr }) : "Sélectionner"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={endDate}
+                          onSelect={setEndDate}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              </div>
+
+              {/* Options d'exclusion */}
+              <div className="space-y-4">
+                <Label className="text-sm font-medium text-foreground">Options</Label>
+                
+                {/* Exclure les week-ends */}
+                <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Exclure les week-ends</p>
+                    <p className="text-xs text-muted-foreground">Les samedis et dimanches ne seront pas planifiés</p>
+                  </div>
+                  <Switch 
+                    checked={excludeWeekends}
+                    onCheckedChange={setExcludeWeekends}
+                  />
+                </div>
+
+                {/* Exclure une période */}
+                <div className="p-3 rounded-lg border border-border space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Exclure une période</p>
+                      <p className="text-xs text-muted-foreground">Définir une période à exclure de la planification</p>
+                    </div>
+                    <Switch 
+                      checked={excludePeriod}
+                      onCheckedChange={setExcludePeriod}
                     />
                   </div>
+
+                  {excludePeriod && (
+                    <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border">
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Du</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal mt-1",
+                                !excludeStartDate && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {excludeStartDate ? format(excludeStartDate, "PPP", { locale: fr }) : "Début"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={excludeStartDate}
+                              onSelect={setExcludeStartDate}
+                              initialFocus
+                              className="pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Au</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal mt-1",
+                                !excludeEndDate && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {excludeEndDate ? format(excludeEndDate, "PPP", { locale: fr }) : "Fin"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={excludeEndDate}
+                              onSelect={setExcludeEndDate}
+                              initialFocus
+                              className="pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -315,14 +615,14 @@ const MaintenanceRanges: React.FC = () => {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setIsGenerateDialogOpen(false)}
+              onClick={handleCloseDialog}
             >
               Annuler
             </Button>
             <Button
               className="bg-green-600 hover:bg-green-700 text-white"
               onClick={handleConfirmGeneration}
-              disabled={!startDate || !endDate}
+              disabled={!startDate || !endDate || selectedEquipments.length === 0}
             >
               <Play className="h-4 w-4 mr-2" />
               Générer le plan
