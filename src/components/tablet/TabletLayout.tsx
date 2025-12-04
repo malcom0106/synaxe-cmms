@@ -80,15 +80,15 @@ export const TabletLayout: React.FC = () => {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background flex">
-        {/* Sidebar avec toggle */}
+        {/* Sidebar */}
         <aside className={cn(
           "bg-primary flex flex-col py-3 shrink-0 transition-all duration-300",
           expanded ? "w-48 px-3" : "w-16 items-center"
         )}>
-          {/* Logo + Toggle */}
+          {/* Logo */}
           <div className={cn(
             "flex items-center mb-2",
-            expanded ? "justify-between px-1" : "justify-center"
+            expanded ? "justify-start px-1" : "justify-center"
           )}>
             <div className={cn(
               "rounded-lg bg-primary-foreground/20 flex items-center justify-center",
@@ -96,15 +96,7 @@ export const TabletLayout: React.FC = () => {
             )}>
               <span className="text-primary-foreground font-bold text-sm">GM</span>
             </div>
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className={cn(
-                "w-7 h-7 rounded-lg bg-primary-foreground/10 flex items-center justify-center text-primary-foreground/70 hover:bg-primary-foreground/20 hover:text-primary-foreground transition-all",
-                !expanded && "absolute left-12 top-3 z-10"
-              )}
-            >
-              {expanded ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-            </button>
+            {expanded && <span className="text-primary-foreground font-semibold ml-2 text-sm">GMAO</span>}
           </div>
 
           {/* Navigation items */}
@@ -194,10 +186,15 @@ export const TabletLayout: React.FC = () => {
               {!isOnline && (
                 <span className="text-xs text-orange-600 font-medium">Mode hors ligne</span>
               )}
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              {/* Toggle menu + User */}
+              <button
+                onClick={() => setExpanded(!expanded)}
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
                 <User className="h-4 w-4" />
                 <span className="hidden sm:inline">Jean Martin</span>
-              </div>
+                {expanded ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              </button>
             </div>
           </header>
 
