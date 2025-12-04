@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format, eachDayOfInterval, isWeekend, isSameDay, addDays, addWeeks, addMonths, addYears, isWithinInterval } from 'date-fns';
+import { format, eachDayOfInterval, isWeekend, isSameDay, addDays, addWeeks, addMonths, addYears, isWithinInterval, getDay, nextMonday } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { Button } from '@/components/ui/button';
@@ -240,23 +240,29 @@ const MaintenanceRanges: React.FC = () => {
 
         let currentDate = new Date(startDate);
         while (currentDate <= endDate) {
-          let shouldAdd = true;
+          let interventionDate = new Date(currentDate);
 
-          // Exclure les week-ends
-          if (excludeWeekends && isWeekend(currentDate)) {
-            shouldAdd = false;
+          // Décaler au prochain jour ouvré si week-end
+          if (excludeWeekends && isWeekend(interventionDate)) {
+            interventionDate = nextMonday(interventionDate);
           }
 
-          // Exclure la période définie
+          // Vérifier si la date (potentiellement décalée) est dans la période exclue
+          let shouldAdd = true;
           if (excludePeriod && excludeStartDate && excludeEndDate) {
-            if (isWithinInterval(currentDate, { start: excludeStartDate, end: excludeEndDate })) {
+            if (isWithinInterval(interventionDate, { start: excludeStartDate, end: excludeEndDate })) {
               shouldAdd = false;
             }
           }
 
+          // Vérifier que la date décalée ne dépasse pas la date de fin
+          if (interventionDate > endDate) {
+            shouldAdd = false;
+          }
+
           if (shouldAdd) {
             interventions.push({
-              date: new Date(currentDate),
+              date: interventionDate,
               rangeId: range.id,
               rangeName: range.name,
               equipmentId: equipment.id,
