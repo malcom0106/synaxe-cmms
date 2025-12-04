@@ -165,25 +165,56 @@ const MaintenanceRanges: React.FC = () => {
   // États pour la recherche de gammes (modale masse)
   const [rangeSearchQuery, setRangeSearchQuery] = useState('');
 
+  // Familles et sous-familles disponibles basées sur les gammes sélectionnées
+  const allowedFamiliesAndSubFamilies = useMemo(() => {
+    const rangesToCheck = isMassDialogOpen 
+      ? maintenanceRanges.filter(r => selectedRanges.includes(r.id))
+      : selectedRange ? [selectedRange] : [];
+    
+    if (rangesToCheck.length === 0) {
+      return { families: [], subFamilies: [] };
+    }
+
+    const families = [...new Set(rangesToCheck.map(r => r.familyEquipment))];
+    const subFamilies = [...new Set(rangesToCheck.map(r => r.subFamily))];
+    
+    return { families, subFamilies };
+  }, [selectedRange, selectedRanges, isMassDialogOpen]);
+
+  // Vérifier si une gamme est sélectionnée
+  const hasSelectedRange = useMemo(() => {
+    return isMassDialogOpen ? selectedRanges.length > 0 : selectedRange !== null;
+  }, [selectedRange, selectedRanges, isMassDialogOpen]);
+
+  // Équipements disponibles basés sur les gammes sélectionnées
+  const availableEquipments = useMemo(() => {
+    if (!hasSelectedRange) return [];
+    
+    return equipmentList.filter(equipment => 
+      allowedFamiliesAndSubFamilies.families.includes(equipment.family) &&
+      allowedFamiliesAndSubFamilies.subFamilies.includes(equipment.subFamily)
+    );
+  }, [hasSelectedRange, allowedFamiliesAndSubFamilies]);
+
   const families = useMemo(() => {
-    return [...new Set(equipmentList.map(e => e.family))];
-  }, []);
+    return [...new Set(availableEquipments.map(e => e.family))];
+  }, [availableEquipments]);
 
   const subFamilies = useMemo(() => {
     if (familyFilter === 'all') {
-      return [...new Set(equipmentList.map(e => e.subFamily))];
+      return [...new Set(availableEquipments.map(e => e.subFamily))];
     }
-    return [...new Set(equipmentList.filter(e => e.family === familyFilter).map(e => e.subFamily))];
-  }, [familyFilter]);
+    return [...new Set(availableEquipments.filter(e => e.family === familyFilter).map(e => e.subFamily))];
+  }, [familyFilter, availableEquipments]);
 
   const filteredEquipments = useMemo(() => {
-    return equipmentList.filter(equipment => {
+    return availableEquipments.filter(equipment => {
       const matchesSearch = equipment.name.toLowerCase().includes(equipmentSearchQuery.toLowerCase());
       const matchesFamily = familyFilter === 'all' || equipment.family === familyFilter;
       const matchesSubFamily = subFamilyFilter === 'all' || equipment.subFamily === subFamilyFilter;
       return matchesSearch && matchesFamily && matchesSubFamily;
     });
-  }, [equipmentSearchQuery, familyFilter, subFamilyFilter]);
+  }, [equipmentSearchQuery, familyFilter, subFamilyFilter, availableEquipments]);
 
   const filteredRanges = useMemo(() => {
     return maintenanceRanges.filter(range =>
@@ -397,85 +428,106 @@ const MaintenanceRanges: React.FC = () => {
     <div className="space-y-3">
       <Label className="text-sm font-medium text-foreground">Équipements</Label>
       
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher un équipement..."
-            value={equipmentSearchQuery}
-            onChange={(e) => setEquipmentSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+      {!hasSelectedRange ? (
+        <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
+          <p className="text-sm text-amber-700">
+            Veuillez d'abord sélectionner une gamme de maintenance pour voir les équipements disponibles.
+          </p>
         </div>
-        <Select value={familyFilter} onValueChange={(value) => {
-          setFamilyFilter(value);
-          setSubFamilyFilter('all');
-        }}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Famille" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Toutes</SelectItem>
-            {families.map(family => (
-              <SelectItem key={family} value={family}>{family}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={subFamilyFilter} onValueChange={setSubFamilyFilter}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Sous-famille" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Toutes</SelectItem>
-            {subFamilies.map(subFamily => (
-              <SelectItem key={subFamily} value={subFamily}>{subFamily}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-        <Checkbox 
-          id="select-all-equipment"
-          checked={allFilteredEquipmentsSelected}
-          onCheckedChange={handleSelectAllEquipments}
-        />
-        <Label htmlFor="select-all-equipment" className="text-sm cursor-pointer">
-          Tout sélectionner ({filteredEquipments.length} équipement(s))
-        </Label>
-      </div>
-
-      <ScrollArea className="h-[150px] border border-border rounded-lg">
-        <div className="p-2 space-y-1">
-          {filteredEquipments.map(equipment => (
-            <div 
-              key={equipment.id}
-              className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 transition-colors"
-            >
-              <Checkbox 
-                id={`equipment-${equipment.id}`}
-                checked={selectedEquipments.includes(equipment.id)}
-                onCheckedChange={() => handleToggleEquipment(equipment.id)}
+      ) : (
+        <>
+          <div className="p-2 rounded-lg bg-muted/30 text-xs text-muted-foreground">
+            Équipements filtrés par famille : <span className="font-medium">{allowedFamiliesAndSubFamilies.families.join(', ')}</span>
+            {' / Sous-famille : '}
+            <span className="font-medium">{allowedFamiliesAndSubFamilies.subFamilies.join(', ')}</span>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher un équipement..."
+                value={equipmentSearchQuery}
+                onChange={(e) => setEquipmentSearchQuery(e.target.value)}
+                className="pl-10"
               />
-              <Label htmlFor={`equipment-${equipment.id}`} className="flex-1 cursor-pointer">
-                <span className="text-sm font-medium">{equipment.name}</span>
-                <span className="text-xs text-muted-foreground ml-2">
-                  {equipment.family} &gt; {equipment.subFamily}
-                </span>
-              </Label>
             </div>
-          ))}
-          {filteredEquipments.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              Aucun équipement trouvé
-            </p>
-          )}
-        </div>
-      </ScrollArea>
+            {families.length > 1 && (
+              <Select value={familyFilter} onValueChange={(value) => {
+                setFamilyFilter(value);
+                setSubFamilyFilter('all');
+              }}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Famille" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes</SelectItem>
+                  {families.map(family => (
+                    <SelectItem key={family} value={family}>{family}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {subFamilies.length > 1 && (
+              <Select value={subFamilyFilter} onValueChange={setSubFamilyFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Sous-famille" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes</SelectItem>
+                  {subFamilies.map(subFamily => (
+                    <SelectItem key={subFamily} value={subFamily}>{subFamily}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
 
-      <p className="text-xs text-muted-foreground">
-        {selectedEquipments.length} équipement(s) sélectionné(s)
-      </p>
+          <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
+            <Checkbox 
+              id="select-all-equipment"
+              checked={allFilteredEquipmentsSelected}
+              onCheckedChange={handleSelectAllEquipments}
+              disabled={!hasSelectedRange}
+            />
+            <Label htmlFor="select-all-equipment" className="text-sm cursor-pointer">
+              Tout sélectionner ({filteredEquipments.length} équipement(s))
+            </Label>
+          </div>
+
+          <ScrollArea className="h-[150px] border border-border rounded-lg">
+            <div className="p-2 space-y-1">
+              {filteredEquipments.map(equipment => (
+                <div 
+                  key={equipment.id}
+                  className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 transition-colors"
+                >
+                  <Checkbox 
+                    id={`equipment-${equipment.id}`}
+                    checked={selectedEquipments.includes(equipment.id)}
+                    onCheckedChange={() => handleToggleEquipment(equipment.id)}
+                  />
+                  <Label htmlFor={`equipment-${equipment.id}`} className="flex-1 cursor-pointer">
+                    <span className="text-sm font-medium">{equipment.name}</span>
+                    <span className="text-xs text-muted-foreground ml-2">
+                      {equipment.family} &gt; {equipment.subFamily}
+                    </span>
+                  </Label>
+                </div>
+              ))}
+              {filteredEquipments.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Aucun équipement correspondant trouvé
+                </p>
+              )}
+            </div>
+          </ScrollArea>
+
+          <p className="text-xs text-muted-foreground">
+            {selectedEquipments.length} équipement(s) sélectionné(s)
+          </p>
+        </>
+      )}
     </div>
   );
 
@@ -672,14 +724,15 @@ const MaintenanceRanges: React.FC = () => {
         </div>
       </div>
 
-      {/* Calendrier de prévisualisation */}
+      {/* Calendrier de prévisualisation - 2 mois côte à côte */}
       <div>
         <Label className="text-sm font-medium text-foreground mb-2 block">Vue calendrier</Label>
-        <div className="border border-border rounded-lg p-2">
+        <div className="border border-border rounded-lg p-2 overflow-x-auto">
           <Calendar
             mode="multiple"
             selected={interventionDates}
-            className="pointer-events-auto w-full"
+            numberOfMonths={2}
+            className="pointer-events-auto"
             modifiers={{
               intervention: interventionDates,
             }}
