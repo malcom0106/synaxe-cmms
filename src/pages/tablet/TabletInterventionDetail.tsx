@@ -29,8 +29,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Check,
-  Pen,
-  X
+  Pen
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -77,7 +76,7 @@ interface InterventionData {
   signature?: string;
 }
 
-// Données de démonstration
+// Données de démonstration enrichies
 const interventionData: Record<string, InterventionData> = {
   'INT001': {
     id: 'INT001',
@@ -85,7 +84,7 @@ const interventionData: Record<string, InterventionData> = {
     equipmentCode: 'EQ001',
     location: 'Zone A - Bâtiment principal',
     gamme: 'Maintenance préventive mensuelle',
-    description: 'Vérification complète du système oléohydraulique.',
+    description: 'Vérification complète du système oléohydraulique incluant le contrôle des niveaux, la vérification des connexions et le test des capteurs.',
     assignedTo: 'Jean Martin',
     plannedDate: '04/12/2025',
     plannedTime: '08:00',
@@ -94,11 +93,11 @@ const interventionData: Record<string, InterventionData> = {
     startedAt: '04/12/2025 08:15',
     completedAt: '04/12/2025 10:30',
     steps: [
-      { id: 's1', order: 1, label: 'Vérifier le niveau d\'huile', description: 'Contrôler le niveau dans le réservoir principal.', inputType: 'boolean', required: true, value: true, completed: true, remarks: '', stepComment: '', stepPhoto: null, completedAt: '08:20' },
-      { id: 's2', order: 2, label: 'Relever la pression', description: 'Mesurer la pression du circuit hydraulique.', inputType: 'numeric', required: true, unit: 'bar', minValue: 150, maxValue: 200, value: 175, completed: true, remarks: '', stepComment: '', stepPhoto: null, completedAt: '08:35' },
-      { id: 's3', order: 3, label: 'Contrôler les connexions électriques', description: 'Vérifier visuellement l\'état des câbles.', inputType: 'boolean', required: true, value: true, completed: true, remarks: '', stepComment: '', stepPhoto: null, completedAt: '08:50' },
-      { id: 's4', order: 4, label: 'Photo du compteur', description: 'Prendre une photo du compteur.', inputType: 'photo', required: true, value: 'photo_compteur.jpg', completed: true, remarks: '', stepComment: '', stepPhoto: 'photo_compteur.jpg', completedAt: '09:00' },
-      { id: 's5', order: 5, label: 'Observations générales', description: 'Noter toute observation.', inputType: 'comment', required: false, value: 'RAS', completed: true, remarks: '', stepComment: '', stepPhoto: null, completedAt: '09:15' },
+      { id: 's1', order: 1, label: 'Vérifier le niveau d\'huile', description: 'Contrôler le niveau dans le réservoir principal. Le niveau doit être entre MIN et MAX.', inputType: 'boolean', required: true, value: true, completed: true, remarks: '', stepComment: '', stepPhoto: null, completedAt: '08:20' },
+      { id: 's2', order: 2, label: 'Relever la pression', description: 'Mesurer la pression du circuit hydraulique en bar.', inputType: 'numeric', required: true, unit: 'bar', minValue: 150, maxValue: 200, value: 175, completed: true, remarks: 'Pression nominale', stepComment: '', stepPhoto: null, completedAt: '08:35' },
+      { id: 's3', order: 3, label: 'Contrôler les connexions électriques', description: 'Vérifier visuellement l\'état des câbles et connexions.', inputType: 'boolean', required: true, value: true, completed: true, remarks: '', stepComment: '', stepPhoto: null, completedAt: '08:50' },
+      { id: 's4', order: 4, label: 'Photo du compteur', description: 'Prendre une photo du compteur pour archivage.', inputType: 'photo', required: true, value: 'photo_compteur.jpg', completed: true, remarks: '', stepComment: '', stepPhoto: 'photo_compteur.jpg', completedAt: '09:00' },
+      { id: 's5', order: 5, label: 'Observations générales', description: 'Noter toute observation ou anomalie constatée.', inputType: 'comment', required: false, value: 'RAS - Équipement en bon état général', completed: true, remarks: '', stepComment: '', stepPhoto: null, completedAt: '09:15' },
     ],
     comments: [],
     photos: ['photo_compteur.jpg']
@@ -109,7 +108,7 @@ const interventionData: Record<string, InterventionData> = {
     equipmentCode: 'EQ015',
     location: 'Zone A - Station de pompage',
     gamme: 'Contrôle visuel',
-    description: 'Inspection visuelle de la pompe principale.',
+    description: 'Inspection visuelle de la pompe principale pour détecter tout signe d\'usure ou de dysfonctionnement.',
     assignedTo: 'Jean Martin',
     plannedDate: '04/12/2025',
     plannedTime: '10:30',
@@ -118,11 +117,11 @@ const interventionData: Record<string, InterventionData> = {
     startedAt: '04/12/2025 10:45',
     pausedAt: '04/12/2025 11:00',
     steps: [
-      { id: 's1', order: 1, label: 'Inspecter les joints', description: 'Vérifier l\'état des joints d\'étanchéité.', inputType: 'boolean', required: true, value: true, completed: true, remarks: '', stepComment: 'Aucune fuite', stepPhoto: null, completedAt: '10:50' },
-      { id: 's2', order: 2, label: 'Mesurer les vibrations', description: 'Utiliser le vibromètre.', inputType: 'numeric', required: true, unit: 'mm/s', minValue: 0, maxValue: 10, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
-      { id: 's3', order: 3, label: 'Relever la température', description: 'Mesurer la température.', inputType: 'numeric', required: true, unit: '°C', minValue: 20, maxValue: 80, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
-      { id: 's4', order: 4, label: 'Vérifier les fixations', description: 'Contrôler le serrage.', inputType: 'checkbox', required: true, value: false, completed: false, remarks: '', stepComment: '', stepPhoto: null },
-      { id: 's5', order: 5, label: 'Photo de la pompe', description: 'Documenter l\'état visuel.', inputType: 'photo', required: false, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's1', order: 1, label: 'Inspecter les joints', description: 'Vérifier l\'état des joints d\'étanchéité. Signaler tout signe d\'usure ou de fuite.', inputType: 'boolean', required: true, value: true, completed: true, remarks: 'Joint principal OK', stepComment: 'Aucune fuite visible', stepPhoto: null, completedAt: '10:50' },
+      { id: 's2', order: 2, label: 'Mesurer les vibrations', description: 'Utiliser le vibromètre pour mesurer les vibrations en mm/s.', inputType: 'numeric', required: true, unit: 'mm/s', minValue: 0, maxValue: 10, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's3', order: 3, label: 'Relever la température', description: 'Mesurer la température de fonctionnement en °C.', inputType: 'numeric', required: true, unit: '°C', minValue: 20, maxValue: 80, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's4', order: 4, label: 'Vérifier les fixations', description: 'Contrôler le serrage de toutes les fixations.', inputType: 'checkbox', required: true, value: false, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's5', order: 5, label: 'Photo de la pompe', description: 'Documenter l\'état visuel de la pompe.', inputType: 'photo', required: false, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
     ],
     comments: [],
     photos: []
@@ -133,18 +132,18 @@ const interventionData: Record<string, InterventionData> = {
     equipmentCode: 'EQ008',
     location: 'Zone 1 - Point de distribution',
     gamme: 'Calibration',
-    description: 'Calibration du compteur de débit.',
+    description: 'Calibration du compteur de débit selon les procédures standards.',
     assignedTo: 'Jean Martin',
     plannedDate: '04/12/2025',
     plannedTime: '14:00',
     status: 'planned',
     priority: 'medium',
     steps: [
-      { id: 's1', order: 1, label: 'Préparer l\'équipement', description: 'Rassembler le matériel.', inputType: 'checkbox', required: true, value: false, completed: false, remarks: '', stepComment: '', stepPhoto: null },
-      { id: 's2', order: 2, label: 'Relever valeur initiale', description: 'Noter la valeur affichée.', inputType: 'numeric', required: true, unit: 'L/min', value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
-      { id: 's3', order: 3, label: 'Effectuer la calibration', description: 'Suivre la procédure.', inputType: 'boolean', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's1', order: 1, label: 'Préparer l\'équipement', description: 'Rassembler le matériel de calibration nécessaire.', inputType: 'checkbox', required: true, value: false, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's2', order: 2, label: 'Relever valeur initiale', description: 'Noter la valeur affichée avant calibration.', inputType: 'numeric', required: true, unit: 'L/min', value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's3', order: 3, label: 'Effectuer la calibration', description: 'Suivre la procédure de calibration du manuel.', inputType: 'boolean', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
       { id: 's4', order: 4, label: 'Relever valeur finale', description: 'Noter la valeur après calibration.', inputType: 'numeric', required: true, unit: 'L/min', value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
-      { id: 's5', order: 5, label: 'Commentaire de validation', description: 'Décrire le résultat.', inputType: 'comment', required: true, value: '', completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's5', order: 5, label: 'Commentaire de validation', description: 'Décrire le résultat de la calibration.', inputType: 'comment', required: true, value: '', completed: false, remarks: '', stepComment: '', stepPhoto: null },
     ],
     comments: [],
     photos: []
@@ -166,6 +165,17 @@ const getStatusConfig = (status: string) => {
   }
 };
 
+const getInputTypeIcon = (type: StepInputType) => {
+  switch (type) {
+    case 'boolean': return ToggleLeft;
+    case 'numeric': return Hash;
+    case 'comment': return FileText;
+    case 'photo': return Camera;
+    case 'checkbox': return CheckCircle2;
+    default: return FileText;
+  }
+};
+
 const TabletInterventionDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -179,6 +189,7 @@ const TabletInterventionDetail: React.FC = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // Lors du démarrage ou reprise, aller à la première étape non complétée
   useEffect(() => {
     if (status === 'in-progress' || status === 'paused') {
       const firstIncompleteIndex = steps.findIndex(s => !s.completed);
@@ -190,11 +201,9 @@ const TabletInterventionDetail: React.FC = () => {
 
   if (!intervention) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <Card className="p-6 text-center max-w-sm">
-          <h2 className="text-lg font-semibold mb-3">Intervention introuvable</h2>
-          <Button onClick={() => navigate('/tablet')}>Retour à l'accueil</Button>
-        </Card>
+      <div className="p-4 text-center">
+        <h2 className="text-xl font-semibold mb-4">Intervention introuvable</h2>
+        <Button onClick={() => navigate('/tablet')}>Retour à l'accueil</Button>
       </div>
     );
   }
@@ -212,27 +221,38 @@ const TabletInterventionDetail: React.FC = () => {
 
   const handleStepValueChange = (value: any) => {
     if (isLocked) return;
-    setSteps(steps.map((s, i) => i === currentStepIndex ? { ...s, value } : s));
+    setSteps(steps.map((s, i) => 
+      i === currentStepIndex ? { ...s, value } : s
+    ));
   };
 
   const handleStepCommentChange = (stepComment: string) => {
     if (isLocked) return;
-    setSteps(steps.map((s, i) => i === currentStepIndex ? { ...s, stepComment } : s));
+    setSteps(steps.map((s, i) => 
+      i === currentStepIndex ? { ...s, stepComment } : s
+    ));
   };
 
   const handleTakePhoto = () => {
     if (isLocked) return;
     const photoName = `photo_step_${currentStepIndex + 1}_${Date.now()}.jpg`;
-    setSteps(steps.map((s, i) => i === currentStepIndex ? { ...s, stepPhoto: photoName } : s));
-    toast({ title: "Photo capturée" });
+    setSteps(steps.map((s, i) => 
+      i === currentStepIndex ? { ...s, stepPhoto: photoName } : s
+    ));
+    toast({ title: "Photo capturée", description: photoName });
   };
 
   const handleValidateStep = () => {
     if (isLocked) return;
     const step = currentStep;
 
+    // Vérifier si la saisie est valide
     if (step.required && (step.value === null || step.value === '' || step.value === undefined)) {
-      toast({ title: "Saisie obligatoire", variant: "destructive" });
+      toast({ 
+        title: "Saisie obligatoire", 
+        description: "Veuillez remplir ce champ avant de valider.",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -246,6 +266,7 @@ const TabletInterventionDetail: React.FC = () => {
     
     toast({ title: "Étape validée" });
 
+    // Passer automatiquement à l'étape suivante ou afficher la signature
     if (!isLastStep) {
       setTimeout(() => setCurrentStepIndex(currentStepIndex + 1), 300);
     }
@@ -255,7 +276,7 @@ const TabletInterventionDetail: React.FC = () => {
     setStatus('in-progress');
     const firstIncompleteIndex = steps.findIndex(s => !s.completed);
     setCurrentStepIndex(firstIncompleteIndex !== -1 ? firstIncompleteIndex : 0);
-    toast({ title: "Intervention démarrée" });
+    toast({ title: "Intervention démarrée", description: "Le chronomètre est lancé" });
   };
 
   const handleResumeIntervention = () => {
@@ -264,24 +285,31 @@ const TabletInterventionDetail: React.FC = () => {
     if (firstIncompleteIndex !== -1) {
       setCurrentStepIndex(firstIncompleteIndex);
     }
-    toast({ title: "Intervention reprise" });
+    toast({ title: "Intervention reprise", description: "Continuez à l'étape en cours" });
   };
 
   const handlePauseIntervention = () => {
     setStatus('paused');
-    toast({ title: "Intervention mise en pause" });
+    toast({ 
+      title: "Intervention mise en pause", 
+      description: "Vous pourrez reprendre à tout moment" 
+    });
   };
 
   const handleCompleteIntervention = () => {
     const uncompletedRequired = steps.filter(s => s.required && !s.completed);
     if (uncompletedRequired.length > 0) {
-      toast({ title: "Étapes manquantes", variant: "destructive" });
+      toast({ 
+        title: "Étapes obligatoires manquantes",
+        description: `${uncompletedRequired.length} étape(s) obligatoire(s) non complétée(s)`,
+        variant: "destructive"
+      });
       return;
     }
     setShowSignature(true);
   };
 
-  // Signature handlers
+  // Signature canvas handlers
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     setIsDrawing(true);
     const canvas = canvasRef.current;
@@ -315,7 +343,9 @@ const TabletInterventionDetail: React.FC = () => {
     ctx.stroke();
   };
 
-  const stopDrawing = () => setIsDrawing(false);
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
 
   const clearSignature = () => {
     const canvas = canvasRef.current;
@@ -328,7 +358,10 @@ const TabletInterventionDetail: React.FC = () => {
   const handleSignAndValidate = () => {
     setStatus('locked');
     setShowSignature(false);
-    toast({ title: "Intervention validée et verrouillée" });
+    toast({ 
+      title: "Intervention validée et verrouillée", 
+      description: "Les données ont été enregistrées et synchronisées" 
+    });
   };
 
   const renderStepInput = () => {
@@ -338,33 +371,34 @@ const TabletInterventionDetail: React.FC = () => {
     switch (step.inputType) {
       case 'boolean':
         return (
-          <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-            <Label className="text-sm font-medium">Conforme ?</Label>
+          <div className="flex items-center justify-between p-6 bg-muted/30 rounded-xl">
+            <Label className="text-lg font-medium">Conforme ?</Label>
             <Switch
               checked={step.value === true}
               onCheckedChange={(checked) => handleStepValueChange(checked)}
               disabled={isLocked || step.completed}
+              className="scale-125"
             />
           </div>
         );
 
       case 'numeric':
         return (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">
+          <div className="space-y-3">
+            <Label className="text-lg font-medium">
               Valeur {step.unit && `(${step.unit})`}
             </Label>
             {step.minValue !== undefined && step.maxValue !== undefined && (
-              <p className="text-xs text-muted-foreground">
-                Plage : {step.minValue} - {step.maxValue} {step.unit}
+              <p className="text-sm text-muted-foreground">
+                Plage acceptée : {step.minValue} - {step.maxValue} {step.unit}
               </p>
             )}
             <Input
               type="number"
-              placeholder={`Valeur${step.unit ? ` en ${step.unit}` : ''}`}
+              placeholder={`Entrer la valeur${step.unit ? ` en ${step.unit}` : ''}`}
               value={step.value || ''}
               onChange={(e) => handleStepValueChange(e.target.value ? parseFloat(e.target.value) : null)}
-              className="h-10"
+              className="h-16 text-xl"
               disabled={isLocked || step.completed}
             />
           </div>
@@ -372,13 +406,13 @@ const TabletInterventionDetail: React.FC = () => {
 
       case 'comment':
         return (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Observation</Label>
+          <div className="space-y-3">
+            <Label className="text-lg font-medium">Observation</Label>
             <Textarea
-              placeholder="Votre observation..."
+              placeholder="Entrez votre observation..."
               value={step.value || ''}
               onChange={(e) => handleStepValueChange(e.target.value)}
-              className="min-h-[80px] text-sm"
+              className="min-h-[120px] text-base"
               disabled={isLocked || step.completed}
             />
           </div>
@@ -386,24 +420,24 @@ const TabletInterventionDetail: React.FC = () => {
 
       case 'photo':
         return (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Photo requise</Label>
+          <div className="space-y-4">
+            <Label className="text-lg font-medium">Photo requise</Label>
             {step.value ? (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
-                <Image className="h-5 w-5 text-green-600" />
-                <span className="text-green-700 text-sm">{step.value}</span>
+              <div className="p-6 bg-green-50 border border-green-200 rounded-xl flex items-center gap-4">
+                <Image className="h-8 w-8 text-green-600" />
+                <span className="text-green-700 text-lg">{step.value}</span>
               </div>
             ) : (
               <Button 
                 variant="outline" 
-                className="w-full h-10"
+                className="w-full h-16 text-lg"
                 onClick={() => {
                   handleStepValueChange(`photo_step_${currentStepIndex + 1}.jpg`);
                   toast({ title: "Photo capturée" });
                 }}
                 disabled={isLocked || step.completed}
               >
-                <Camera className="h-4 w-4 mr-2" />
+                <Camera className="h-6 w-6 mr-3" />
                 Prendre une photo
               </Button>
             )}
@@ -413,15 +447,15 @@ const TabletInterventionDetail: React.FC = () => {
       case 'checkbox':
         return (
           <div 
-            className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg cursor-pointer"
+            className="flex items-center gap-6 p-6 bg-muted/30 rounded-xl cursor-pointer"
             onClick={() => !isLocked && !step.completed && handleStepValueChange(!step.value)}
           >
             <Checkbox 
               checked={step.value === true}
               disabled={isLocked || step.completed}
-              className="h-5 w-5"
+              className="h-8 w-8"
             />
-            <Label className="text-sm font-medium cursor-pointer">Tâche effectuée</Label>
+            <Label className="text-lg font-medium cursor-pointer">Tâche effectuée</Label>
           </div>
         );
 
@@ -433,146 +467,160 @@ const TabletInterventionDetail: React.FC = () => {
   // Vue non active (planifié ou en pause)
   if (!isActive && !isLocked) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-lg p-5 space-y-4">
-          {/* Header */}
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => navigate('/tablet')}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-base font-bold text-foreground truncate">{intervention.equipment}</h1>
-              <p className="text-xs text-muted-foreground">{intervention.id}</p>
-            </div>
-            <Badge className={cn("text-xs", statusConfig.className)}>
-              <StatusIcon className="h-3 w-3 mr-1" />
-              {statusConfig.label}
-            </Badge>
+      <div className="p-4 pb-8 space-y-4">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-12 w-12"
+            onClick={() => navigate('/tablet')}
+          >
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+          <div className="flex-1">
+            <h1 className="text-xl font-bold text-foreground">{intervention.equipment}</h1>
+            <p className="text-sm text-muted-foreground">{intervention.id}</p>
           </div>
+          <Badge className={cn("text-sm px-3 py-1", statusConfig.className)}>
+            <StatusIcon className="h-4 w-4 mr-1" />
+            {statusConfig.label}
+          </Badge>
+        </div>
 
-          {/* Informations */}
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-              <Wrench className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="truncate">{intervention.gamme}</span>
-            </div>
-            <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-              <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="truncate">{intervention.location}</span>
-            </div>
-            <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-              <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span>{intervention.plannedDate}</span>
-            </div>
-            <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-              <User className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="truncate">{intervention.assignedTo}</span>
-            </div>
+        {/* Informations générales */}
+        <Card className="p-4 space-y-3">
+          <div className="flex items-center gap-3 text-sm">
+            <Wrench className="h-5 w-5 text-muted-foreground" />
+            <span className="text-foreground">{intervention.gamme}</span>
           </div>
+          <div className="flex items-center gap-3 text-sm">
+            <MapPin className="h-5 w-5 text-muted-foreground" />
+            <span className="text-foreground">{intervention.location}</span>
+          </div>
+          <div className="flex items-center gap-3 text-sm">
+            <Calendar className="h-5 w-5 text-muted-foreground" />
+            <span className="text-foreground">{intervention.plannedDate} à {intervention.plannedTime}</span>
+          </div>
+          <div className="flex items-center gap-3 text-sm">
+            <User className="h-5 w-5 text-muted-foreground" />
+            <span className="text-foreground">{intervention.assignedTo}</span>
+          </div>
+          
+          <div className="pt-2 border-t border-border">
+            <p className="text-sm text-muted-foreground">{intervention.description}</p>
+          </div>
+        </Card>
 
-          {/* Progression si en pause */}
-          {isPaused && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-medium">Progression</span>
-                <span className="text-muted-foreground">{completedSteps}/{steps.length}</span>
-              </div>
-              <Progress value={progress} className="h-2" />
+        {/* Progression si en pause */}
+        {isPaused && (
+          <Card className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-semibold text-foreground">Progression</h2>
+              <span className="text-sm font-medium">{completedSteps}/{steps.length} étapes</span>
             </div>
-          )}
+            <Progress value={progress} className="h-3" />
+            <p className="text-sm text-muted-foreground mt-2">{progress}% complété</p>
+          </Card>
+        )}
 
-          {/* Résumé des étapes */}
+        {/* Résumé des étapes */}
+        <Card className="p-4">
+          <h2 className="text-lg font-semibold text-foreground mb-3">Étapes ({steps.length})</h2>
           <div className="space-y-2">
-            <h2 className="text-sm font-semibold">Étapes ({steps.length})</h2>
-            <div className="space-y-1 max-h-48 overflow-y-auto">
-              {steps.map((step, index) => (
-                <div 
-                  key={step.id}
-                  className={cn(
-                    "flex items-center gap-2 p-2 rounded-lg text-xs",
-                    step.completed && "bg-green-50"
-                  )}
-                >
-                  <div className={cn(
-                    "w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0",
-                    step.completed ? "bg-green-500 text-white" : "bg-muted text-muted-foreground"
-                  )}>
-                    {step.completed ? <Check className="h-3 w-3" /> : index + 1}
-                  </div>
-                  <span className={cn("truncate", step.completed && "text-green-700")}>
-                    {step.label}
-                  </span>
-                  {step.required && !step.completed && (
-                    <Badge variant="outline" className="text-[10px] ml-auto shrink-0">Requis</Badge>
-                  )}
+            {steps.map((step, index) => (
+              <div 
+                key={step.id}
+                className={cn(
+                  "flex items-center gap-3 p-2 rounded-lg",
+                  step.completed && "bg-green-50"
+                )}
+              >
+                <div className={cn(
+                  "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
+                  step.completed 
+                    ? "bg-green-500 text-white" 
+                    : "bg-muted text-muted-foreground"
+                )}>
+                  {step.completed ? <Check className="h-4 w-4" /> : index + 1}
                 </div>
-              ))}
-            </div>
+                <span className={cn(
+                  "text-sm",
+                  step.completed ? "text-green-700" : "text-foreground"
+                )}>{step.label}</span>
+                {step.required && !step.completed && (
+                  <Badge variant="outline" className="text-xs ml-auto">Obligatoire</Badge>
+                )}
+              </div>
+            ))}
           </div>
+        </Card>
 
-          {/* Boutons d'action */}
+        {/* Boutons d'action */}
+        <div className="space-y-3">
           {status === 'planned' && (
-            <Button className="w-full h-11" onClick={handleStartIntervention}>
-              <PlayCircle className="h-5 w-5 mr-2" />
+            <Button 
+              className="w-full h-16 text-lg"
+              onClick={handleStartIntervention}
+            >
+              <PlayCircle className="h-6 w-6 mr-3" />
               Démarrer l'intervention
             </Button>
           )}
           {isPaused && (
-            <Button className="w-full h-11" onClick={handleResumeIntervention}>
-              <PlayCircle className="h-5 w-5 mr-2" />
+            <Button 
+              className="w-full h-16 text-lg"
+              onClick={handleResumeIntervention}
+            >
+              <PlayCircle className="h-6 w-6 mr-3" />
               Reprendre l'intervention
             </Button>
           )}
-        </Card>
+        </div>
       </div>
     );
   }
 
-  // Vue active (en cours) - Condensée avec marges
+  // Vue active (en cours)
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl overflow-hidden flex flex-col" style={{ maxHeight: 'calc(100vh - 2rem)' }}>
-        {/* Header compact */}
-        <div className="p-3 border-b border-border bg-muted/30 shrink-0">
-          <div className="flex items-center gap-2 mb-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/tablet')}>
-              <X className="h-4 w-4" />
-            </Button>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-sm font-bold truncate">{intervention.equipment}</h1>
-              <p className="text-[10px] text-muted-foreground truncate">{intervention.gamme}</p>
-            </div>
-            <Badge className={cn("text-xs", statusConfig.className)}>
-              {statusConfig.label}
-            </Badge>
-            {!isLocked && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-orange-600 hover:bg-orange-50"
-                onClick={handlePauseIntervention}
-              >
-                <PauseCircle className="h-4 w-4" />
-              </Button>
-            )}
+    <div className="flex flex-col h-[calc(100vh-4rem)]">
+      {/* Header fixe */}
+      <div className="p-4 border-b border-border bg-background">
+        <div className="flex items-center gap-3 mb-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10"
+            onClick={() => navigate('/tablet')}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex-1">
+            <h1 className="text-lg font-bold text-foreground">{intervention.equipment}</h1>
+            <p className="text-xs text-muted-foreground">{intervention.gamme}</p>
           </div>
+          <Badge className={cn("text-sm px-3 py-1", statusConfig.className)}>
+            <StatusIcon className="h-4 w-4 mr-1" />
+            {statusConfig.label}
+          </Badge>
+        </div>
 
-          {/* Barre de progression compacte */}
-          <div className="flex items-center gap-2">
-            <Progress value={progress} className="flex-1 h-1.5" />
-            <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-              {completedSteps}/{steps.length}
-            </span>
+        {/* Barre de progression */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium">Progression</span>
+            <span className="text-muted-foreground">{completedSteps}/{steps.length} étapes</span>
           </div>
+          <Progress value={progress} className="h-2" />
           
           {/* Indicateurs d'étapes */}
-          <div className="flex gap-0.5 mt-2">
+          <div className="flex gap-1 mt-2">
             {steps.map((step, index) => (
               <button
                 key={step.id}
                 onClick={() => setCurrentStepIndex(index)}
                 className={cn(
-                  "flex-1 h-1.5 rounded-full transition-all",
+                  "flex-1 h-2 rounded-full transition-all",
                   step.completed 
                     ? "bg-green-500" 
                     : index === currentStepIndex 
@@ -583,149 +631,167 @@ const TabletInterventionDetail: React.FC = () => {
             ))}
           </div>
         </div>
+      </div>
 
-        {/* Contenu de l'étape */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {currentStep && (
-            <>
-              {/* Numéro et titre */}
-              <div className="flex items-center gap-3">
-                <div className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0",
-                  currentStep.completed ? "bg-green-500 text-white" : "bg-primary text-primary-foreground"
-                )}>
-                  {currentStep.completed ? <Check className="h-5 w-5" /> : currentStep.order}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-sm font-bold truncate">{currentStep.label}</h2>
-                  {currentStep.required && (
-                    <Badge variant="outline" className="text-[10px]">Obligatoire</Badge>
-                  )}
-                </div>
+      {/* Contenu de l'étape courante */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {currentStep && (
+          <>
+            {/* Numéro et titre de l'étape */}
+            <div className="text-center space-y-2">
+              <div className={cn(
+                "w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold mx-auto",
+                currentStep.completed 
+                  ? "bg-green-500 text-white" 
+                  : "bg-primary text-primary-foreground"
+              )}>
+                {currentStep.completed ? <Check className="h-8 w-8" /> : currentStep.order}
               </div>
-
-              {/* Description */}
-              <p className="text-xs text-muted-foreground bg-muted/30 p-2 rounded-lg">
-                {currentStep.description}
-              </p>
-
-              {/* Zone de saisie principale */}
-              <div className="bg-card border border-border rounded-lg p-3">
-                {renderStepInput()}
-              </div>
-
-              {/* Commentaire et photo en ligne */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <MessageSquare className="h-3 w-3" />
-                    <span>Commentaire</span>
-                  </div>
-                  <Textarea
-                    placeholder="Optionnel..."
-                    value={currentStep.stepComment}
-                    onChange={(e) => handleStepCommentChange(e.target.value)}
-                    className="min-h-[60px] text-xs"
-                    disabled={isLocked || currentStep.completed}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Camera className="h-3 w-3" />
-                    <span>Photo</span>
-                  </div>
-                  {currentStep.stepPhoto ? (
-                    <div className="h-[60px] bg-green-50 border border-green-200 rounded-lg flex items-center justify-center gap-2">
-                      <Image className="h-4 w-4 text-green-600" />
-                      <span className="text-green-700 text-xs truncate">{currentStep.stepPhoto}</span>
-                    </div>
-                  ) : (
-                    <Button 
-                      variant="outline" 
-                      className="w-full h-[60px] text-xs"
-                      onClick={handleTakePhoto}
-                      disabled={isLocked || currentStep.completed}
-                    >
-                      <Camera className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {/* Bouton de validation ou statut */}
-              {!currentStep.completed && !isLocked ? (
-                <Button className="w-full h-10" onClick={handleValidateStep}>
-                  <Check className="h-4 w-4 mr-2" />
-                  Valider l'étape {currentStep.order}/{steps.length}
-                </Button>
-              ) : currentStep.completed && (
-                <div className="text-center p-2 bg-green-50 rounded-lg">
-                  <p className="text-green-700 text-xs font-medium flex items-center justify-center gap-1">
-                    <CheckCircle2 className="h-4 w-4" />
-                    Validée à {currentStep.completedAt}
-                  </p>
-                </div>
+              <h2 className="text-xl font-bold text-foreground">{currentStep.label}</h2>
+              {currentStep.required && (
+                <Badge variant="outline">Obligatoire</Badge>
               )}
-            </>
-          )}
+            </div>
 
-          {/* Bouton de finalisation */}
-          {allStepsCompleted && !isLocked && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-center space-y-2">
-              <CheckCircle2 className="h-8 w-8 text-green-600 mx-auto" />
-              <p className="text-sm font-medium text-green-800">Toutes les étapes complétées !</p>
+            {/* Description */}
+            <Card className="p-4">
+              <p className="text-muted-foreground">{currentStep.description}</p>
+            </Card>
+
+            {/* Zone de saisie principale */}
+            <Card className="p-4">
+              {renderStepInput()}
+            </Card>
+
+            {/* Commentaire de l'étape */}
+            <Card className="p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                <Label className="font-medium">Commentaire (optionnel)</Label>
+              </div>
+              <Textarea
+                placeholder="Ajouter un commentaire pour cette étape..."
+                value={currentStep.stepComment}
+                onChange={(e) => handleStepCommentChange(e.target.value)}
+                className="min-h-[80px]"
+                disabled={isLocked || currentStep.completed}
+              />
+            </Card>
+
+            {/* Photo de l'étape */}
+            <Card className="p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <Camera className="h-5 w-5 text-muted-foreground" />
+                <Label className="font-medium">Photo (optionnel)</Label>
+              </div>
+              {currentStep.stepPhoto ? (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+                  <Image className="h-6 w-6 text-green-600" />
+                  <span className="text-green-700">{currentStep.stepPhoto}</span>
+                </div>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12"
+                  onClick={handleTakePhoto}
+                  disabled={isLocked || currentStep.completed}
+                >
+                  <Camera className="h-5 w-5 mr-2" />
+                  Prendre une photo
+                </Button>
+              )}
+            </Card>
+
+            {/* Bouton de validation de l'étape */}
+            {!currentStep.completed && !isLocked && (
               <Button 
-                className="w-full h-10 bg-green-600 hover:bg-green-700"
+                className="w-full h-14 text-lg"
+                onClick={handleValidateStep}
+              >
+                <Check className="h-6 w-6 mr-2" />
+                Valider l'étape {currentStep.order}/{steps.length}
+              </Button>
+            )}
+
+            {/* Indication si étape déjà complétée */}
+            {currentStep.completed && (
+              <div className="text-center p-4 bg-green-50 rounded-xl">
+                <CheckCircle2 className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                <p className="text-green-700 font-medium">Étape validée à {currentStep.completedAt}</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Bouton de finalisation si toutes les étapes sont complétées */}
+        {allStepsCompleted && !isLocked && (
+          <Card className="p-4 bg-green-50 border-green-200">
+            <div className="text-center space-y-3">
+              <CheckCircle2 className="h-12 w-12 text-green-600 mx-auto" />
+              <h3 className="text-lg font-bold text-green-800">Toutes les étapes sont complétées !</h3>
+              <p className="text-sm text-green-700">Vous pouvez maintenant finaliser l'intervention.</p>
+              <Button 
+                className="w-full h-14 text-lg bg-green-600 hover:bg-green-700"
                 onClick={handleCompleteIntervention}
               >
-                <Pen className="h-4 w-4 mr-2" />
+                <Pen className="h-6 w-6 mr-2" />
                 Signer et finaliser
               </Button>
             </div>
-          )}
-        </div>
+          </Card>
+        )}
+      </div>
 
-        {/* Navigation entre étapes */}
-        <div className="p-3 border-t border-border bg-muted/30 shrink-0">
-          <div className="flex gap-2">
+      {/* Navigation entre étapes */}
+      <div className="p-4 border-t border-border bg-background">
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            className="flex-1 h-12"
+            onClick={() => setCurrentStepIndex(Math.max(0, currentStepIndex - 1))}
+            disabled={currentStepIndex === 0}
+          >
+            <ChevronLeft className="h-5 w-5 mr-1" />
+            Précédent
+          </Button>
+
+          {!isLocked && (
             <Button
               variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={() => setCurrentStepIndex(Math.max(0, currentStepIndex - 1))}
-              disabled={currentStepIndex === 0}
+              className="h-12 px-4 text-orange-600 border-orange-300 hover:bg-orange-50"
+              onClick={handlePauseIntervention}
             >
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Précédent
+              <PauseCircle className="h-5 w-5" />
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={() => setCurrentStepIndex(Math.min(steps.length - 1, currentStepIndex + 1))}
-              disabled={currentStepIndex === steps.length - 1}
-            >
-              Suivant
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
-          </div>
+          )}
+
+          <Button
+            variant="outline"
+            className="flex-1 h-12"
+            onClick={() => setCurrentStepIndex(Math.min(steps.length - 1, currentStepIndex + 1))}
+            disabled={currentStepIndex === steps.length - 1}
+          >
+            Suivant
+            <ChevronRight className="h-5 w-5 ml-1" />
+          </Button>
         </div>
-      </Card>
+      </div>
 
       {/* Modal de signature */}
       {showSignature && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md p-4 space-y-3">
-            <h2 className="text-base font-bold text-center">Validation finale</h2>
-            <p className="text-xs text-muted-foreground text-center">
-              En signant, vous confirmez avoir réalisé toutes les étapes.
+          <Card className="w-full max-w-lg p-6 space-y-4">
+            <h2 className="text-xl font-bold text-foreground text-center">Validation finale</h2>
+            <p className="text-sm text-muted-foreground text-center">
+              En signant, vous confirmez avoir réalisé toutes les étapes de l'intervention. 
+              L'intervention sera verrouillée et ne pourra plus être modifiée.
             </p>
             
             <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg overflow-hidden">
               <canvas 
                 ref={canvasRef}
-                width={350}
-                height={120}
+                width={400}
+                height={150}
                 className="w-full bg-white touch-none"
                 onMouseDown={startDrawing}
                 onMouseMove={draw}
@@ -736,17 +802,24 @@ const TabletInterventionDetail: React.FC = () => {
                 onTouchEnd={stopDrawing}
               />
             </div>
-            <Button variant="ghost" size="sm" onClick={clearSignature} className="w-full text-xs">
+            <Button variant="ghost" size="sm" onClick={clearSignature} className="w-full">
               Effacer la signature
             </Button>
 
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1" onClick={() => setShowSignature(false)}>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                className="flex-1 h-12"
+                onClick={() => setShowSignature(false)}
+              >
                 Annuler
               </Button>
-              <Button size="sm" className="flex-1 bg-green-600 hover:bg-green-700" onClick={handleSignAndValidate}>
-                <Lock className="h-4 w-4 mr-1" />
-                Valider
+              <Button 
+                className="flex-1 h-12 bg-green-600 hover:bg-green-700"
+                onClick={handleSignAndValidate}
+              >
+                <Lock className="h-5 w-5 mr-2" />
+                Signer et valider
               </Button>
             </div>
           </Card>
