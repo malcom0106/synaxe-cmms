@@ -21,6 +21,16 @@ import EquipmentFamilies from "./pages/EquipmentFamilies";
 import EquipmentSubFamilies from "./pages/EquipmentSubFamilies";
 import NotFound from "./pages/NotFound";
 
+// Tablet pages
+import { TabletLayout } from "./components/tablet/TabletLayout";
+import TabletLogin from "./pages/tablet/TabletLogin";
+import TabletDashboard from "./pages/tablet/TabletDashboard";
+import TabletInterventionDetail from "./pages/tablet/TabletInterventionDetail";
+import TabletMaintenanceRanges from "./pages/tablet/TabletMaintenanceRanges";
+import TabletMaintenancePlan from "./pages/tablet/TabletMaintenancePlan";
+import TabletInterventionRequests from "./pages/tablet/TabletInterventionRequests";
+import TabletDiagnostic from "./pages/tablet/TabletDiagnostic";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -29,30 +39,46 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <div className="flex h-screen w-full overflow-hidden">
-          <Sidebar />
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <main className="flex-1 overflow-auto bg-background">
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/maintenance" element={<Maintenance />} />
-                <Route path="/maintenance/ranges" element={<MaintenanceRanges />} />
-                <Route path="/maintenance/ranges/:id" element={<MaintenanceRangeDetail />} />
-                <Route path="/maintenance/actions" element={<MaintenanceActions />} />
-                <Route path="/preventive" element={<PreventiveMaintenance />} />
-                <Route path="/corrective" element={<CorrectiveMaintenance />} />
-                <Route path="/equipment" element={<Equipment />} />
-                <Route path="/equipment/:id" element={<EquipmentDetail />} />
-                <Route path="/inventory" element={<Inventory />} />
-                <Route path="/documents" element={<Documents />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/settings/equipment-families" element={<EquipmentFamilies />} />
-                <Route path="/settings/equipment-subfamilies" element={<EquipmentSubFamilies />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-          </div>
-        </div>
+        <Routes>
+          {/* Tablet routes */}
+          <Route path="/tablet/login" element={<TabletLogin />} />
+          <Route path="/tablet" element={<TabletLayout />}>
+            <Route index element={<TabletDashboard />} />
+            <Route path="intervention/:id" element={<TabletInterventionDetail />} />
+            <Route path="ranges" element={<TabletMaintenanceRanges />} />
+            <Route path="plan" element={<TabletMaintenancePlan />} />
+            <Route path="requests" element={<TabletInterventionRequests />} />
+            <Route path="diagnostic" element={<TabletDiagnostic />} />
+          </Route>
+
+          {/* Desktop routes */}
+          <Route path="/*" element={
+            <div className="flex h-screen w-full overflow-hidden">
+              <Sidebar />
+              <div className="flex flex-1 flex-col overflow-hidden">
+                <main className="flex-1 overflow-auto bg-background">
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/maintenance" element={<Maintenance />} />
+                    <Route path="/maintenance/ranges" element={<MaintenanceRanges />} />
+                    <Route path="/maintenance/ranges/:id" element={<MaintenanceRangeDetail />} />
+                    <Route path="/maintenance/actions" element={<MaintenanceActions />} />
+                    <Route path="/preventive" element={<PreventiveMaintenance />} />
+                    <Route path="/corrective" element={<CorrectiveMaintenance />} />
+                    <Route path="/equipment" element={<Equipment />} />
+                    <Route path="/equipment/:id" element={<EquipmentDetail />} />
+                    <Route path="/inventory" element={<Inventory />} />
+                    <Route path="/documents" element={<Documents />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/settings/equipment-families" element={<EquipmentFamilies />} />
+                    <Route path="/settings/equipment-subfamilies" element={<EquipmentSubFamilies />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </main>
+              </div>
+            </div>
+          } />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
