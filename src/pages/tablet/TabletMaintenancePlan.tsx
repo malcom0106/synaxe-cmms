@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import {
   ChevronRight as ChevronRightIcon, 
   Clock, 
   User,
-  Filter
+  Play
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -45,6 +46,7 @@ const getStatusBadge = (status: string) => {
 };
 
 const TabletMaintenancePlan: React.FC = () => {
+  const navigate = useNavigate();
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date();
     const day = today.getDay();
@@ -171,6 +173,16 @@ const TabletMaintenancePlan: React.FC = () => {
                             {intervention.assignedTo}
                           </div>
                         </div>
+                        {intervention.status !== 'completed' && (
+                          <Button
+                            size="sm"
+                            className="shrink-0"
+                            onClick={() => navigate(`/tablet/intervention/${intervention.id}`)}
+                          >
+                            <Play className="h-4 w-4 mr-1" />
+                            Réaliser
+                          </Button>
+                        )}
                       </div>
                     </Card>
                   ))}
