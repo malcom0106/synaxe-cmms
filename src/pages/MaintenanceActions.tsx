@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -57,6 +58,7 @@ const maintenanceActions: MaintenanceAction[] = [
 ];
 
 const MaintenanceActions: React.FC = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedActions, setSelectedActions] = useState<string[]>([]);
 
@@ -136,9 +138,10 @@ const MaintenanceActions: React.FC = () => {
               {maintenanceActions.map((action) => (
                 <tr 
                   key={action.id} 
-                  className="border-b border-border hover:bg-muted/30 transition-colors"
+                  className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/maintenance/actions/${action.id}`)}
                 >
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <Checkbox 
                       checked={selectedActions.includes(action.id)}
                       onCheckedChange={(checked) => handleSelectAction(action.id, checked as boolean)}
@@ -158,9 +161,9 @@ const MaintenanceActions: React.FC = () => {
                   <td className="px-4 py-3 text-sm text-foreground">
                     {action.estimatedTime}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => navigate(`/maintenance/actions/${action.id}`)}>
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
