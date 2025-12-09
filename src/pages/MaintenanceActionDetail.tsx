@@ -280,23 +280,32 @@ const MaintenanceActionDetail: React.FC = () => {
               {mockHistory.map((entry, index) => (
                 <div 
                   key={index}
-                  className="flex items-start gap-4 p-4 rounded-lg border border-border bg-card"
+                  className="flex items-start gap-3 pb-4 border-b border-border last:border-0"
                 >
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary flex-shrink-0">
-                    {entry.initials}
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-semibold text-primary">
+                      {entry.initials}
+                    </span>
                   </div>
+                  
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-foreground">{entry.user}</span>
-                      <span className="text-muted-foreground">a modifié</span>
-                      <Badge variant="outline" className="text-xs">{entry.field}</Badge>
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm">
+                          <span className="font-semibold text-foreground">{entry.user}</span>
+                          {' '}a mis à jour{' '}
+                          <span className="font-semibold text-foreground">{entry.field}</span>
+                        </p>
+                        <div className="flex items-center gap-2 mt-1 text-sm">
+                          <span className="text-muted-foreground line-through">{entry.oldValue}</span>
+                          <span className="text-muted-foreground">→</span>
+                          <span className="text-foreground">{entry.newValue}</span>
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {entry.date}
+                      </span>
                     </div>
-                    <div className="text-sm text-muted-foreground mb-2">
-                      <span className="line-through text-red-500/70">{entry.oldValue}</span>
-                      <span className="mx-2">→</span>
-                      <span className="text-green-600">{entry.newValue}</span>
-                    </div>
-                    <div className="text-xs text-muted-foreground">{entry.date}</div>
                   </div>
                 </div>
               ))}
