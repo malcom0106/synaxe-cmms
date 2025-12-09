@@ -269,10 +269,10 @@ const MaintenanceActionDetail: React.FC = () => {
               </Card>
             </div>
 
-            {/* Colonne droite - Résultats attendus */}
+            {/* Colonne droite - Résultat(s) attendu(s) */}
             <div>
               <Card className="p-6">
-                <h2 className="text-lg font-semibold text-foreground mb-4">Résultats attendus</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-4">Résultat(s) attendu(s)</h2>
                 {action.expectedResults.length === 0 ? (
                   <p className="text-sm text-muted-foreground italic">Aucun résultat attendu défini</p>
                 ) : (
