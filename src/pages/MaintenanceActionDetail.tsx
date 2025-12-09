@@ -20,10 +20,7 @@ const maintenanceActionsData: Record<string, {
   description: string;
   estimatedTime: string;
   instructions: string;
-  requiredTools: string[];
-  safetyNotes: string;
-  createdAt: string;
-  createdBy: string;
+  expectedResults: string;
 }> = {
   '1': {
     id: '1',
@@ -32,10 +29,7 @@ const maintenanceActionsData: Record<string, {
     description: 'Vérification visuelle de l\'équipement pour détecter tout signe d\'usure, de dommage ou d\'anomalie.',
     estimatedTime: '15 min',
     instructions: 'Inspecter visuellement toutes les parties accessibles de l\'équipement. Vérifier l\'absence de fuites, fissures, corrosion ou déformations.',
-    requiredTools: ['Lampe torche', 'Miroir d\'inspection', 'Caméra'],
-    safetyNotes: 'S\'assurer que l\'équipement est à l\'arrêt avant l\'inspection.',
-    createdAt: '2023-01-15',
-    createdBy: 'Jean Martin'
+    expectedResults: 'Aucune anomalie visuelle détectée. État général conforme aux standards de fonctionnement.'
   },
   '2': {
     id: '2',
@@ -44,10 +38,7 @@ const maintenanceActionsData: Record<string, {
     description: 'Application de graisse sur les points de lubrification définis pour assurer le bon fonctionnement des pièces mobiles.',
     estimatedTime: '30 min',
     instructions: 'Identifier tous les points de graissage. Nettoyer les graisseurs avant application. Appliquer la quantité recommandée de graisse.',
-    requiredTools: ['Pistolet à graisse', 'Chiffons', 'Graisse compatible'],
-    safetyNotes: 'Porter des gants de protection. Utiliser uniquement la graisse spécifiée.',
-    createdAt: '2023-02-20',
-    createdBy: 'Sophie Bernard'
+    expectedResults: 'Tous les points de lubrification traités. Mouvement fluide des pièces mobiles sans bruit anormal.'
   },
   '3': {
     id: '3',
@@ -56,10 +47,7 @@ const maintenanceActionsData: Record<string, {
     description: 'Changement des filtres à air et à huile selon les préconisations du constructeur.',
     estimatedTime: '45 min',
     instructions: 'Arrêter l\'équipement. Retirer les anciens filtres. Vérifier l\'état des joints. Installer les nouveaux filtres. Contrôler l\'étanchéité.',
-    requiredTools: ['Clé à filtre', 'Bac de récupération', 'Filtres neufs', 'Joints'],
-    safetyNotes: 'Attendre le refroidissement de l\'équipement. Disposer correctement des filtres usagés.',
-    createdAt: '2023-03-10',
-    createdBy: 'Pierre Lefebvre'
+    expectedResults: 'Filtres neufs installés correctement. Absence de fuite. Pression de fonctionnement normale.'
   },
   '4': {
     id: '4',
@@ -68,10 +56,7 @@ const maintenanceActionsData: Record<string, {
     description: 'Nettoyage approfondi de l\'équipement incluant toutes les surfaces accessibles et les composants externes.',
     estimatedTime: '1h',
     instructions: 'Déconnecter l\'alimentation. Utiliser les produits de nettoyage appropriés. Nettoyer méthodiquement toutes les surfaces. Sécher complètement avant remise en service.',
-    requiredTools: ['Produits de nettoyage', 'Chiffons microfibres', 'Air comprimé', 'Aspirateur'],
-    safetyNotes: 'Ne pas utiliser d\'eau sur les composants électriques. Porter des équipements de protection.',
-    createdAt: '2023-04-05',
-    createdBy: 'Marie Dubois'
+    expectedResults: 'Équipement propre et sec. Aucun résidu visible. Ventilation et dissipation thermique optimales.'
   },
   '5': {
     id: '5',
@@ -80,10 +65,7 @@ const maintenanceActionsData: Record<string, {
     description: 'Calibration des capteurs et instruments de mesure pour garantir la précision des données.',
     estimatedTime: '1h 30min',
     instructions: 'Utiliser les étalons de référence. Suivre la procédure de calibration spécifique. Documenter les valeurs avant et après calibration.',
-    requiredTools: ['Étalons de référence', 'Multimètre', 'Logiciel de calibration', 'Tournevis de précision'],
-    safetyNotes: 'Travailler dans un environnement stable. Manipuler les instruments avec précaution.',
-    createdAt: '2023-05-12',
-    createdBy: 'Jean Martin'
+    expectedResults: 'Mesures conformes aux tolérances définies. Écart maximal inférieur à 0.5%. Certificat de calibration émis.'
   },
 };
 
@@ -201,21 +183,6 @@ const MaintenanceActionDetail: React.FC = () => {
                   </div>
                 </div>
               </Card>
-
-              {/* Métadonnées */}
-              <Card className="p-6">
-                <h2 className="text-lg font-semibold text-foreground mb-4">Métadonnées</h2>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">Date de création</div>
-                    <div className="text-sm font-medium text-foreground">{action.createdAt}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">Créé par</div>
-                    <div className="text-sm font-medium text-foreground">{action.createdBy}</div>
-                  </div>
-                </div>
-              </Card>
             </div>
 
             {/* Colonne droite */}
@@ -229,24 +196,10 @@ const MaintenanceActionDetail: React.FC = () => {
                 <p className="text-sm text-foreground">{action.instructions}</p>
               </Card>
 
-              {/* Outils requis */}
+              {/* Résultats attendus */}
               <Card className="p-6">
-                <h2 className="text-lg font-semibold text-foreground mb-4">Outils requis</h2>
-                <div className="flex flex-wrap gap-2">
-                  {action.requiredTools.map((tool, index) => (
-                    <Badge key={index} variant="outline" className="text-foreground">
-                      {tool}
-                    </Badge>
-                  ))}
-                </div>
-              </Card>
-
-              {/* Notes de sécurité */}
-              <Card className="p-6 border-orange-200 bg-orange-50/50 dark:bg-orange-950/20 dark:border-orange-900">
-                <h2 className="text-lg font-semibold text-orange-800 dark:text-orange-200 mb-4">
-                  ⚠️ Notes de sécurité
-                </h2>
-                <p className="text-sm text-orange-700 dark:text-orange-300">{action.safetyNotes}</p>
+                <h2 className="text-lg font-semibold text-foreground mb-4">Résultats attendus</h2>
+                <p className="text-sm text-foreground">{action.expectedResults}</p>
               </Card>
             </div>
           </div>
