@@ -17,6 +17,7 @@ import Settings from "./pages/Settings";
 import MaintenanceRanges from "./pages/MaintenanceRanges";
 import MaintenanceRangeDetail from "./pages/MaintenanceRangeDetail";
 import MaintenanceActions from "./pages/MaintenanceActions";
+import MaintenanceActionDetail from "./pages/MaintenanceActionDetail";
 import EquipmentFamilies from "./pages/EquipmentFamilies";
 import EquipmentSubFamilies from "./pages/EquipmentSubFamilies";
 import NotFound from "./pages/NotFound";
@@ -69,6 +70,7 @@ const App = () => (
                     <Route path="/maintenance/ranges" element={<MaintenanceRanges />} />
                     <Route path="/maintenance/ranges/:id" element={<MaintenanceRangeDetail />} />
                     <Route path="/maintenance/actions" element={<MaintenanceActions />} />
+                    <Route path="/maintenance/actions/:id" element={<MaintenanceActionDetail />} />
                     <Route path="/preventive" element={<PreventiveMaintenance />} />
                     <Route path="/corrective" element={<CorrectiveMaintenance />} />
                     <Route path="/equipment" element={<Equipment />} />
