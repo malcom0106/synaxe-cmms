@@ -7,8 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Plus, 
   Search,
-  Edit,
-  Trash2
+  Edit
 } from 'lucide-react';
 
 interface MaintenanceAction {
@@ -121,7 +120,7 @@ const MaintenanceActions: React.FC = () => {
                   Statut
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
-                  Actions
+                  Action
                 </th>
               </tr>
             </thead>
@@ -153,14 +152,9 @@ const MaintenanceActions: React.FC = () => {
                     </Badge>
                   </td>
                   <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => navigate(`/maintenance/actions/${action.id}`)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => navigate(`/maintenance/actions/${action.id}`)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
                   </td>
                 </tr>
               ))}
