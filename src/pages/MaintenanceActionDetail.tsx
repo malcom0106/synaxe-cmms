@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Edit, FileText, ChevronUp, ChevronDown, Trash2 } from 'lucide-react';
+import EditMaintenanceActionModal from '@/components/maintenance/EditMaintenanceActionModal';
 
 // Mock data
 interface ExpectedResult {
@@ -134,9 +135,11 @@ interface Document {
 const MaintenanceActionDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const action = id ? maintenanceActionsData[id] : null;
+  const [actionData, setActionData] = useState(id ? maintenanceActionsData[id] : null);
+  const action = actionData;
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isDocumentsOpen, setIsDocumentsOpen] = useState(true);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const handleAddDocument = () => {
     // Mock add document
@@ -150,6 +153,15 @@ const MaintenanceActionDetail: React.FC = () => {
 
   const handleDeleteDocument = (docId: string) => {
     setDocuments(documents.filter(d => d.id !== docId));
+  };
+
+  const handleSave = (updatedAction: { id: string; name: string; description: string; isActive: boolean }) => {
+    if (action) {
+      setActionData({
+        ...action,
+        ...updatedAction,
+      });
+    }
   };
 
   if (!action) {
@@ -176,11 +188,18 @@ const MaintenanceActionDetail: React.FC = () => {
             {action.isActive ? 'Actif' : 'Inactif'}
           </Badge>
         </div>
-        <Button className="bg-primary hover:bg-primary/90">
+        <Button className="bg-primary hover:bg-primary/90" onClick={() => setEditModalOpen(true)}>
           <Edit className="h-4 w-4 mr-2" />
           Modifier
         </Button>
       </div>
+
+      <EditMaintenanceActionModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        action={action}
+        onSave={handleSave}
+      />
 
       <Tabs defaultValue="general" className="w-full">
         <TabsList className="mb-6 w-full grid grid-cols-2 bg-muted/30">
