@@ -9,6 +9,7 @@ import {
   Search,
   Edit
 } from 'lucide-react';
+import EditMaintenanceActionModal from '@/components/maintenance/EditMaintenanceActionModal';
 
 interface MaintenanceAction {
   id: string;
@@ -17,7 +18,7 @@ interface MaintenanceAction {
   isActive: boolean;
 }
 
-const maintenanceActions: MaintenanceAction[] = [
+const maintenanceActionsData: MaintenanceAction[] = [
   {
     id: '1',
     name: 'Contrôle visuel',
@@ -54,6 +55,9 @@ const MaintenanceActions: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedActions, setSelectedActions] = useState<string[]>([]);
+  const [maintenanceActions, setMaintenanceActions] = useState<MaintenanceAction[]>(maintenanceActionsData);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedAction, setSelectedAction] = useState<MaintenanceAction | null>(null);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -69,6 +73,17 @@ const MaintenanceActions: React.FC = () => {
     } else {
       setSelectedActions(selectedActions.filter(a => a !== id));
     }
+  };
+
+  const handleEditClick = (action: MaintenanceAction) => {
+    setSelectedAction(action);
+    setEditModalOpen(true);
+  };
+
+  const handleSave = (updatedAction: MaintenanceAction) => {
+    setMaintenanceActions(prev => 
+      prev.map(a => a.id === updatedAction.id ? updatedAction : a)
+    );
   };
 
   return (
@@ -152,7 +167,7 @@ const MaintenanceActions: React.FC = () => {
                     </Badge>
                   </td>
                   <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                    <Button variant="ghost" size="sm" onClick={() => navigate(`/maintenance/actions/${action.id}`)}>
+                    <Button variant="ghost" size="sm" onClick={() => handleEditClick(action)}>
                       <Edit className="h-4 w-4" />
                     </Button>
                   </td>
@@ -162,6 +177,13 @@ const MaintenanceActions: React.FC = () => {
           </table>
         </div>
       </div>
+
+      <EditMaintenanceActionModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        action={selectedAction}
+        onSave={handleSave}
+      />
     </div>
   );
 };
