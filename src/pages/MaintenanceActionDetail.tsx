@@ -13,14 +13,25 @@ import {
 } from 'lucide-react';
 
 // Mock data
+interface ExpectedResult {
+  variableName: string;
+  label: string;
+  type: 'Texte' | 'Nombre' | 'Oui/Non';
+  required: boolean;
+  minLength?: string;
+  maxLength?: string;
+  minValue?: string;
+  maxValue?: string;
+  defaultValue?: string;
+}
+
 const maintenanceActionsData: Record<string, {
   id: string;
   name: string;
   category: string;
   description: string;
   estimatedTime: string;
-  instructions: string;
-  expectedResults: string;
+  expectedResults: ExpectedResult[];
 }> = {
   '1': {
     id: '1',
@@ -28,8 +39,33 @@ const maintenanceActionsData: Record<string, {
     category: 'Inspection',
     description: 'Vérification visuelle de l\'équipement pour détecter tout signe d\'usure, de dommage ou d\'anomalie.',
     estimatedTime: '15 min',
-    instructions: 'Inspecter visuellement toutes les parties accessibles de l\'équipement. Vérifier l\'absence de fuites, fissures, corrosion ou déformations.',
-    expectedResults: 'Aucune anomalie visuelle détectée. État général conforme aux standards de fonctionnement.'
+    expectedResults: [
+      {
+        variableName: 'variable_1765276301014',
+        label: 'Observation générale',
+        type: 'Texte',
+        required: false,
+        minLength: '10',
+        maxLength: '500',
+        defaultValue: 'Aucune anomalie détectée'
+      },
+      {
+        variableName: 'variable_1765276317556',
+        label: 'Niveau d\'usure (%)',
+        type: 'Nombre',
+        required: true,
+        minValue: '0',
+        maxValue: '100',
+        defaultValue: '0'
+      },
+      {
+        variableName: 'variable_1765276327870',
+        label: 'Conformité validée',
+        type: 'Oui/Non',
+        required: false,
+        defaultValue: 'Oui'
+      }
+    ]
   },
   '2': {
     id: '2',
@@ -37,8 +73,7 @@ const maintenanceActionsData: Record<string, {
     category: 'Lubrification',
     description: 'Application de graisse sur les points de lubrification définis pour assurer le bon fonctionnement des pièces mobiles.',
     estimatedTime: '30 min',
-    instructions: 'Identifier tous les points de graissage. Nettoyer les graisseurs avant application. Appliquer la quantité recommandée de graisse.',
-    expectedResults: 'Tous les points de lubrification traités. Mouvement fluide des pièces mobiles sans bruit anormal.'
+    expectedResults: []
   },
   '3': {
     id: '3',
@@ -46,8 +81,7 @@ const maintenanceActionsData: Record<string, {
     category: 'Remplacement',
     description: 'Changement des filtres à air et à huile selon les préconisations du constructeur.',
     estimatedTime: '45 min',
-    instructions: 'Arrêter l\'équipement. Retirer les anciens filtres. Vérifier l\'état des joints. Installer les nouveaux filtres. Contrôler l\'étanchéité.',
-    expectedResults: 'Filtres neufs installés correctement. Absence de fuite. Pression de fonctionnement normale.'
+    expectedResults: []
   },
   '4': {
     id: '4',
@@ -55,8 +89,7 @@ const maintenanceActionsData: Record<string, {
     category: 'Nettoyage',
     description: 'Nettoyage approfondi de l\'équipement incluant toutes les surfaces accessibles et les composants externes.',
     estimatedTime: '1h',
-    instructions: 'Déconnecter l\'alimentation. Utiliser les produits de nettoyage appropriés. Nettoyer méthodiquement toutes les surfaces. Sécher complètement avant remise en service.',
-    expectedResults: 'Équipement propre et sec. Aucun résidu visible. Ventilation et dissipation thermique optimales.'
+    expectedResults: []
   },
   '5': {
     id: '5',
@@ -64,8 +97,7 @@ const maintenanceActionsData: Record<string, {
     category: 'Réglage',
     description: 'Calibration des capteurs et instruments de mesure pour garantir la précision des données.',
     estimatedTime: '1h 30min',
-    instructions: 'Utiliser les étalons de référence. Suivre la procédure de calibration spécifique. Documenter les valeurs avant et après calibration.',
-    expectedResults: 'Mesures conformes aux tolérances définies. Écart maximal inférieur à 0.5%. Certificat de calibration émis.'
+    expectedResults: []
   },
 };
 
@@ -187,19 +219,74 @@ const MaintenanceActionDetail: React.FC = () => {
 
             {/* Colonne droite */}
             <div className="space-y-6">
-              {/* Instructions */}
-              <Card className="p-6">
-                <h2 className="text-lg font-semibold text-foreground mb-4">
-                  <FileText className="h-5 w-5 inline mr-2" />
-                  Instructions
-                </h2>
-                <p className="text-sm text-foreground">{action.instructions}</p>
-              </Card>
-
               {/* Résultats attendus */}
               <Card className="p-6">
                 <h2 className="text-lg font-semibold text-foreground mb-4">Résultats attendus</h2>
-                <p className="text-sm text-foreground">{action.expectedResults}</p>
+                {action.expectedResults.length === 0 ? (
+                  <p className="text-sm text-muted-foreground italic">Aucun résultat attendu défini</p>
+                ) : (
+                  <div className="space-y-4">
+                    {action.expectedResults.map((result, index) => (
+                      <div key={index} className="p-4 rounded-lg border border-border bg-muted/20">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-medium text-foreground">{result.label}</span>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">{result.type}</Badge>
+                            {result.required && (
+                              <Badge className="bg-red-500/10 text-red-600 hover:bg-red-500/10 border-0 text-xs">
+                                Obligatoire
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Nom de la variable:</span>
+                            <span className="ml-2 text-foreground font-mono text-xs">{result.variableName}</span>
+                          </div>
+                          {result.type === 'Texte' && (
+                            <>
+                              {result.minLength && (
+                                <div>
+                                  <span className="text-muted-foreground">Longueur min:</span>
+                                  <span className="ml-2 text-foreground">{result.minLength}</span>
+                                </div>
+                              )}
+                              {result.maxLength && (
+                                <div>
+                                  <span className="text-muted-foreground">Longueur max:</span>
+                                  <span className="ml-2 text-foreground">{result.maxLength}</span>
+                                </div>
+                              )}
+                            </>
+                          )}
+                          {result.type === 'Nombre' && (
+                            <>
+                              {result.minValue && (
+                                <div>
+                                  <span className="text-muted-foreground">Valeur min:</span>
+                                  <span className="ml-2 text-foreground">{result.minValue}</span>
+                                </div>
+                              )}
+                              {result.maxValue && (
+                                <div>
+                                  <span className="text-muted-foreground">Valeur max:</span>
+                                  <span className="ml-2 text-foreground">{result.maxValue}</span>
+                                </div>
+                              )}
+                            </>
+                          )}
+                          {result.defaultValue && (
+                            <div>
+                              <span className="text-muted-foreground">Valeur par défaut:</span>
+                              <span className="ml-2 text-foreground">{result.defaultValue}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </Card>
             </div>
           </div>
