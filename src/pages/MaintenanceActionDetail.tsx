@@ -23,17 +23,15 @@ interface ExpectedResult {
 const maintenanceActionsData: Record<string, {
   id: string;
   name: string;
-  category: string;
   description: string;
-  estimatedTime: string;
+  isActive: boolean;
   expectedResults: ExpectedResult[];
 }> = {
   '1': {
     id: '1',
     name: 'Contrôle visuel',
-    category: 'Inspection',
     description: 'Vérification visuelle de l\'équipement pour détecter tout signe d\'usure, de dommage ou d\'anomalie.',
-    estimatedTime: '15 min',
+    isActive: true,
     expectedResults: [
       {
         variableName: 'variable_1765276301014',
@@ -65,33 +63,29 @@ const maintenanceActionsData: Record<string, {
   '2': {
     id: '2',
     name: 'Graissage',
-    category: 'Lubrification',
     description: 'Application de graisse sur les points de lubrification définis pour assurer le bon fonctionnement des pièces mobiles.',
-    estimatedTime: '30 min',
+    isActive: true,
     expectedResults: []
   },
   '3': {
     id: '3',
     name: 'Remplacement filtres',
-    category: 'Remplacement',
     description: 'Changement des filtres à air et à huile selon les préconisations du constructeur.',
-    estimatedTime: '45 min',
+    isActive: false,
     expectedResults: []
   },
   '4': {
     id: '4',
     name: 'Nettoyage complet',
-    category: 'Nettoyage',
     description: 'Nettoyage approfondi de l\'équipement incluant toutes les surfaces accessibles et les composants externes.',
-    estimatedTime: '1h',
+    isActive: true,
     expectedResults: []
   },
   '5': {
     id: '5',
     name: 'Calibration',
-    category: 'Réglage',
     description: 'Calibration des capteurs et instruments de mesure pour garantir la précision des données.',
-    estimatedTime: '1h 30min',
+    isActive: false,
     expectedResults: []
   },
 };
@@ -173,7 +167,15 @@ const MaintenanceActionDetail: React.FC = () => {
     <div className="p-6 w-full bg-background">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">{action.name}</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-foreground">{action.name}</h1>
+          <Badge className={action.isActive 
+            ? "bg-green-500/10 text-green-600 hover:bg-green-500/10 border-0" 
+            : "bg-muted text-muted-foreground hover:bg-muted border-0"
+          }>
+            {action.isActive ? 'Actif' : 'Inactif'}
+          </Badge>
+        </div>
         <Button className="bg-primary hover:bg-primary/90">
           <Edit className="h-4 w-4 mr-2" />
           Modifier

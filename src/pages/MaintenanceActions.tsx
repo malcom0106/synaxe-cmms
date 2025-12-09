@@ -14,46 +14,40 @@ import {
 interface MaintenanceAction {
   id: string;
   name: string;
-  category: string;
   description: string;
-  estimatedTime: string;
+  isActive: boolean;
 }
 
 const maintenanceActions: MaintenanceAction[] = [
   {
     id: '1',
     name: 'Contrôle visuel',
-    category: 'Inspection',
     description: 'Vérification visuelle de l\'équipement',
-    estimatedTime: '15 min'
+    isActive: true
   },
   {
     id: '2',
     name: 'Graissage',
-    category: 'Lubrification',
     description: 'Application de graisse sur les points de lubrification',
-    estimatedTime: '30 min'
+    isActive: true
   },
   {
     id: '3',
     name: 'Remplacement filtres',
-    category: 'Remplacement',
     description: 'Changement des filtres à air et à huile',
-    estimatedTime: '45 min'
+    isActive: false
   },
   {
     id: '4',
     name: 'Nettoyage complet',
-    category: 'Nettoyage',
     description: 'Nettoyage approfondi de l\'équipement',
-    estimatedTime: '1h'
+    isActive: true
   },
   {
     id: '5',
     name: 'Calibration',
-    category: 'Réglage',
     description: 'Calibration des capteurs et instruments',
-    estimatedTime: '1h 30min'
+    isActive: false
   },
 ];
 
@@ -121,13 +115,10 @@ const MaintenanceActions: React.FC = () => {
                   Nom
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
-                  Catégorie
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
                   Description
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
-                  Temps estimé
+                  Statut
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
                   Actions
@@ -150,16 +141,16 @@ const MaintenanceActions: React.FC = () => {
                   <td className="px-4 py-3 text-sm font-medium text-foreground">
                     {action.name}
                   </td>
-                  <td className="px-4 py-3">
-                    <Badge className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/10 border-0">
-                      {action.category}
-                    </Badge>
-                  </td>
                   <td className="px-4 py-3 text-sm text-muted-foreground">
                     {action.description}
                   </td>
-                  <td className="px-4 py-3 text-sm text-foreground">
-                    {action.estimatedTime}
+                  <td className="px-4 py-3">
+                    <Badge className={action.isActive 
+                      ? "bg-green-500/10 text-green-600 hover:bg-green-500/10 border-0" 
+                      : "bg-muted text-muted-foreground hover:bg-muted border-0"
+                    }>
+                      {action.isActive ? 'Actif' : 'Inactif'}
+                    </Badge>
                   </td>
                   <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-2">
