@@ -6,9 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ArrowLeft,
-  Clock,
-  Tag,
-  FileText,
   Edit
 } from 'lucide-react';
 
@@ -165,7 +162,6 @@ const MaintenanceActionDetail: React.FC = () => {
         </Button>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-foreground">{action.name}</h1>
-          <p className="text-muted-foreground">{action.category}</p>
         </div>
         <Button className="bg-primary hover:bg-primary/90">
           <Edit className="h-4 w-4 mr-2" />
@@ -193,22 +189,6 @@ const MaintenanceActionDetail: React.FC = () => {
                     <div className="text-sm font-medium text-foreground">{action.name}</div>
                   </div>
                   
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">Catégorie</div>
-                    <Badge className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/10 border-0">
-                      <Tag className="h-3 w-3 mr-1" />
-                      {action.category}
-                    </Badge>
-                  </div>
-
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">Temps estimé</div>
-                    <div className="text-sm text-foreground flex items-center gap-1">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      {action.estimatedTime}
-                    </div>
-                  </div>
-
                   <div>
                     <div className="text-sm text-muted-foreground mb-1">Description</div>
                     <div className="text-sm text-foreground">{action.description}</div>
