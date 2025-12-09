@@ -4,10 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  ArrowLeft,
-  Edit
-} from 'lucide-react';
+import { Edit } from 'lucide-react';
 
 // Mock data
 interface ExpectedResult {
@@ -151,18 +148,9 @@ const MaintenanceActionDetail: React.FC = () => {
 
   return (
     <div className="p-6 w-full bg-background">
-      {/* Header avec bouton retour */}
-      <div className="flex items-center gap-4 mb-6">
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => navigate('/maintenance/actions')}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground">{action.name}</h1>
-        </div>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-foreground">{action.name}</h1>
         <Button className="bg-primary hover:bg-primary/90">
           <Edit className="h-4 w-4 mr-2" />
           Modifier
@@ -177,98 +165,92 @@ const MaintenanceActionDetail: React.FC = () => {
 
         {/* Onglet Général */}
         <TabsContent value="general" className="mt-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Colonne gauche */}
-            <div className="space-y-6">
-              {/* Informations générales */}
-              <Card className="p-6">
-                <h2 className="text-lg font-semibold text-foreground mb-4">Informations générales</h2>
-                <div className="space-y-4">
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">Nom</div>
-                    <div className="text-sm font-medium text-foreground">{action.name}</div>
-                  </div>
-                  
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">Description</div>
-                    <div className="text-sm text-foreground">{action.description}</div>
-                  </div>
+          <div className="space-y-6">
+            {/* Informations générales */}
+            <Card className="p-6">
+              <h2 className="text-lg font-semibold text-foreground mb-4">Informations générales</h2>
+              <div className="space-y-4">
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">Nom</div>
+                  <div className="text-sm font-medium text-foreground">{action.name}</div>
                 </div>
-              </Card>
-            </div>
+                
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">Description</div>
+                  <div className="text-sm text-foreground">{action.description}</div>
+                </div>
+              </div>
+            </Card>
 
-            {/* Colonne droite */}
-            <div className="space-y-6">
-              {/* Résultats attendus */}
-              <Card className="p-6">
-                <h2 className="text-lg font-semibold text-foreground mb-4">Résultats attendus</h2>
-                {action.expectedResults.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic">Aucun résultat attendu défini</p>
-                ) : (
-                  <div className="space-y-4">
-                    {action.expectedResults.map((result, index) => (
-                      <div key={index} className="p-4 rounded-lg border border-border bg-muted/20">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="font-medium text-foreground">{result.label}</span>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs">{result.type}</Badge>
-                            {result.required && (
-                              <Badge className="bg-red-500/10 text-red-600 hover:bg-red-500/10 border-0 text-xs">
-                                Obligatoire
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 text-sm">
-                          <div>
-                            <span className="text-muted-foreground">Nom de la variable:</span>
-                            <span className="ml-2 text-foreground font-mono text-xs">{result.variableName}</span>
-                          </div>
-                          {result.type === 'Texte' && (
-                            <>
-                              {result.minLength && (
-                                <div>
-                                  <span className="text-muted-foreground">Longueur min:</span>
-                                  <span className="ml-2 text-foreground">{result.minLength}</span>
-                                </div>
-                              )}
-                              {result.maxLength && (
-                                <div>
-                                  <span className="text-muted-foreground">Longueur max:</span>
-                                  <span className="ml-2 text-foreground">{result.maxLength}</span>
-                                </div>
-                              )}
-                            </>
-                          )}
-                          {result.type === 'Nombre' && (
-                            <>
-                              {result.minValue && (
-                                <div>
-                                  <span className="text-muted-foreground">Valeur min:</span>
-                                  <span className="ml-2 text-foreground">{result.minValue}</span>
-                                </div>
-                              )}
-                              {result.maxValue && (
-                                <div>
-                                  <span className="text-muted-foreground">Valeur max:</span>
-                                  <span className="ml-2 text-foreground">{result.maxValue}</span>
-                                </div>
-                              )}
-                            </>
-                          )}
-                          {result.defaultValue && (
-                            <div>
-                              <span className="text-muted-foreground">Valeur par défaut:</span>
-                              <span className="ml-2 text-foreground">{result.defaultValue}</span>
-                            </div>
+            {/* Résultats attendus */}
+            <Card className="p-6">
+              <h2 className="text-lg font-semibold text-foreground mb-4">Résultats attendus</h2>
+              {action.expectedResults.length === 0 ? (
+                <p className="text-sm text-muted-foreground italic">Aucun résultat attendu défini</p>
+              ) : (
+                <div className="space-y-4">
+                  {action.expectedResults.map((result, index) => (
+                    <div key={index} className="p-4 rounded-lg border border-border bg-muted/20">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-medium text-foreground">{result.label}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">{result.type}</Badge>
+                          {result.required && (
+                            <Badge className="bg-red-500/10 text-red-600 hover:bg-red-500/10 border-0 text-xs">
+                              Obligatoire
+                            </Badge>
                           )}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            </div>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">Nom de la variable:</span>
+                          <span className="ml-2 text-foreground font-mono text-xs">{result.variableName}</span>
+                        </div>
+                        {result.type === 'Texte' && (
+                          <>
+                            {result.minLength && (
+                              <div>
+                                <span className="text-muted-foreground">Longueur min:</span>
+                                <span className="ml-2 text-foreground">{result.minLength}</span>
+                              </div>
+                            )}
+                            {result.maxLength && (
+                              <div>
+                                <span className="text-muted-foreground">Longueur max:</span>
+                                <span className="ml-2 text-foreground">{result.maxLength}</span>
+                              </div>
+                            )}
+                          </>
+                        )}
+                        {result.type === 'Nombre' && (
+                          <>
+                            {result.minValue && (
+                              <div>
+                                <span className="text-muted-foreground">Valeur min:</span>
+                                <span className="ml-2 text-foreground">{result.minValue}</span>
+                              </div>
+                            )}
+                            {result.maxValue && (
+                              <div>
+                                <span className="text-muted-foreground">Valeur max:</span>
+                                <span className="ml-2 text-foreground">{result.maxValue}</span>
+                              </div>
+                            )}
+                          </>
+                        )}
+                        {result.defaultValue && (
+                          <div>
+                            <span className="text-muted-foreground">Valeur par défaut:</span>
+                            <span className="ml-2 text-foreground">{result.defaultValue}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
           </div>
         </TabsContent>
 
