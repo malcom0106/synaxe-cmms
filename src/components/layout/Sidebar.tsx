@@ -12,7 +12,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronDown,
-  Package
+  Package,
+  Cog
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -84,7 +85,7 @@ export const Sidebar: React.FC = () => {
             <div className="ml-4 mt-1 space-y-1 border-l-2 border-border pl-4">
               <NavItem to="/maintenance" icon={Wrench} label="Liste des Interventions" expanded={!collapsed} />
               <NavItem to="/maintenance/ranges" icon={Calendar} label="Gamme de maintenance" expanded={!collapsed} />
-              <NavItem to="/maintenance/actions" icon={Wrench} label="Actions de maintenance" expanded={!collapsed} />
+              <NavItem to="/maintenance/actions" icon={Cog} label="Actions de maintenance" expanded={!collapsed} />
             </div>
           )}
         </div>
