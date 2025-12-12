@@ -34,7 +34,7 @@ const navItems: NavItem[] = [
   { icon: Home, label: 'Accueil', path: '/tablet' },
   { icon: Wrench, label: 'Gammes', path: '/tablet/ranges' },
   { icon: Calendar, label: 'Plan', path: '/tablet/plan' },
-  { icon: AlertTriangle, label: 'Demandes', path: '/tablet/requests' },
+  { icon: AlertTriangle, label: "Demande d'intervention", path: '/tablet/requests' },
   { icon: Package, label: 'Inventaire', path: '/tablet/inventory' },
   { icon: History, label: 'Historique', path: '/tablet/history' },
   { icon: Stethoscope, label: 'Diagnostic', path: '/tablet/diagnostic' },
