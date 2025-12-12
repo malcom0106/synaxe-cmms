@@ -345,11 +345,6 @@ const TabletInterventionRequestDetail: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-3 text-sm">
-            <MapPin className="h-5 w-5 text-muted-foreground" />
-            <span className="text-muted-foreground">{request.location}</span>
-          </div>
-          
-          <div className="flex items-center gap-3 text-sm">
             <User className="h-5 w-5 text-muted-foreground" />
             <span className="text-muted-foreground">{request.createdBy}</span>
           </div>
