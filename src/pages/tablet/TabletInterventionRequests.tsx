@@ -286,11 +286,6 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, requests, onCardClic
                 </h3>
                 <p className="text-xs text-primary font-medium truncate">{request.equipment}</p>
                 
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <MapPin className="h-3 w-3 flex-shrink-0" />
-                  <span className="truncate">{request.location}</span>
-                </div>
-                
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <User className="h-3 w-3" />
