@@ -17,12 +17,10 @@ import {
   AlertTriangle, 
   Clock, 
   User,
-  MapPin,
   Wrench,
   Stethoscope,
   X as XIcon,
   Camera,
-  Image as ImageIcon,
   CheckCircle2,
   XCircle,
   FileText,
@@ -33,6 +31,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import RangeExecutionPanel from '@/components/tablet/RangeExecutionPanel';
 
 type RequestStatus = 'ouverte' | 'assignee' | 'en_cours' | 'en_attente' | 'terminee' | 'annulee';
 
@@ -52,6 +51,24 @@ interface InterventionRequest {
   cancelReason?: string;
 }
 
+interface MaintenanceStep {
+  id: string;
+  order: number;
+  label: string;
+  description: string;
+  inputType: 'boolean' | 'numeric' | 'comment' | 'photo' | 'checkbox';
+  required: boolean;
+  unit?: string;
+  minValue?: number;
+  maxValue?: number;
+  value: any;
+  completed: boolean;
+  remarks: string;
+  stepComment: string;
+  stepPhoto: string | null;
+  completedAt?: string;
+}
+
 interface MaintenanceRange {
   id: string;
   name: string;
@@ -60,6 +77,7 @@ interface MaintenanceRange {
   frequency: string;
   estimatedTime: string;
   tasksCount: number;
+  steps: MaintenanceStep[];
 }
 
 const maintenanceRanges: MaintenanceRange[] = [
@@ -70,7 +88,17 @@ const maintenanceRanges: MaintenanceRange[] = [
     family: 'Oléoserveur',
     frequency: 'Mensuel',
     estimatedTime: '2h',
-    tasksCount: 12,
+    tasksCount: 8,
+    steps: [
+      { id: 's1', order: 1, label: 'Vérifier le niveau d\'huile', description: 'Contrôler le niveau dans le réservoir principal', inputType: 'boolean', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's2', order: 2, label: 'Relever la pression', description: 'Mesurer la pression du circuit hydraulique', inputType: 'numeric', required: true, unit: 'bar', minValue: 150, maxValue: 200, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's3', order: 3, label: 'Contrôler les connexions électriques', description: 'Vérifier visuellement l\'état des câbles', inputType: 'boolean', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's4', order: 4, label: 'Photo du compteur', description: 'Prendre une photo du compteur', inputType: 'photo', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's5', order: 5, label: 'Tester les capteurs de pression', description: 'Vérifier le bon fonctionnement des capteurs', inputType: 'boolean', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's6', order: 6, label: 'Nettoyer les filtres', description: 'Nettoyer ou remplacer si nécessaire', inputType: 'checkbox', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's7', order: 7, label: 'Vérifier l\'étanchéité', description: 'Contrôler l\'absence de fuites', inputType: 'boolean', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's8', order: 8, label: 'Observations générales', description: 'Noter toute observation', inputType: 'comment', required: false, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+    ],
   },
   {
     id: 'GM002',
@@ -80,6 +108,13 @@ const maintenanceRanges: MaintenanceRange[] = [
     frequency: 'Hebdomadaire',
     estimatedTime: '30min',
     tasksCount: 5,
+    steps: [
+      { id: 's1', order: 1, label: 'Inspecter les joints', description: 'Vérifier l\'état des joints', inputType: 'boolean', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's2', order: 2, label: 'Écouter les bruits', description: 'Détecter tout bruit anormal', inputType: 'boolean', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's3', order: 3, label: 'Vérifier les vibrations', description: 'Contrôler les vibrations', inputType: 'boolean', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's4', order: 4, label: 'Contrôler la température', description: 'Vérifier la température', inputType: 'numeric', required: true, unit: '°C', minValue: 20, maxValue: 80, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's5', order: 5, label: 'Observations', description: 'Noter les observations', inputType: 'comment', required: false, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+    ],
   },
   {
     id: 'GM003',
@@ -88,7 +123,14 @@ const maintenanceRanges: MaintenanceRange[] = [
     family: 'Compteur',
     frequency: 'Trimestriel',
     estimatedTime: '1h30',
-    tasksCount: 8,
+    tasksCount: 5,
+    steps: [
+      { id: 's1', order: 1, label: 'Préparer l\'équipement', description: 'Rassembler le matériel', inputType: 'checkbox', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's2', order: 2, label: 'Relever valeur initiale', description: 'Noter la valeur avant calibration', inputType: 'numeric', required: true, unit: 'L/min', value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's3', order: 3, label: 'Effectuer la calibration', description: 'Suivre la procédure', inputType: 'boolean', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's4', order: 4, label: 'Relever valeur finale', description: 'Noter la valeur après', inputType: 'numeric', required: true, unit: 'L/min', value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's5', order: 5, label: 'Commentaire de validation', description: 'Décrire le résultat', inputType: 'comment', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+    ],
   },
   {
     id: 'GM004',
@@ -97,7 +139,15 @@ const maintenanceRanges: MaintenanceRange[] = [
     family: 'Vanne',
     frequency: 'Annuel',
     estimatedTime: '4h',
-    tasksCount: 20,
+    tasksCount: 6,
+    steps: [
+      { id: 's1', order: 1, label: 'Préparer la documentation', description: 'Rassembler les documents réglementaires', inputType: 'checkbox', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's2', order: 2, label: 'Inspection visuelle', description: 'Vérifier l\'état général de la vanne', inputType: 'boolean', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's3', order: 3, label: 'Test de fonctionnement', description: 'Tester l\'ouverture et fermeture', inputType: 'boolean', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's4', order: 4, label: 'Mesure du débit', description: 'Mesurer le débit nominal', inputType: 'numeric', required: true, unit: 'L/min', value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's5', order: 5, label: 'Photo de la plaque signalétique', description: 'Documenter les informations', inputType: 'photo', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+      { id: 's6', order: 6, label: 'Rapport de conformité', description: 'Rédiger le compte-rendu', inputType: 'comment', required: true, value: null, completed: false, remarks: '', stepComment: '', stepPhoto: null },
+    ],
   },
 ];
 
@@ -174,6 +224,7 @@ const TabletInterventionRequestDetail: React.FC = () => {
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [diagnosticModalOpen, setDiagnosticModalOpen] = useState(false);
   const [finishModalOpen, setFinishModalOpen] = useState(false);
+  const [executingRange, setExecutingRange] = useState<MaintenanceRange | null>(null);
   
   // Form states
   const [cancelComment, setCancelComment] = useState('');
@@ -226,11 +277,20 @@ const TabletInterventionRequestDetail: React.FC = () => {
 
   const handleSelectRange = (range: MaintenanceRange) => {
     setSelectedRange(range);
-    setRequest({ ...request, assignedRange: range.id, status: 'en_cours' });
     setRangeModalOpen(false);
+    // Start executing the range inline instead of navigating
+    setExecutingRange(range);
+    setRequest({ ...request, assignedRange: range.id, status: 'en_cours' });
     toast.success(`Gamme "${range.name}" assignée`);
-    // Navigate to execute the range
-    navigate(`/tablet/ranges/${range.id}?requestId=${request.id}`);
+  };
+
+  const handleRangeExecutionComplete = () => {
+    setExecutingRange(null);
+    toast.success('Gamme exécutée avec succès');
+  };
+
+  const handleRangeExecutionCancel = () => {
+    setExecutingRange(null);
   };
 
   const handleStartDiagnostic = () => {
@@ -661,6 +721,15 @@ const TabletInterventionRequestDetail: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Range Execution Panel */}
+      {executingRange && (
+        <RangeExecutionPanel
+          range={executingRange}
+          onComplete={handleRangeExecutionComplete}
+          onCancel={handleRangeExecutionCancel}
+        />
+      )}
     </div>
   );
 };
