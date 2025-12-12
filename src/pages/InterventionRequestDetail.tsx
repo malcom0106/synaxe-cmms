@@ -27,7 +27,8 @@ import {
   ChevronRight,
   Search,
   Play,
-  Pause
+  Pause,
+  Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -577,14 +578,27 @@ const InterventionRequestDetail: React.FC = () => {
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher une gamme..."
-                value={rangeSearchQuery}
-                onChange={(e) => setRangeSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher une gamme..."
+                  value={rangeSearchQuery}
+                  onChange={(e) => setRangeSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  setRangeModalOpen(false);
+                  navigate('/maintenance/ranges/new');
+                }}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Créer une gamme
+              </Button>
             </div>
             
             <div className="space-y-2 max-h-96 overflow-y-auto">
