@@ -30,6 +30,7 @@ interface CreateInterventionRequestModalProps {
     description: string;
     equipmentId: string;
     equipmentName: string;
+    priority: 'low' | 'medium' | 'high' | 'critical';
     photo?: string;
   }) => void;
 }
@@ -83,6 +84,7 @@ export const CreateInterventionRequestModal: React.FC<CreateInterventionRequestM
 }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high' | 'critical'>('medium');
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [familyFilter, setFamilyFilter] = useState<string>('');
@@ -123,12 +125,14 @@ export const CreateInterventionRequestModal: React.FC<CreateInterventionRequestM
       description,
       equipmentId: selectedEquipment.id,
       equipmentName: selectedEquipment.name,
+      priority,
       photo: photo || undefined,
     });
 
     // Reset form
     setTitle('');
     setDescription('');
+    setPriority('medium');
     setSelectedEquipment(null);
     setSearchQuery('');
     setFamilyFilter('');
@@ -140,6 +144,7 @@ export const CreateInterventionRequestModal: React.FC<CreateInterventionRequestM
   const handleClose = () => {
     setTitle('');
     setDescription('');
+    setPriority('medium');
     setSelectedEquipment(null);
     setSearchQuery('');
     setFamilyFilter('');
@@ -270,6 +275,57 @@ export const CreateInterventionRequestModal: React.FC<CreateInterventionRequestM
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
             />
+          </div>
+
+          {/* Criticité */}
+          <div className="space-y-2">
+            <Label className="text-base font-medium">Criticité *</Label>
+            <div className="grid grid-cols-4 gap-2">
+              <Button
+                type="button"
+                variant={priority === 'low' ? 'default' : 'outline'}
+                className={cn(
+                  "h-12",
+                  priority === 'low' ? 'bg-green-600 hover:bg-green-700' : 'hover:bg-green-50 hover:border-green-500'
+                )}
+                onClick={() => setPriority('low')}
+              >
+                Basse
+              </Button>
+              <Button
+                type="button"
+                variant={priority === 'medium' ? 'default' : 'outline'}
+                className={cn(
+                  "h-12",
+                  priority === 'medium' ? 'bg-yellow-500 hover:bg-yellow-600' : 'hover:bg-yellow-50 hover:border-yellow-500'
+                )}
+                onClick={() => setPriority('medium')}
+              >
+                Moyenne
+              </Button>
+              <Button
+                type="button"
+                variant={priority === 'high' ? 'default' : 'outline'}
+                className={cn(
+                  "h-12",
+                  priority === 'high' ? 'bg-orange-500 hover:bg-orange-600' : 'hover:bg-orange-50 hover:border-orange-500'
+                )}
+                onClick={() => setPriority('high')}
+              >
+                Haute
+              </Button>
+              <Button
+                type="button"
+                variant={priority === 'critical' ? 'default' : 'outline'}
+                className={cn(
+                  "h-12",
+                  priority === 'critical' ? 'bg-red-600 hover:bg-red-700' : 'hover:bg-red-50 hover:border-red-500'
+                )}
+                onClick={() => setPriority('critical')}
+              >
+                Critique
+              </Button>
+            </div>
           </div>
 
           {/* Photo */}

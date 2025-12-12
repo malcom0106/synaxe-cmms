@@ -272,8 +272,8 @@ const TabletInterventionRequestDetail: React.FC = () => {
   return (
     <div className="p-4 pb-8 space-y-4">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/tablet/requests')}>
+      <div className="flex items-start gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/tablet/requests')} className="mt-1">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">
@@ -290,6 +290,55 @@ const TabletInterventionRequestDetail: React.FC = () => {
           </div>
           <h1 className="text-xl font-bold text-foreground mt-1">{request.title}</h1>
         </div>
+        
+        {/* Actions en haut */}
+        {canPerformActions && (
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {request.status === 'ouverte' && (
+              <>
+                <Button 
+                  size="sm"
+                  onClick={() => setRangeModalOpen(true)}
+                  className="gap-1"
+                >
+                  <FileText className="h-4 w-4" />
+                  <span className="hidden sm:inline">Gamme</span>
+                </Button>
+
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDiagnosticModalOpen(true)}
+                  className="gap-1 border-purple-500/30 hover:bg-purple-500/10"
+                >
+                  <Stethoscope className="h-4 w-4 text-purple-600" />
+                  <span className="hidden sm:inline">Diagnostic</span>
+                </Button>
+              </>
+            )}
+
+            {canFinish && (
+              <Button 
+                size="sm"
+                className="gap-1 bg-green-600 hover:bg-green-700"
+                onClick={() => setFinishModalOpen(true)}
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Terminer</span>
+              </Button>
+            )}
+
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={() => setCancelModalOpen(true)}
+              className="gap-1 border-destructive/30 hover:bg-destructive/10"
+            >
+              <XCircle className="h-4 w-4 text-destructive" />
+              <span className="hidden sm:inline">Annuler</span>
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Informations */}
@@ -357,66 +406,6 @@ const TabletInterventionRequestDetail: React.FC = () => {
         </Card>
       )}
 
-      {/* Actions */}
-      {canPerformActions && (
-        <div className="space-y-3 pt-4">
-          <h3 className="font-medium text-foreground">Actions</h3>
-          
-          {request.status === 'ouverte' && (
-            <>
-              <Button 
-                className="w-full h-14 justify-start gap-3 text-base"
-                onClick={() => setRangeModalOpen(true)}
-              >
-                <FileText className="h-6 w-6" />
-                <div className="text-left">
-                  <p className="font-medium">Appliquer une gamme de maintenance</p>
-                  <p className="text-xs opacity-80">Sélectionner et exécuter une gamme</p>
-                </div>
-                <ChevronRight className="h-5 w-5 ml-auto" />
-              </Button>
-
-              <Button 
-                variant="outline"
-                className="w-full h-14 justify-start gap-3 text-base border-purple-500/30 hover:bg-purple-500/10"
-                onClick={() => setDiagnosticModalOpen(true)}
-              >
-                <Stethoscope className="h-6 w-6 text-purple-600" />
-                <div className="text-left">
-                  <p className="font-medium">Réaliser un diagnostic</p>
-                  <p className="text-xs text-muted-foreground">Commentaire libre avec photo</p>
-                </div>
-                <ChevronRight className="h-5 w-5 ml-auto" />
-              </Button>
-            </>
-          )}
-
-          {canFinish && (
-            <Button 
-              className="w-full h-14 justify-start gap-3 text-base bg-green-600 hover:bg-green-700"
-              onClick={() => setFinishModalOpen(true)}
-            >
-              <CheckCircle2 className="h-6 w-6" />
-              <div className="text-left">
-                <p className="font-medium">Terminer la demande</p>
-                <p className="text-xs opacity-80">Clôturer cette intervention</p>
-              </div>
-            </Button>
-          )}
-
-          <Button 
-            variant="outline"
-            className="w-full h-14 justify-start gap-3 text-base border-destructive/30 hover:bg-destructive/10"
-            onClick={() => setCancelModalOpen(true)}
-          >
-            <XCircle className="h-6 w-6 text-destructive" />
-            <div className="text-left">
-              <p className="font-medium text-destructive">Annuler la demande</p>
-              <p className="text-xs text-muted-foreground">Avec justification obligatoire</p>
-            </div>
-          </Button>
-        </div>
-      )}
 
       {/* Modal: Sélection de gamme */}
       <Dialog open={rangeModalOpen} onOpenChange={setRangeModalOpen}>
