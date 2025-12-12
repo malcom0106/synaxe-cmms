@@ -531,51 +531,50 @@ const InterventionRequestDetail: React.FC = () => {
         )}
       </div>
 
-      {/* Actions secondaires en bas */}
+      {/* Actions secondaires en bas à droite */}
       {canPerformActions && request.status !== 'annulee' && (
-        <div className="flex items-center justify-between gap-4 pt-4 border-t border-border">
-          <div className="flex items-center gap-2">
+        <div className="sticky bottom-4 bg-background border border-border rounded-lg p-4 shadow-lg">
+          <div className="flex items-center justify-end gap-3">
             {canPutOnHold && (
               <Button 
-                variant="outline" 
-                className="gap-2"
+                variant="outline"
                 onClick={handlePutOnHold}
+                className="gap-2 border-amber-500/30 hover:bg-amber-500/10"
               >
-                <Pause className="h-4 w-4" />
+                <Pause className="h-4 w-4 text-amber-600" />
                 Mettre en attente
               </Button>
             )}
-            
+
             {request.status === 'en_attente' && (
               <Button 
-                variant="outline" 
-                className="gap-2"
                 onClick={handleResumeWork}
+                className="gap-2 bg-purple-600 hover:bg-purple-700"
               >
                 <Play className="h-4 w-4" />
-                Reprendre le travail
+                Reprendre
               </Button>
             )}
 
             <Button 
               variant="outline"
-              className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10"
               onClick={() => setCancelModalOpen(true)}
+              className="gap-2 border-destructive/30 hover:bg-destructive/10"
             >
-              <XCircle className="h-4 w-4" />
+              <XCircle className="h-4 w-4 text-destructive" />
               Annuler la demande
             </Button>
-          </div>
 
-          {canFinish && (
-            <Button 
-              className="gap-2 bg-green-600 hover:bg-green-700"
-              onClick={() => setFinishModalOpen(true)}
-            >
-              <CheckCircle2 className="h-4 w-4" />
-              Terminer la demande
-            </Button>
-          )}
+            {canFinish && (
+              <Button 
+                className="gap-2 bg-green-600 hover:bg-green-700"
+                onClick={() => setFinishModalOpen(true)}
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                Terminer la demande
+              </Button>
+            )}
+          </div>
         </div>
       )}
 
