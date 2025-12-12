@@ -221,6 +221,7 @@ const TabletInterventionRequests: React.FC = () => {
                 "p-4 border-l-4 cursor-pointer transition-all active:scale-[0.98] hover:shadow-md",
                 priorityConfig.borderColor
               )}
+              onClick={() => navigate(`/tablet/requests/${request.id}`)}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
