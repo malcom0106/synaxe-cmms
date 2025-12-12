@@ -124,6 +124,7 @@ const TabletInterventionRequests: React.FC = () => {
     description: string;
     equipmentId: string;
     equipmentName: string;
+    priority: 'low' | 'medium' | 'high' | 'critical';
     photo?: string;
   }) => {
     const newRequest: InterventionRequest = {
@@ -133,7 +134,7 @@ const TabletInterventionRequests: React.FC = () => {
       equipmentCode: data.equipmentId,
       location: 'Zone à définir',
       description: data.description,
-      priority: 'medium',
+      priority: data.priority,
       status: 'pending',
       createdBy: 'Jean Martin',
       createdAt: new Date().toLocaleString('fr-FR', { 
