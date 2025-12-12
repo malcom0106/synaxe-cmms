@@ -458,9 +458,8 @@ const InterventionRequestDetail: React.FC = () => {
       </div>
 
       {/* Contenu principal */}
-      <div className="flex-1 grid grid-cols-3 gap-6">
-        {/* Colonne principale */}
-        <div className="col-span-2 space-y-6">
+      <div className="flex-1 space-y-6">
+        <div className="grid grid-cols-2 gap-6">
           {/* Informations */}
           <Card className="p-6 space-y-4">
             <h2 className="font-semibold text-lg text-foreground">Informations</h2>
@@ -498,90 +497,87 @@ const InterventionRequestDetail: React.FC = () => {
             <h2 className="font-semibold text-lg text-foreground mb-3">Description</h2>
             <p className="text-muted-foreground">{request.description}</p>
           </Card>
-
-          {/* Diagnostic if exists */}
-          {request.diagnostic && (
-            <Card className="p-6 border-purple-200 bg-purple-50/50">
-              <h2 className="font-semibold text-lg text-purple-800 mb-3 flex items-center gap-2">
-                <Stethoscope className="h-5 w-5" />
-                Diagnostic
-              </h2>
-              <p className="text-purple-900">{request.diagnostic}</p>
-            </Card>
-          )}
-
-          {/* Assigned range if exists */}
-          {request.assignedRange && (
-            <Card className="p-6 border-primary/20 bg-primary/5">
-              <h2 className="font-semibold text-lg text-foreground mb-3 flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
-                Gamme assignée
-              </h2>
-              {maintenanceRanges.find(r => r.id === request.assignedRange) && (
-                <div>
-                  <p className="font-medium text-foreground">
-                    {maintenanceRanges.find(r => r.id === request.assignedRange)?.name}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {maintenanceRanges.find(r => r.id === request.assignedRange)?.code}
-                  </p>
-                </div>
-              )}
-            </Card>
-          )}
         </div>
 
-        {/* Colonne latérale - Actions secondaires */}
-        <div className="space-y-4">
-          <Card className="p-4">
-            <h3 className="font-semibold text-foreground mb-4">Actions</h3>
-            <div className="space-y-2">
-              {canPutOnHold && (
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start gap-2"
-                  onClick={handlePutOnHold}
-                >
-                  <Pause className="h-4 w-4" />
-                  Mettre en attente
-                </Button>
-              )}
-              
-              {request.status === 'en_attente' && (
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start gap-2"
-                  onClick={handleResumeWork}
-                >
-                  <Play className="h-4 w-4" />
-                  Reprendre le travail
-                </Button>
-              )}
-
-              {canFinish && (
-                <Button 
-                  className="w-full justify-start gap-2 bg-green-600 hover:bg-green-700"
-                  onClick={() => setFinishModalOpen(true)}
-                >
-                  <CheckCircle2 className="h-4 w-4" />
-                  Terminer la demande
-                </Button>
-              )}
-
-              {canPerformActions && request.status !== 'annulee' && (
-                <Button 
-                  variant="outline"
-                  className="w-full justify-start gap-2 text-destructive border-destructive/30 hover:bg-destructive/10"
-                  onClick={() => setCancelModalOpen(true)}
-                >
-                  <XCircle className="h-4 w-4" />
-                  Annuler la demande
-                </Button>
-              )}
-            </div>
+        {/* Diagnostic if exists */}
+        {request.diagnostic && (
+          <Card className="p-6 border-purple-200 bg-purple-50/50">
+            <h2 className="font-semibold text-lg text-purple-800 mb-3 flex items-center gap-2">
+              <Stethoscope className="h-5 w-5" />
+              Diagnostic
+            </h2>
+            <p className="text-purple-900">{request.diagnostic}</p>
           </Card>
-        </div>
+        )}
+
+        {/* Assigned range if exists */}
+        {request.assignedRange && (
+          <Card className="p-6 border-primary/20 bg-primary/5">
+            <h2 className="font-semibold text-lg text-foreground mb-3 flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              Gamme assignée
+            </h2>
+            {maintenanceRanges.find(r => r.id === request.assignedRange) && (
+              <div>
+                <p className="font-medium text-foreground">
+                  {maintenanceRanges.find(r => r.id === request.assignedRange)?.name}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {maintenanceRanges.find(r => r.id === request.assignedRange)?.code}
+                </p>
+              </div>
+            )}
+          </Card>
+        )}
       </div>
+
+      {/* Actions secondaires en bas */}
+      {canPerformActions && request.status !== 'annulee' && (
+        <div className="flex items-center justify-between gap-4 pt-4 border-t border-border">
+          <div className="flex items-center gap-2">
+            {canPutOnHold && (
+              <Button 
+                variant="outline" 
+                className="gap-2"
+                onClick={handlePutOnHold}
+              >
+                <Pause className="h-4 w-4" />
+                Mettre en attente
+              </Button>
+            )}
+            
+            {request.status === 'en_attente' && (
+              <Button 
+                variant="outline" 
+                className="gap-2"
+                onClick={handleResumeWork}
+              >
+                <Play className="h-4 w-4" />
+                Reprendre le travail
+              </Button>
+            )}
+
+            <Button 
+              variant="outline"
+              className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10"
+              onClick={() => setCancelModalOpen(true)}
+            >
+              <XCircle className="h-4 w-4" />
+              Annuler la demande
+            </Button>
+          </div>
+
+          {canFinish && (
+            <Button 
+              className="gap-2 bg-green-600 hover:bg-green-700"
+              onClick={() => setFinishModalOpen(true)}
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              Terminer la demande
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Modal: Sélection de gamme */}
       <Dialog open={rangeModalOpen} onOpenChange={setRangeModalOpen}>
