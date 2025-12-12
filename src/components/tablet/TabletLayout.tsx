@@ -77,15 +77,15 @@ export const TabletLayout: React.FC = () => {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-background flex">
-        {/* Sidebar */}
+      <div className="h-screen bg-background flex overflow-hidden">
+        {/* Sidebar - Fixed height, no scroll */}
         <aside className={cn(
-          "bg-primary flex flex-col py-3 shrink-0 transition-all duration-300",
+          "bg-primary flex flex-col py-3 shrink-0 transition-all duration-300 h-screen",
           expanded ? "w-48 px-3" : "w-16 items-center"
         )}>
           {/* Logo */}
           <div className={cn(
-            "flex items-center mb-2",
+            "flex items-center mb-2 shrink-0",
             expanded ? "justify-start px-1" : "justify-center"
           )}>
             <div className={cn(
@@ -98,7 +98,7 @@ export const TabletLayout: React.FC = () => {
           </div>
 
           {/* Navigation items */}
-          <nav className="flex-1 flex flex-col gap-1">
+          <nav className="flex-1 flex flex-col gap-1 min-h-0">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path || 
                 (item.path !== '/tablet' && location.pathname.startsWith(item.path));
@@ -107,7 +107,7 @@ export const TabletLayout: React.FC = () => {
                 <button
                   onClick={() => handleNavigation(item.path)}
                   className={cn(
-                    "rounded-lg flex items-center transition-all",
+                    "rounded-lg flex items-center transition-all shrink-0",
                     expanded 
                       ? "w-full h-10 px-3 gap-3 justify-start" 
                       : "w-11 h-11 justify-center",
@@ -138,44 +138,47 @@ export const TabletLayout: React.FC = () => {
             })}
           </nav>
 
-          {/* Statut connexion */}
-          <div className={cn(
-            "rounded-lg flex items-center",
-            expanded ? "w-full h-10 px-3 gap-3" : "w-11 h-11 justify-center",
-            isOnline ? "text-green-300" : "text-red-300"
-          )}>
-            {isOnline ? <Wifi className="h-5 w-5 shrink-0" /> : <WifiOff className="h-5 w-5 shrink-0" />}
-            {expanded && <span className="text-sm">{isOnline ? 'En ligne' : 'Hors ligne'}</span>}
-          </div>
+          {/* Bottom section - Statut connexion + Déconnexion */}
+          <div className="shrink-0 mt-auto pt-2 space-y-1">
+            {/* Statut connexion */}
+            <div className={cn(
+              "rounded-lg flex items-center",
+              expanded ? "w-full h-10 px-3 gap-3" : "w-11 h-11 justify-center",
+              isOnline ? "text-green-300" : "text-red-300"
+            )}>
+              {isOnline ? <Wifi className="h-5 w-5 shrink-0" /> : <WifiOff className="h-5 w-5 shrink-0" />}
+              {expanded && <span className="text-sm">{isOnline ? 'En ligne' : 'Hors ligne'}</span>}
+            </div>
 
-          {/* Déconnexion */}
-          {expanded ? (
-            <button
-              onClick={handleLogout}
-              className="w-full h-10 rounded-lg flex items-center px-3 gap-3 text-primary-foreground/70 hover:bg-red-500/20 hover:text-red-300 transition-all"
-            >
-              <LogOut className="h-5 w-5 shrink-0" />
-              <span className="text-sm font-medium">Déconnexion</span>
-            </button>
-          ) : (
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={handleLogout}
-                  className="w-11 h-11 rounded-lg flex items-center justify-center text-primary-foreground/70 hover:bg-red-500/20 hover:text-red-300 transition-all"
-                >
-                  <LogOut className="h-5 w-5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="font-medium">
-                Déconnexion
-              </TooltipContent>
-            </Tooltip>
-          )}
+            {/* Déconnexion */}
+            {expanded ? (
+              <button
+                onClick={handleLogout}
+                className="w-full h-10 rounded-lg flex items-center px-3 gap-3 text-primary-foreground/70 hover:bg-red-500/20 hover:text-red-300 transition-all"
+              >
+                <LogOut className="h-5 w-5 shrink-0" />
+                <span className="text-sm font-medium">Déconnexion</span>
+              </button>
+            ) : (
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleLogout}
+                    className="w-11 h-11 rounded-lg flex items-center justify-center text-primary-foreground/70 hover:bg-red-500/20 hover:text-red-300 transition-all"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="font-medium">
+                  Déconnexion
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
         </aside>
 
         {/* Main content area */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 h-screen">
           {/* Header compact */}
           <header className="h-12 bg-card border-b border-border flex items-center justify-between px-4 shrink-0">
             <h1 className="text-base font-semibold text-foreground">GMAO Tablette</h1>
@@ -198,14 +201,14 @@ export const TabletLayout: React.FC = () => {
 
           {/* Barre hors ligne */}
           {!isOnline && (
-            <div className="bg-orange-500 text-white px-4 py-1.5 text-xs text-center">
+            <div className="bg-orange-500 text-white px-4 py-1.5 text-xs text-center shrink-0">
               <WifiOff className="h-3 w-3 inline mr-2" />
               Les données seront synchronisées à la reconnexion
             </div>
           )}
 
-          {/* Main Content */}
-          <main className="flex-1 overflow-auto p-4">
+          {/* Main Content - Only this area scrolls */}
+          <main className="flex-1 overflow-auto">
             <Outlet />
           </main>
         </div>
