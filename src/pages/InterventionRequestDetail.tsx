@@ -458,75 +458,66 @@ const InterventionRequestDetail: React.FC = () => {
       </div>
 
       {/* Contenu principal */}
-      <div className="flex-1 space-y-6">
-        <div className="grid grid-cols-2 gap-6">
-          {/* Informations */}
-          <Card className="p-6 space-y-4">
-            <h2 className="font-semibold text-lg text-foreground">Informations</h2>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-3 text-sm">
-                <Wrench className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="text-muted-foreground text-xs">Équipement</p>
-                  <p className="font-medium text-foreground">{request.equipment}</p>
-                  <p className="text-muted-foreground text-xs">{request.equipmentCode}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3 text-sm">
-                <User className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-muted-foreground text-xs">Créé par</p>
-                  <p className="font-medium text-foreground">{request.createdBy}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3 text-sm">
-                <Clock className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-muted-foreground text-xs">Date de création</p>
-                  <p className="font-medium text-foreground">{request.createdAt}</p>
-                </div>
-              </div>
+      <div className="flex-1 space-y-4">
+        {/* Informations */}
+        <Card className="p-4 space-y-3">
+          <div className="flex items-center gap-3 text-sm">
+            <Wrench className="h-5 w-5 text-primary" />
+            <div>
+              <p className="font-medium text-foreground">{request.equipment}</p>
+              <p className="text-muted-foreground">{request.equipmentCode}</p>
             </div>
-          </Card>
+          </div>
+          
+          <div className="flex items-center gap-3 text-sm">
+            <User className="h-5 w-5 text-muted-foreground" />
+            <span className="text-muted-foreground">{request.createdBy}</span>
+          </div>
+          
+          <div className="flex items-center gap-3 text-sm">
+            <Clock className="h-5 w-5 text-muted-foreground" />
+            <span className="text-muted-foreground">{request.createdAt}</span>
+          </div>
+        </Card>
 
-          {/* Description */}
-          <Card className="p-6">
-            <h2 className="font-semibold text-lg text-foreground mb-3">Description</h2>
-            <p className="text-muted-foreground">{request.description}</p>
-          </Card>
-        </div>
-
-        {/* Diagnostic if exists */}
-        {request.diagnostic && (
-          <Card className="p-6 border-purple-200 bg-purple-50/50">
-            <h2 className="font-semibold text-lg text-purple-800 mb-3 flex items-center gap-2">
-              <Stethoscope className="h-5 w-5" />
-              Diagnostic
-            </h2>
-            <p className="text-purple-900">{request.diagnostic}</p>
-          </Card>
-        )}
+        {/* Description */}
+        <Card className="p-4">
+          <h3 className="font-medium text-foreground mb-2">Description</h3>
+          <p className="text-sm text-muted-foreground">{request.description}</p>
+        </Card>
 
         {/* Assigned range if exists */}
         {request.assignedRange && (
-          <Card className="p-6 border-primary/20 bg-primary/5">
-            <h2 className="font-semibold text-lg text-foreground mb-3 flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              Gamme assignée
-            </h2>
-            {maintenanceRanges.find(r => r.id === request.assignedRange) && (
-              <div>
-                <p className="font-medium text-foreground">
-                  {maintenanceRanges.find(r => r.id === request.assignedRange)?.name}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {maintenanceRanges.find(r => r.id === request.assignedRange)?.code}
-                </p>
-              </div>
-            )}
+          <Card className="p-4 border-primary/20 bg-primary/5">
+            <div className="flex items-center gap-2 text-primary mb-2">
+              <FileText className="h-5 w-5" />
+              <span className="font-medium">Gamme assignée</span>
+            </div>
+            <p className="text-sm text-foreground">
+              {maintenanceRanges.find(r => r.id === request.assignedRange)?.name || request.assignedRange}
+            </p>
+          </Card>
+        )}
+
+        {/* Diagnostic if exists */}
+        {request.diagnostic && (
+          <Card className="p-4 border-purple-500/20 bg-purple-500/5">
+            <div className="flex items-center gap-2 text-purple-600 mb-2">
+              <Stethoscope className="h-5 w-5" />
+              <span className="font-medium">Diagnostic réalisé</span>
+            </div>
+            <p className="text-sm text-foreground">{request.diagnostic}</p>
+          </Card>
+        )}
+
+        {/* Cancel reason if exists */}
+        {request.cancelReason && (
+          <Card className="p-4 border-destructive/20 bg-destructive/5">
+            <div className="flex items-center gap-2 text-destructive mb-2">
+              <XCircle className="h-5 w-5" />
+              <span className="font-medium">Raison d'annulation</span>
+            </div>
+            <p className="text-sm text-foreground">{request.cancelReason}</p>
           </Card>
         )}
       </div>
