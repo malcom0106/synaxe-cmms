@@ -159,7 +159,7 @@ const TabletInterventionRequests: React.FC = () => {
           onClick={() => setCreateModalOpen(true)}
         >
           <Plus className="h-5 w-5 mr-2" />
-          Nouvelle
+          Nouvelle Demande d'Intervention
         </Button>
       </div>
 
