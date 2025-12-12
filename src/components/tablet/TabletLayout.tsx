@@ -4,8 +4,7 @@ import {
   Home, 
   Wrench, 
   Calendar, 
-  AlertTriangle, 
-  Stethoscope,
+  AlertTriangle,
   LogOut,
   User,
   Package,
@@ -37,7 +36,6 @@ const navItems: NavItem[] = [
   { icon: AlertTriangle, label: "Demande d'intervention", path: '/tablet/requests' },
   { icon: Package, label: 'Inventaire', path: '/tablet/inventory' },
   { icon: History, label: 'Historique', path: '/tablet/history' },
-  { icon: Stethoscope, label: 'Diagnostic', path: '/tablet/diagnostic' },
 ];
 
 export const TabletLayout: React.FC = () => {
