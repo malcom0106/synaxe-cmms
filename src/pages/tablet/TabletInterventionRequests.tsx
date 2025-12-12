@@ -92,6 +92,126 @@ const interventionRequests: InterventionRequest[] = [
     createdBy: 'Luc Moreau',
     createdAt: '02/12/2025 14:00'
   },
+  {
+    id: 'DI006',
+    title: 'Courroie usée ventilateur',
+    equipment: 'Ventilateur V-301',
+    equipmentCode: 'EQ056',
+    location: 'Zone D - Ventilation',
+    description: 'Courroie présentant des signes d\'usure avancée',
+    priority: 'medium',
+    status: 'ouverte',
+    createdBy: 'Anne Petit',
+    createdAt: '05/12/2025 09:30'
+  },
+  {
+    id: 'DI007',
+    title: 'Fuite hydraulique vérin',
+    equipment: 'Vérin hydraulique H-12',
+    equipmentCode: 'EQ078',
+    location: 'Zone A - Poste levage',
+    description: 'Fuite hydraulique détectée sur le joint du vérin',
+    priority: 'critical',
+    status: 'en_cours',
+    createdBy: 'Marc Durand',
+    createdAt: '04/12/2025 11:00'
+  },
+  {
+    id: 'DI008',
+    title: 'Thermostat défaillant',
+    equipment: 'Chaudière CH-01',
+    equipmentCode: 'EQ089',
+    location: 'Zone B - Chaufferie',
+    description: 'Thermostat ne régule plus correctement la température',
+    priority: 'high',
+    status: 'assignee',
+    createdBy: 'Claire Fontaine',
+    createdAt: '03/12/2025 16:45'
+  },
+  {
+    id: 'DI009',
+    title: 'Roulement bruyant moteur',
+    equipment: 'Moteur électrique M-205',
+    equipmentCode: 'EQ102',
+    location: 'Zone C - Ligne production',
+    description: 'Bruit anormal provenant du roulement côté accouplement',
+    priority: 'medium',
+    status: 'ouverte',
+    createdBy: 'Thomas Blanc',
+    createdAt: '05/12/2025 07:15'
+  },
+  {
+    id: 'DI010',
+    title: 'Valve bloquée circuit refroid.',
+    equipment: 'Valve V-422',
+    equipmentCode: 'EQ115',
+    location: 'Zone A - Refroidissement',
+    description: 'Valve de régulation bloquée en position fermée',
+    priority: 'critical',
+    status: 'en_attente',
+    createdBy: 'Julie Roche',
+    createdAt: '04/12/2025 13:20'
+  },
+  {
+    id: 'DI011',
+    title: 'Câblage endommagé armoire',
+    equipment: 'Armoire électrique AE-07',
+    equipmentCode: 'EQ128',
+    location: 'Zone D - Local technique',
+    description: 'Câbles présentant des traces de surchauffe',
+    priority: 'high',
+    status: 'assignee',
+    createdBy: 'François Michel',
+    createdAt: '03/12/2025 10:30'
+  },
+  {
+    id: 'DI012',
+    title: 'Filtre colmaté compresseur',
+    equipment: 'Compresseur C-03',
+    equipmentCode: 'EQ141',
+    location: 'Zone B - Air comprimé',
+    description: 'Filtre à air nécessitant un remplacement urgent',
+    priority: 'low',
+    status: 'ouverte',
+    createdBy: 'Isabelle Girard',
+    createdAt: '05/12/2025 14:00'
+  },
+  {
+    id: 'DI013',
+    title: 'Jauge niveau HS',
+    equipment: 'Réservoir R-501',
+    equipmentCode: 'EQ154',
+    location: 'Zone C - Stockage',
+    description: 'Jauge de niveau ne fonctionne plus',
+    priority: 'medium',
+    status: 'en_cours',
+    createdBy: 'Paul Lambert',
+    createdAt: '02/12/2025 08:45'
+  },
+  {
+    id: 'DI014',
+    title: 'Fissure tuyauterie',
+    equipment: 'Tuyauterie T-89',
+    equipmentCode: 'EQ167',
+    location: 'Zone A - Distribution',
+    description: 'Micro-fissure détectée lors de l\'inspection',
+    priority: 'critical',
+    status: 'ouverte',
+    createdBy: 'Nathalie Leroy',
+    createdAt: '05/12/2025 11:30'
+  },
+  {
+    id: 'DI015',
+    title: 'Contacteur défectueux',
+    equipment: 'Contacteur CT-22',
+    equipmentCode: 'EQ180',
+    location: 'Zone D - Électricité',
+    description: 'Contacteur ne s\'enclenche plus correctement',
+    priority: 'high',
+    status: 'en_attente',
+    createdBy: 'Olivier Mercier',
+    createdAt: '01/12/2025 15:00'
+  },
 ];
 
 const getPriorityConfig = (priority: string) => {

@@ -286,7 +286,7 @@ const TabletInterventionRequestDetail: React.FC = () => {
   };
 
   return (
-    <div className="p-4 pb-8 space-y-4">
+    <div className="p-4 pb-8 space-y-4 flex flex-col min-h-[calc(100vh-6rem)]">
       {/* Header */}
       <div className="flex items-start gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate('/tablet/requests')} className="mt-1">
@@ -307,142 +307,144 @@ const TabletInterventionRequestDetail: React.FC = () => {
           <h1 className="text-xl font-bold text-foreground mt-1">{request.title}</h1>
         </div>
         
-        {/* Actions en haut */}
-        {canPerformActions && (
+        {/* Actions principales en haut - Gamme et Diagnostic */}
+        {canPerformActions && request.status !== 'annulee' && (
           <div className="flex items-center gap-2 flex-shrink-0">
-            {(request.status === 'ouverte' || request.status === 'assignee') && (
-              <>
-                <Button 
-                  size="sm"
-                  onClick={() => setRangeModalOpen(true)}
-                  className="gap-1"
-                >
-                  <FileText className="h-4 w-4" />
-                  <span className="hidden sm:inline">Gamme</span>
-                </Button>
-
-                <Button 
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setDiagnosticModalOpen(true)}
-                  className="gap-1 border-purple-500/30 hover:bg-purple-500/10"
-                >
-                  <Stethoscope className="h-4 w-4 text-purple-600" />
-                  <span className="hidden sm:inline">Diagnostic</span>
-                </Button>
-              </>
-            )}
-
-            {canPutOnHold && (
-              <Button 
-                variant="outline"
-                size="sm"
-                onClick={handlePutOnHold}
-                className="gap-1 border-amber-500/30 hover:bg-amber-500/10"
-              >
-                <Pause className="h-4 w-4 text-amber-600" />
-                <span className="hidden sm:inline">Mettre en attente</span>
-              </Button>
-            )}
-
-            {request.status === 'en_attente' && (
-              <Button 
-                size="sm"
-                onClick={handleResumeWork}
-                className="gap-1 bg-purple-600 hover:bg-purple-700"
-              >
-                <Play className="h-4 w-4" />
-                <span className="hidden sm:inline">Reprendre</span>
-              </Button>
-            )}
-
-            {canFinish && (
-              <Button 
-                size="sm"
-                className="gap-1 bg-green-600 hover:bg-green-700"
-                onClick={() => setFinishModalOpen(true)}
-              >
-                <CheckCircle2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Terminer</span>
-              </Button>
-            )}
+            <Button 
+              size="sm"
+              onClick={() => setRangeModalOpen(true)}
+              className="gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              Assigner une gamme
+            </Button>
 
             <Button 
               variant="outline"
               size="sm"
-              onClick={() => setCancelModalOpen(true)}
-              className="gap-1 border-destructive/30 hover:bg-destructive/10"
+              onClick={() => setDiagnosticModalOpen(true)}
+              className="gap-2 border-purple-500/30 hover:bg-purple-500/10"
             >
-              <XCircle className="h-4 w-4 text-destructive" />
-              <span className="hidden sm:inline">Annuler</span>
+              <Stethoscope className="h-4 w-4 text-purple-600" />
+              Réaliser un diagnostic
             </Button>
           </div>
         )}
       </div>
 
-      {/* Informations */}
-      <Card className="p-4 space-y-3">
-        <div className="flex items-center gap-3 text-sm">
-          <Wrench className="h-5 w-5 text-primary" />
-          <div>
-            <p className="font-medium text-foreground">{request.equipment}</p>
-            <p className="text-muted-foreground">{request.equipmentCode}</p>
+      {/* Contenu principal */}
+      <div className="flex-1 space-y-4">
+        {/* Informations */}
+        <Card className="p-4 space-y-3">
+          <div className="flex items-center gap-3 text-sm">
+            <Wrench className="h-5 w-5 text-primary" />
+            <div>
+              <p className="font-medium text-foreground">{request.equipment}</p>
+              <p className="text-muted-foreground">{request.equipmentCode}</p>
+            </div>
           </div>
-        </div>
-        
-        <div className="flex items-center gap-3 text-sm">
-          <MapPin className="h-5 w-5 text-muted-foreground" />
-          <span className="text-muted-foreground">{request.location}</span>
-        </div>
-        
-        <div className="flex items-center gap-3 text-sm">
-          <User className="h-5 w-5 text-muted-foreground" />
-          <span className="text-muted-foreground">{request.createdBy}</span>
-        </div>
-        
-        <div className="flex items-center gap-3 text-sm">
-          <Clock className="h-5 w-5 text-muted-foreground" />
-          <span className="text-muted-foreground">{request.createdAt}</span>
-        </div>
-      </Card>
-
-      {/* Description */}
-      <Card className="p-4">
-        <h3 className="font-medium text-foreground mb-2">Description</h3>
-        <p className="text-sm text-muted-foreground">{request.description}</p>
-      </Card>
-
-      {/* Status Info */}
-      {request.assignedRange && (
-        <Card className="p-4 border-primary/20 bg-primary/5">
-          <div className="flex items-center gap-2 text-primary mb-2">
-            <FileText className="h-5 w-5" />
-            <span className="font-medium">Gamme assignée</span>
+          
+          <div className="flex items-center gap-3 text-sm">
+            <MapPin className="h-5 w-5 text-muted-foreground" />
+            <span className="text-muted-foreground">{request.location}</span>
           </div>
-          <p className="text-sm text-foreground">
-            {maintenanceRanges.find(r => r.id === request.assignedRange)?.name || request.assignedRange}
-          </p>
+          
+          <div className="flex items-center gap-3 text-sm">
+            <User className="h-5 w-5 text-muted-foreground" />
+            <span className="text-muted-foreground">{request.createdBy}</span>
+          </div>
+          
+          <div className="flex items-center gap-3 text-sm">
+            <Clock className="h-5 w-5 text-muted-foreground" />
+            <span className="text-muted-foreground">{request.createdAt}</span>
+          </div>
         </Card>
-      )}
 
-      {request.diagnostic && (
-        <Card className="p-4 border-purple-500/20 bg-purple-500/5">
-          <div className="flex items-center gap-2 text-purple-600 mb-2">
-            <Stethoscope className="h-5 w-5" />
-            <span className="font-medium">Diagnostic réalisé</span>
-          </div>
-          <p className="text-sm text-foreground">{request.diagnostic}</p>
+        {/* Description */}
+        <Card className="p-4">
+          <h3 className="font-medium text-foreground mb-2">Description</h3>
+          <p className="text-sm text-muted-foreground">{request.description}</p>
         </Card>
-      )}
 
-      {request.cancelReason && (
-        <Card className="p-4 border-destructive/20 bg-destructive/5">
-          <div className="flex items-center gap-2 text-destructive mb-2">
-            <XCircle className="h-5 w-5" />
-            <span className="font-medium">Raison d'annulation</span>
+        {/* Status Info */}
+        {request.assignedRange && (
+          <Card className="p-4 border-primary/20 bg-primary/5">
+            <div className="flex items-center gap-2 text-primary mb-2">
+              <FileText className="h-5 w-5" />
+              <span className="font-medium">Gamme assignée</span>
+            </div>
+            <p className="text-sm text-foreground">
+              {maintenanceRanges.find(r => r.id === request.assignedRange)?.name || request.assignedRange}
+            </p>
+          </Card>
+        )}
+
+        {request.diagnostic && (
+          <Card className="p-4 border-purple-500/20 bg-purple-500/5">
+            <div className="flex items-center gap-2 text-purple-600 mb-2">
+              <Stethoscope className="h-5 w-5" />
+              <span className="font-medium">Diagnostic réalisé</span>
+            </div>
+            <p className="text-sm text-foreground">{request.diagnostic}</p>
+          </Card>
+        )}
+
+        {request.cancelReason && (
+          <Card className="p-4 border-destructive/20 bg-destructive/5">
+            <div className="flex items-center gap-2 text-destructive mb-2">
+              <XCircle className="h-5 w-5" />
+              <span className="font-medium">Raison d'annulation</span>
+            </div>
+            <p className="text-sm text-foreground">{request.cancelReason}</p>
+          </Card>
+        )}
+      </div>
+
+      {/* Actions secondaires en bas - Terminer, Annuler, En attente */}
+      {canPerformActions && (
+        <div className="sticky bottom-4 bg-background border border-border rounded-lg p-4 shadow-lg">
+          <div className="flex items-center justify-end gap-3">
+            {canPutOnHold && (
+              <Button 
+                variant="outline"
+                onClick={handlePutOnHold}
+                className="gap-2 border-amber-500/30 hover:bg-amber-500/10"
+              >
+                <Pause className="h-4 w-4 text-amber-600" />
+                Mettre en attente
+              </Button>
+            )}
+
+            {request.status === 'en_attente' && (
+              <Button 
+                onClick={handleResumeWork}
+                className="gap-2 bg-purple-600 hover:bg-purple-700"
+              >
+                <Play className="h-4 w-4" />
+                Reprendre
+              </Button>
+            )}
+
+            <Button 
+              variant="outline"
+              onClick={() => setCancelModalOpen(true)}
+              className="gap-2 border-destructive/30 hover:bg-destructive/10"
+            >
+              <XCircle className="h-4 w-4 text-destructive" />
+              Annuler la demande
+            </Button>
+
+            {canFinish && (
+              <Button 
+                className="gap-2 bg-green-600 hover:bg-green-700"
+                onClick={() => setFinishModalOpen(true)}
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                Terminer la demande
+              </Button>
+            )}
           </div>
-          <p className="text-sm text-foreground">{request.cancelReason}</p>
-        </Card>
+        </div>
       )}
 
 
