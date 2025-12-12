@@ -1,0 +1,643 @@
+import React, { useState, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { 
+  ArrowLeft, 
+  AlertTriangle, 
+  Clock, 
+  User,
+  MapPin,
+  Wrench,
+  Stethoscope,
+  X as XIcon,
+  Camera,
+  Image as ImageIcon,
+  CheckCircle2,
+  XCircle,
+  FileText,
+  ChevronRight,
+  Search,
+  Play
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+
+type RequestStatus = 'ouverte' | 'en_cours' | 'terminee' | 'annulee';
+
+interface InterventionRequest {
+  id: string;
+  title: string;
+  equipment: string;
+  equipmentCode: string;
+  location: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: RequestStatus;
+  createdBy: string;
+  createdAt: string;
+  assignedRange?: string;
+  diagnostic?: string;
+  cancelReason?: string;
+}
+
+interface MaintenanceRange {
+  id: string;
+  name: string;
+  code: string;
+  family: string;
+  frequency: string;
+  estimatedTime: string;
+  tasksCount: number;
+}
+
+const maintenanceRanges: MaintenanceRange[] = [
+  {
+    id: 'GM001',
+    name: 'Maintenance préventive mensuelle',
+    code: 'MP-OLEO-M',
+    family: 'Oléoserveur',
+    frequency: 'Mensuel',
+    estimatedTime: '2h',
+    tasksCount: 12,
+  },
+  {
+    id: 'GM002',
+    name: 'Contrôle visuel hebdomadaire',
+    code: 'CV-POMP-H',
+    family: 'Pompe',
+    frequency: 'Hebdomadaire',
+    estimatedTime: '30min',
+    tasksCount: 5,
+  },
+  {
+    id: 'GM003',
+    name: 'Calibration compteurs',
+    code: 'CAL-COMP-T',
+    family: 'Compteur',
+    frequency: 'Trimestriel',
+    estimatedTime: '1h30',
+    tasksCount: 8,
+  },
+  {
+    id: 'GM004',
+    name: 'Inspection réglementaire',
+    code: 'IR-VANNE-A',
+    family: 'Vanne',
+    frequency: 'Annuel',
+    estimatedTime: '4h',
+    tasksCount: 20,
+  },
+];
+
+const mockRequests: Record<string, InterventionRequest> = {
+  'DI001': {
+    id: 'DI001',
+    title: 'Fuite détectée sur raccord B2',
+    equipment: 'Oléoserveur 201',
+    equipmentCode: 'EQ001',
+    location: 'Zone A - Bâtiment principal',
+    description: 'Fuite d\'huile légère détectée lors de la maintenance préventive. Le raccord semble usé et nécessite une intervention.',
+    priority: 'high',
+    status: 'ouverte',
+    createdBy: 'Jean Martin',
+    createdAt: '04/12/2025 08:45'
+  },
+  'DI002': {
+    id: 'DI002',
+    title: 'Bruit anormal pompe',
+    equipment: 'Pompe principale Zone A',
+    equipmentCode: 'EQ015',
+    location: 'Zone A - Station de pompage',
+    description: 'Vibrations et bruit inhabituel lors du fonctionnement',
+    priority: 'critical',
+    status: 'en_cours',
+    createdBy: 'Sophie Bernard',
+    createdAt: '03/12/2025 14:20',
+    assignedRange: 'GM002'
+  },
+};
+
+const getPriorityConfig = (priority: string) => {
+  switch (priority) {
+    case 'critical':
+      return { label: 'Critique', className: 'bg-red-600 text-white' };
+    case 'high':
+      return { label: 'Haute', className: 'bg-orange-500 text-white' };
+    case 'medium':
+      return { label: 'Moyenne', className: 'bg-yellow-500 text-white' };
+    default:
+      return { label: 'Basse', className: 'bg-green-500 text-white' };
+  }
+};
+
+const getStatusConfig = (status: RequestStatus) => {
+  switch (status) {
+    case 'ouverte':
+      return { label: 'Ouverte', className: 'bg-blue-100 text-blue-800', icon: AlertTriangle };
+    case 'en_cours':
+      return { label: 'En cours', className: 'bg-purple-100 text-purple-800', icon: Play };
+    case 'terminee':
+      return { label: 'Terminée', className: 'bg-green-100 text-green-800', icon: CheckCircle2 };
+    case 'annulee':
+      return { label: 'Annulée', className: 'bg-gray-100 text-gray-800', icon: XCircle };
+    default:
+      return { label: status, className: 'bg-gray-100 text-gray-800', icon: AlertTriangle };
+  }
+};
+
+const TabletInterventionRequestDetail: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  
+  const [request, setRequest] = useState<InterventionRequest | null>(
+    id ? mockRequests[id] || null : null
+  );
+  
+  // Modal states
+  const [rangeModalOpen, setRangeModalOpen] = useState(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [diagnosticModalOpen, setDiagnosticModalOpen] = useState(false);
+  const [finishModalOpen, setFinishModalOpen] = useState(false);
+  
+  // Form states
+  const [cancelComment, setCancelComment] = useState('');
+  const [cancelPhoto, setCancelPhoto] = useState<string | null>(null);
+  const [diagnosticComment, setDiagnosticComment] = useState('');
+  const [diagnosticPhoto, setDiagnosticPhoto] = useState<string | null>(null);
+  const [rangeSearchQuery, setRangeSearchQuery] = useState('');
+  const [selectedRange, setSelectedRange] = useState<MaintenanceRange | null>(null);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const diagnosticFileInputRef = useRef<HTMLInputElement>(null);
+
+  if (!request) {
+    return (
+      <div className="p-4">
+        <Button variant="ghost" onClick={() => navigate('/tablet/requests')}>
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Retour
+        </Button>
+        <Card className="p-8 text-center mt-4">
+          <AlertTriangle className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+          <p className="text-muted-foreground">Demande non trouvée</p>
+        </Card>
+      </div>
+    );
+  }
+
+  const priorityConfig = getPriorityConfig(request.priority);
+  const statusConfig = getStatusConfig(request.status);
+  const StatusIcon = statusConfig.icon;
+
+  const filteredRanges = maintenanceRanges.filter(range =>
+    range.name.toLowerCase().includes(rangeSearchQuery.toLowerCase()) ||
+    range.code.toLowerCase().includes(rangeSearchQuery.toLowerCase())
+  );
+
+  const handlePhotoCapture = (
+    e: React.ChangeEvent<HTMLInputElement>, 
+    setPhoto: React.Dispatch<React.SetStateAction<string | null>>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhoto(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSelectRange = (range: MaintenanceRange) => {
+    setSelectedRange(range);
+    setRequest({ ...request, assignedRange: range.id, status: 'en_cours' });
+    setRangeModalOpen(false);
+    toast.success(`Gamme "${range.name}" assignée`);
+    // Navigate to execute the range
+    navigate(`/tablet/ranges/${range.id}?requestId=${request.id}`);
+  };
+
+  const handleStartDiagnostic = () => {
+    if (!diagnosticComment.trim()) {
+      toast.error('Veuillez saisir un commentaire de diagnostic');
+      return;
+    }
+    setRequest({ 
+      ...request, 
+      status: 'en_cours', 
+      diagnostic: diagnosticComment 
+    });
+    setDiagnosticModalOpen(false);
+    setDiagnosticComment('');
+    setDiagnosticPhoto(null);
+    toast.success('Diagnostic enregistré');
+  };
+
+  const handleCancel = () => {
+    if (!cancelComment.trim()) {
+      toast.error('Veuillez saisir un commentaire de justification');
+      return;
+    }
+    setRequest({ 
+      ...request, 
+      status: 'annulee', 
+      cancelReason: cancelComment 
+    });
+    setCancelModalOpen(false);
+    setCancelComment('');
+    setCancelPhoto(null);
+    toast.success('Demande annulée');
+  };
+
+  const handleFinish = () => {
+    setRequest({ ...request, status: 'terminee' });
+    setFinishModalOpen(false);
+    toast.success('Demande d\'intervention terminée');
+  };
+
+  const canFinish = request.status === 'en_cours' && (request.assignedRange || request.diagnostic);
+  const canPerformActions = request.status === 'ouverte' || request.status === 'en_cours';
+
+  return (
+    <div className="p-4 pb-8 space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/tablet/requests')}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm font-mono text-muted-foreground">{request.id}</span>
+            <Badge className={cn("text-xs", priorityConfig.className)}>
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              {priorityConfig.label}
+            </Badge>
+            <Badge className={cn("text-xs", statusConfig.className)}>
+              <StatusIcon className="h-3 w-3 mr-1" />
+              {statusConfig.label}
+            </Badge>
+          </div>
+          <h1 className="text-xl font-bold text-foreground mt-1">{request.title}</h1>
+        </div>
+      </div>
+
+      {/* Informations */}
+      <Card className="p-4 space-y-3">
+        <div className="flex items-center gap-3 text-sm">
+          <Wrench className="h-5 w-5 text-primary" />
+          <div>
+            <p className="font-medium text-foreground">{request.equipment}</p>
+            <p className="text-muted-foreground">{request.equipmentCode}</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-3 text-sm">
+          <MapPin className="h-5 w-5 text-muted-foreground" />
+          <span className="text-muted-foreground">{request.location}</span>
+        </div>
+        
+        <div className="flex items-center gap-3 text-sm">
+          <User className="h-5 w-5 text-muted-foreground" />
+          <span className="text-muted-foreground">{request.createdBy}</span>
+        </div>
+        
+        <div className="flex items-center gap-3 text-sm">
+          <Clock className="h-5 w-5 text-muted-foreground" />
+          <span className="text-muted-foreground">{request.createdAt}</span>
+        </div>
+      </Card>
+
+      {/* Description */}
+      <Card className="p-4">
+        <h3 className="font-medium text-foreground mb-2">Description</h3>
+        <p className="text-sm text-muted-foreground">{request.description}</p>
+      </Card>
+
+      {/* Status Info */}
+      {request.assignedRange && (
+        <Card className="p-4 border-primary/20 bg-primary/5">
+          <div className="flex items-center gap-2 text-primary mb-2">
+            <FileText className="h-5 w-5" />
+            <span className="font-medium">Gamme assignée</span>
+          </div>
+          <p className="text-sm text-foreground">
+            {maintenanceRanges.find(r => r.id === request.assignedRange)?.name || request.assignedRange}
+          </p>
+        </Card>
+      )}
+
+      {request.diagnostic && (
+        <Card className="p-4 border-purple-500/20 bg-purple-500/5">
+          <div className="flex items-center gap-2 text-purple-600 mb-2">
+            <Stethoscope className="h-5 w-5" />
+            <span className="font-medium">Diagnostic réalisé</span>
+          </div>
+          <p className="text-sm text-foreground">{request.diagnostic}</p>
+        </Card>
+      )}
+
+      {request.cancelReason && (
+        <Card className="p-4 border-destructive/20 bg-destructive/5">
+          <div className="flex items-center gap-2 text-destructive mb-2">
+            <XCircle className="h-5 w-5" />
+            <span className="font-medium">Raison d'annulation</span>
+          </div>
+          <p className="text-sm text-foreground">{request.cancelReason}</p>
+        </Card>
+      )}
+
+      {/* Actions */}
+      {canPerformActions && (
+        <div className="space-y-3 pt-4">
+          <h3 className="font-medium text-foreground">Actions</h3>
+          
+          {request.status === 'ouverte' && (
+            <>
+              <Button 
+                className="w-full h-14 justify-start gap-3 text-base"
+                onClick={() => setRangeModalOpen(true)}
+              >
+                <FileText className="h-6 w-6" />
+                <div className="text-left">
+                  <p className="font-medium">Appliquer une gamme de maintenance</p>
+                  <p className="text-xs opacity-80">Sélectionner et exécuter une gamme</p>
+                </div>
+                <ChevronRight className="h-5 w-5 ml-auto" />
+              </Button>
+
+              <Button 
+                variant="outline"
+                className="w-full h-14 justify-start gap-3 text-base border-purple-500/30 hover:bg-purple-500/10"
+                onClick={() => setDiagnosticModalOpen(true)}
+              >
+                <Stethoscope className="h-6 w-6 text-purple-600" />
+                <div className="text-left">
+                  <p className="font-medium">Réaliser un diagnostic</p>
+                  <p className="text-xs text-muted-foreground">Commentaire libre avec photo</p>
+                </div>
+                <ChevronRight className="h-5 w-5 ml-auto" />
+              </Button>
+            </>
+          )}
+
+          {canFinish && (
+            <Button 
+              className="w-full h-14 justify-start gap-3 text-base bg-green-600 hover:bg-green-700"
+              onClick={() => setFinishModalOpen(true)}
+            >
+              <CheckCircle2 className="h-6 w-6" />
+              <div className="text-left">
+                <p className="font-medium">Terminer la demande</p>
+                <p className="text-xs opacity-80">Clôturer cette intervention</p>
+              </div>
+            </Button>
+          )}
+
+          <Button 
+            variant="outline"
+            className="w-full h-14 justify-start gap-3 text-base border-destructive/30 hover:bg-destructive/10"
+            onClick={() => setCancelModalOpen(true)}
+          >
+            <XCircle className="h-6 w-6 text-destructive" />
+            <div className="text-left">
+              <p className="font-medium text-destructive">Annuler la demande</p>
+              <p className="text-xs text-muted-foreground">Avec justification obligatoire</p>
+            </div>
+          </Button>
+        </div>
+      )}
+
+      {/* Modal: Sélection de gamme */}
+      <Dialog open={rangeModalOpen} onOpenChange={setRangeModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Sélectionner une gamme de maintenance</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher une gamme..."
+                value={rangeSearchQuery}
+                onChange={(e) => setRangeSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {filteredRanges.map((range) => (
+                <Card 
+                  key={range.id}
+                  className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => handleSelectRange(range)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="outline" className="text-xs">{range.code}</Badge>
+                        <Badge className="bg-primary/10 text-primary text-xs">{range.frequency}</Badge>
+                      </div>
+                      <h4 className="font-medium text-foreground">{range.name}</h4>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                        <span>{range.family}</span>
+                        <span>•</span>
+                        <span>{range.estimatedTime}</span>
+                        <span>•</span>
+                        <span>{range.tasksCount} tâches</span>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal: Diagnostic */}
+      <Dialog open={diagnosticModalOpen} onOpenChange={setDiagnosticModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Stethoscope className="h-5 w-5 text-purple-600" />
+              Réaliser un diagnostic
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Commentaire *</Label>
+              <Textarea
+                placeholder="Décrivez votre diagnostic..."
+                value={diagnosticComment}
+                onChange={(e) => setDiagnosticComment(e.target.value)}
+                rows={4}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Photo</Label>
+              {diagnosticPhoto ? (
+                <div className="relative">
+                  <img 
+                    src={diagnosticPhoto} 
+                    alt="Photo diagnostic" 
+                    className="w-full max-h-48 object-cover rounded-lg border border-border"
+                  />
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="absolute top-2 right-2"
+                    onClick={() => setDiagnosticPhoto(null)}
+                  >
+                    <XIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  className="w-full h-20 flex-col gap-2"
+                  onClick={() => diagnosticFileInputRef.current?.click()}
+                >
+                  <Camera className="h-6 w-6" />
+                  <span className="text-sm">Ajouter une photo</span>
+                </Button>
+              )}
+              <input
+                ref={diagnosticFileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={(e) => handlePhotoCapture(e, setDiagnosticPhoto)}
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <Button variant="outline" className="flex-1" onClick={() => setDiagnosticModalOpen(false)}>
+              Annuler
+            </Button>
+            <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={handleStartDiagnostic}>
+              Enregistrer le diagnostic
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal: Annulation */}
+      <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <XCircle className="h-5 w-5" />
+              Annuler la demande
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Justification *</Label>
+              <Textarea
+                placeholder="Expliquez la raison de l'annulation..."
+                value={cancelComment}
+                onChange={(e) => setCancelComment(e.target.value)}
+                rows={4}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Photo justificative</Label>
+              {cancelPhoto ? (
+                <div className="relative">
+                  <img 
+                    src={cancelPhoto} 
+                    alt="Photo justification" 
+                    className="w-full max-h-48 object-cover rounded-lg border border-border"
+                  />
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="absolute top-2 right-2"
+                    onClick={() => setCancelPhoto(null)}
+                  >
+                    <XIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  className="w-full h-20 flex-col gap-2"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Camera className="h-6 w-6" />
+                  <span className="text-sm">Ajouter une photo</span>
+                </Button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={(e) => handlePhotoCapture(e, setCancelPhoto)}
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <Button variant="outline" className="flex-1" onClick={() => setCancelModalOpen(false)}>
+              Retour
+            </Button>
+            <Button variant="destructive" className="flex-1" onClick={handleCancel}>
+              Confirmer l'annulation
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal: Terminer */}
+      <Dialog open={finishModalOpen} onOpenChange={setFinishModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-green-600">
+              <CheckCircle2 className="h-5 w-5" />
+              Terminer la demande
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <p className="text-muted-foreground">
+              Êtes-vous sûr de vouloir terminer cette demande d'intervention ? 
+              Cette action marquera l'intervention comme terminée.
+            </p>
+          </div>
+
+          <div className="flex gap-3">
+            <Button variant="outline" className="flex-1" onClick={() => setFinishModalOpen(false)}>
+              Annuler
+            </Button>
+            <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={handleFinish}>
+              Terminer
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default TabletInterventionRequestDetail;

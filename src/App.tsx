@@ -31,6 +31,7 @@ import TabletMaintenanceRanges from "./pages/tablet/TabletMaintenanceRanges";
 import TabletMaintenanceRangeDetail from "./pages/tablet/TabletMaintenanceRangeDetail";
 import TabletMaintenancePlan from "./pages/tablet/TabletMaintenancePlan";
 import TabletInterventionRequests from "./pages/tablet/TabletInterventionRequests";
+import TabletInterventionRequestDetail from "./pages/tablet/TabletInterventionRequestDetail";
 import TabletDiagnostic from "./pages/tablet/TabletDiagnostic";
 import TabletInventory from "./pages/tablet/TabletInventory";
 import TabletHistory from "./pages/tablet/TabletHistory";
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="ranges/:id" element={<TabletMaintenanceRangeDetail />} />
             <Route path="plan" element={<TabletMaintenancePlan />} />
             <Route path="requests" element={<TabletInterventionRequests />} />
+            <Route path="requests/:id" element={<TabletInterventionRequestDetail />} />
             <Route path="diagnostic" element={<TabletDiagnostic />} />
             <Route path="inventory" element={<TabletInventory />} />
             <Route path="history" element={<TabletHistory />} />
