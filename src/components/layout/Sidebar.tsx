@@ -92,7 +92,7 @@ export const Sidebar: React.FC = () => {
 
         <NavItem to="/calendar" icon={Calendar} label="Calendrier" expanded={!collapsed} />
         <NavItem to="/equipment" icon={Box} label="Équipements" expanded={!collapsed} />
-        <NavItem to="/anomalies" icon={TriangleAlert} label="Anomalies" expanded={!collapsed} />
+        <NavItem to="/intervention-requests" icon={TriangleAlert} label="Demandes d'Intervention" expanded={!collapsed} />
         <NavItem to="/settings" icon={Settings} label="Paramètres" expanded={!collapsed} />
       </nav>
 
