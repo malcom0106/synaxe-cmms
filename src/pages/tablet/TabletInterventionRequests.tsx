@@ -14,7 +14,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
-
+import { CreateInterventionRequestModal } from '@/components/tablet/CreateInterventionRequestModal';
+import { toast } from 'sonner';
 interface InterventionRequest {
   id: string;
   title: string;
@@ -110,12 +111,42 @@ const getStatusConfig = (status: string) => {
 const TabletInterventionRequests: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [requests, setRequests] = useState(interventionRequests);
 
-  const filteredRequests = interventionRequests.filter(request =>
+  const filteredRequests = requests.filter(request =>
     request.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     request.equipment.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleCreateRequest = (data: {
+    title: string;
+    description: string;
+    equipmentId: string;
+    equipmentName: string;
+    photo?: string;
+  }) => {
+    const newRequest: InterventionRequest = {
+      id: `DI${String(requests.length + 1).padStart(3, '0')}`,
+      title: data.title,
+      equipment: data.equipmentName,
+      equipmentCode: data.equipmentId,
+      location: 'Zone à définir',
+      description: data.description,
+      priority: 'medium',
+      status: 'pending',
+      createdBy: 'Jean Martin',
+      createdAt: new Date().toLocaleString('fr-FR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+    };
+    setRequests([newRequest, ...requests]);
+    toast.success('Demande d\'intervention créée avec succès');
+  };
   return (
     <div className="p-4 pb-8 space-y-4">
       <div className="flex items-start justify-between">
@@ -125,12 +156,18 @@ const TabletInterventionRequests: React.FC = () => {
         </div>
         <Button 
           className="h-12 px-4"
-          onClick={() => navigate('/tablet/diagnostic')}
+          onClick={() => setCreateModalOpen(true)}
         >
           <Plus className="h-5 w-5 mr-2" />
           Nouvelle
         </Button>
       </div>
+
+      <CreateInterventionRequestModal
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        onSubmit={handleCreateRequest}
+      />
 
       {/* Recherche */}
       <div className="relative">
