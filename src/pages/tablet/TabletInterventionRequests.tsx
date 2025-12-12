@@ -9,14 +9,16 @@ import {
   AlertTriangle, 
   Clock, 
   User,
-  MapPin,
-  ChevronRight
+  MapPin
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { CreateInterventionRequestModal } from '@/components/tablet/CreateInterventionRequestModal';
 import { toast } from 'sonner';
-interface InterventionRequest {
+
+export type RequestStatus = 'ouverte' | 'assignee' | 'en_cours' | 'en_attente' | 'terminee' | 'annulee';
+
+export interface InterventionRequest {
   id: string;
   title: string;
   equipment: string;
@@ -24,7 +26,7 @@ interface InterventionRequest {
   location: string;
   description: string;
   priority: 'low' | 'medium' | 'high' | 'critical';
-  status: 'pending' | 'assigned' | 'in-progress' | 'resolved';
+  status: RequestStatus;
   createdBy: string;
   createdAt: string;
 }
@@ -38,7 +40,7 @@ const interventionRequests: InterventionRequest[] = [
     location: 'Zone A - Bâtiment principal',
     description: 'Fuite d\'huile légère détectée lors de la maintenance préventive',
     priority: 'high',
-    status: 'pending',
+    status: 'ouverte',
     createdBy: 'Jean Martin',
     createdAt: '04/12/2025 08:45'
   },
@@ -50,7 +52,7 @@ const interventionRequests: InterventionRequest[] = [
     location: 'Zone A - Station de pompage',
     description: 'Vibrations et bruit inhabituel lors du fonctionnement',
     priority: 'critical',
-    status: 'assigned',
+    status: 'assignee',
     createdBy: 'Sophie Bernard',
     createdAt: '03/12/2025 14:20'
   },
@@ -62,7 +64,7 @@ const interventionRequests: InterventionRequest[] = [
     location: 'Zone 1 - Point de distribution',
     description: 'Affichage intermittent sur l\'écran de contrôle',
     priority: 'medium',
-    status: 'in-progress',
+    status: 'en_cours',
     createdBy: 'Pierre Lefebvre',
     createdAt: '02/12/2025 10:15'
   },
@@ -74,9 +76,21 @@ const interventionRequests: InterventionRequest[] = [
     location: 'Zone B - Circuit principal',
     description: 'Joint d\'étanchéité présentant des signes d\'usure',
     priority: 'low',
-    status: 'resolved',
+    status: 'terminee',
     createdBy: 'Marie Dubois',
     createdAt: '01/12/2025 16:30'
+  },
+  {
+    id: 'DI005',
+    title: 'Capteur pression défaillant',
+    equipment: 'Capteur P-102',
+    equipmentCode: 'EQ045',
+    location: 'Zone C - Contrôle',
+    description: 'Capteur donnant des valeurs erratiques',
+    priority: 'high',
+    status: 'en_attente',
+    createdBy: 'Luc Moreau',
+    createdAt: '02/12/2025 14:00'
   },
 ];
 
@@ -93,19 +107,93 @@ const getPriorityConfig = (priority: string) => {
   }
 };
 
-const getStatusConfig = (status: string) => {
+const getStatusConfig = (status: RequestStatus) => {
   switch (status) {
-    case 'pending':
-      return { label: 'En attente', className: 'bg-gray-100 text-gray-800' };
-    case 'assigned':
-      return { label: 'Assignée', className: 'bg-blue-100 text-blue-800' };
-    case 'in-progress':
+    case 'ouverte':
+      return { label: 'Ouverte', className: 'bg-blue-100 text-blue-800' };
+    case 'assignee':
+      return { label: 'Assignée', className: 'bg-indigo-100 text-indigo-800' };
+    case 'en_cours':
       return { label: 'En cours', className: 'bg-purple-100 text-purple-800' };
-    case 'resolved':
-      return { label: 'Résolue', className: 'bg-green-100 text-green-800' };
+    case 'en_attente':
+      return { label: 'En attente', className: 'bg-amber-100 text-amber-800' };
+    case 'terminee':
+      return { label: 'Terminée', className: 'bg-green-100 text-green-800' };
+    case 'annulee':
+      return { label: 'Annulée', className: 'bg-gray-100 text-gray-800' };
     default:
       return { label: status, className: 'bg-gray-100 text-gray-800' };
   }
+};
+
+interface KanbanColumnProps {
+  title: string;
+  status: RequestStatus;
+  requests: InterventionRequest[];
+  onCardClick: (id: string) => void;
+  headerColor: string;
+}
+
+const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, requests, onCardClick, headerColor }) => {
+  return (
+    <div className="flex flex-col h-full min-w-0">
+      <div className={cn("p-3 rounded-t-lg font-semibold text-sm", headerColor)}>
+        {title} ({requests.length})
+      </div>
+      <div className="flex-1 bg-muted/30 rounded-b-lg p-2 space-y-2 overflow-y-auto">
+        {requests.map((request) => {
+          const priorityConfig = getPriorityConfig(request.priority);
+          return (
+            <Card 
+              key={request.id}
+              className={cn(
+                "p-3 border-l-4 cursor-pointer transition-all active:scale-[0.98] hover:shadow-md",
+                priorityConfig.borderColor
+              )}
+              onClick={() => onCardClick(request.id)}
+            >
+              <div className="space-y-2">
+                <div className="flex items-center gap-1 flex-wrap">
+                  <Badge className={cn("text-xs", priorityConfig.className)}>
+                    <AlertTriangle className="h-3 w-3 mr-1" />
+                    {priorityConfig.label}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground font-mono">{request.id}</span>
+                </div>
+                
+                <h3 className="font-medium text-foreground text-sm line-clamp-2">
+                  {request.title}
+                </h3>
+                <p className="text-xs text-primary font-medium truncate">{request.equipment}</p>
+                
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <MapPin className="h-3 w-3 flex-shrink-0" />
+                  <span className="truncate">{request.location}</span>
+                </div>
+                
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <User className="h-3 w-3" />
+                    <span className="truncate max-w-16">{request.createdBy}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    <span>{request.createdAt.split(' ')[0]}</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+
+        {requests.length === 0 && (
+          <div className="text-center text-xs text-muted-foreground py-4">
+            Aucune demande
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 const TabletInterventionRequests: React.FC = () => {
@@ -114,10 +202,27 @@ const TabletInterventionRequests: React.FC = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [requests, setRequests] = useState(interventionRequests);
 
-  const filteredRequests = requests.filter(request =>
+  // Filter out completed requests and apply search
+  const activeRequests = requests.filter(r => 
+    r.status !== 'terminee' && r.status !== 'annulee'
+  );
+
+  const filteredRequests = activeRequests.filter(request =>
     request.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     request.equipment.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Group by status for Kanban columns
+  const ouvertes = filteredRequests.filter(r => r.status === 'ouverte');
+  const assignees = filteredRequests.filter(r => r.status === 'assignee');
+  const enCours = filteredRequests.filter(r => r.status === 'en_cours');
+  const enAttente = filteredRequests.filter(r => r.status === 'en_attente');
+
+  // Stats (on all requests)
+  const statsOuvertes = requests.filter(r => r.status === 'ouverte').length;
+  const statsAssignees = requests.filter(r => r.status === 'assignee').length;
+  const statsEnCours = requests.filter(r => r.status === 'en_cours').length;
+  const statsTerminees = requests.filter(r => r.status === 'terminee').length;
 
   const handleCreateRequest = (data: {
     title: string;
@@ -135,7 +240,7 @@ const TabletInterventionRequests: React.FC = () => {
       location: 'Zone à définir',
       description: data.description,
       priority: data.priority,
-      status: 'pending',
+      status: 'ouverte',
       createdBy: 'Jean Martin',
       createdAt: new Date().toLocaleString('fr-FR', { 
         day: '2-digit', 
@@ -146,13 +251,18 @@ const TabletInterventionRequests: React.FC = () => {
       }),
     };
     setRequests([newRequest, ...requests]);
-    toast.success('Demande d\'intervention créée avec succès');
+    toast.success('Demande d\'Intervention créée avec succès');
   };
+
+  const handleCardClick = (id: string) => {
+    navigate(`/tablet/requests/${id}`);
+  };
+
   return (
-    <div className="p-4 pb-8 space-y-4">
+    <div className="p-4 pb-8 space-y-4 h-full flex flex-col">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Demandes d'intervention</h1>
+          <h1 className="text-2xl font-bold text-foreground">Demandes d'Intervention</h1>
           <p className="text-muted-foreground mt-1">Anomalies et demandes signalées</p>
         </div>
         <Button 
@@ -184,95 +294,61 @@ const TabletInterventionRequests: React.FC = () => {
       {/* Stats rapides */}
       <div className="grid grid-cols-4 gap-2">
         <Card className="p-3 text-center">
-          <div className="text-xl font-bold text-foreground">
-            {interventionRequests.filter(r => r.status === 'pending').length}
+          <div className="text-xl font-bold text-blue-600">
+            {statsOuvertes}
           </div>
-          <div className="text-xs text-muted-foreground">En attente</div>
+          <div className="text-xs text-muted-foreground">Ouvertes</div>
         </Card>
         <Card className="p-3 text-center">
-          <div className="text-xl font-bold text-blue-600">
-            {interventionRequests.filter(r => r.status === 'assigned').length}
+          <div className="text-xl font-bold text-indigo-600">
+            {statsAssignees}
           </div>
           <div className="text-xs text-muted-foreground">Assignées</div>
         </Card>
         <Card className="p-3 text-center">
           <div className="text-xl font-bold text-purple-600">
-            {interventionRequests.filter(r => r.status === 'in-progress').length}
+            {statsEnCours}
           </div>
           <div className="text-xs text-muted-foreground">En cours</div>
         </Card>
         <Card className="p-3 text-center">
           <div className="text-xl font-bold text-green-600">
-            {interventionRequests.filter(r => r.status === 'resolved').length}
+            {statsTerminees}
           </div>
           <div className="text-xs text-muted-foreground">Résolues</div>
         </Card>
       </div>
 
-      {/* Liste des demandes */}
-      <div className="space-y-3">
-        {filteredRequests.map((request) => {
-          const priorityConfig = getPriorityConfig(request.priority);
-          const statusConfig = getStatusConfig(request.status);
-          
-          return (
-            <Card 
-              key={request.id}
-              className={cn(
-                "p-4 border-l-4 cursor-pointer transition-all active:scale-[0.98] hover:shadow-md",
-                priorityConfig.borderColor
-              )}
-              onClick={() => navigate(`/tablet/requests/${request.id}`)}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <Badge className={cn("text-xs", priorityConfig.className)}>
-                      <AlertTriangle className="h-3 w-3 mr-1" />
-                      {priorityConfig.label}
-                    </Badge>
-                    <Badge className={cn("text-xs", statusConfig.className)}>
-                      {statusConfig.label}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground font-mono">{request.id}</span>
-                  </div>
-                  
-                  <h3 className="font-semibold text-foreground text-lg">
-                    {request.title}
-                  </h3>
-                  <p className="text-sm text-primary font-medium mt-1">{request.equipment}</p>
-                  
-                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      <span className="truncate">{request.location}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <User className="h-3 w-3" />
-                      {request.createdBy}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {request.createdAt}
-                    </div>
-                  </div>
-                </div>
-                
-                <ChevronRight className="h-6 w-6 text-muted-foreground flex-shrink-0 mt-2" />
-              </div>
-            </Card>
-          );
-        })}
-
-        {filteredRequests.length === 0 && (
-          <Card className="p-8 text-center">
-            <AlertTriangle className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground">Aucune demande trouvée</p>
-          </Card>
-        )}
+      {/* Kanban columns */}
+      <div className="flex-1 grid grid-cols-4 gap-3 min-h-0">
+        <KanbanColumn
+          title="Nouvelles"
+          status="ouverte"
+          requests={ouvertes}
+          onCardClick={handleCardClick}
+          headerColor="bg-blue-100 text-blue-800"
+        />
+        <KanbanColumn
+          title="Assignées"
+          status="assignee"
+          requests={assignees}
+          onCardClick={handleCardClick}
+          headerColor="bg-indigo-100 text-indigo-800"
+        />
+        <KanbanColumn
+          title="En cours"
+          status="en_cours"
+          requests={enCours}
+          onCardClick={handleCardClick}
+          headerColor="bg-purple-100 text-purple-800"
+        />
+        <KanbanColumn
+          title="En attente"
+          status="en_attente"
+          requests={enAttente}
+          onCardClick={handleCardClick}
+          headerColor="bg-amber-100 text-amber-800"
+        />
       </div>
     </div>
   );

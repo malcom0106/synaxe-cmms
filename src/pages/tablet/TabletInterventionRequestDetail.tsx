@@ -28,12 +28,13 @@ import {
   FileText,
   ChevronRight,
   Search,
-  Play
+  Play,
+  Pause
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-type RequestStatus = 'ouverte' | 'en_cours' | 'terminee' | 'annulee';
+type RequestStatus = 'ouverte' | 'assignee' | 'en_cours' | 'en_attente' | 'terminee' | 'annulee';
 
 interface InterventionRequest {
   id: string;
@@ -145,8 +146,12 @@ const getStatusConfig = (status: RequestStatus) => {
   switch (status) {
     case 'ouverte':
       return { label: 'Ouverte', className: 'bg-blue-100 text-blue-800', icon: AlertTriangle };
+    case 'assignee':
+      return { label: 'Assignée', className: 'bg-indigo-100 text-indigo-800', icon: FileText };
     case 'en_cours':
       return { label: 'En cours', className: 'bg-purple-100 text-purple-800', icon: Play };
+    case 'en_attente':
+      return { label: 'En attente', className: 'bg-amber-100 text-amber-800', icon: Pause };
     case 'terminee':
       return { label: 'Terminée', className: 'bg-green-100 text-green-800', icon: CheckCircle2 };
     case 'annulee':
@@ -266,8 +271,19 @@ const TabletInterventionRequestDetail: React.FC = () => {
     toast.success('Demande d\'intervention terminée');
   };
 
-  const canFinish = request.status === 'en_cours' && (request.assignedRange || request.diagnostic);
-  const canPerformActions = request.status === 'ouverte' || request.status === 'en_cours';
+  const canFinish = (request.status === 'en_cours' || request.status === 'en_attente') && (request.assignedRange || request.diagnostic);
+  const canPerformActions = request.status === 'ouverte' || request.status === 'en_cours' || request.status === 'en_attente' || request.status === 'assignee';
+  const canPutOnHold = request.status === 'en_cours';
+
+  const handlePutOnHold = () => {
+    setRequest({ ...request, status: 'en_attente' });
+    toast.success('Demande mise en attente');
+  };
+
+  const handleResumeWork = () => {
+    setRequest({ ...request, status: 'en_cours' });
+    toast.success('Travail repris');
+  };
 
   return (
     <div className="p-4 pb-8 space-y-4">
@@ -294,7 +310,7 @@ const TabletInterventionRequestDetail: React.FC = () => {
         {/* Actions en haut */}
         {canPerformActions && (
           <div className="flex items-center gap-2 flex-shrink-0">
-            {request.status === 'ouverte' && (
+            {(request.status === 'ouverte' || request.status === 'assignee') && (
               <>
                 <Button 
                   size="sm"
@@ -315,6 +331,29 @@ const TabletInterventionRequestDetail: React.FC = () => {
                   <span className="hidden sm:inline">Diagnostic</span>
                 </Button>
               </>
+            )}
+
+            {canPutOnHold && (
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={handlePutOnHold}
+                className="gap-1 border-amber-500/30 hover:bg-amber-500/10"
+              >
+                <Pause className="h-4 w-4 text-amber-600" />
+                <span className="hidden sm:inline">Mettre en attente</span>
+              </Button>
+            )}
+
+            {request.status === 'en_attente' && (
+              <Button 
+                size="sm"
+                onClick={handleResumeWork}
+                className="gap-1 bg-purple-600 hover:bg-purple-700"
+              >
+                <Play className="h-4 w-4" />
+                <span className="hidden sm:inline">Reprendre</span>
+              </Button>
             )}
 
             {canFinish && (
