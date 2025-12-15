@@ -15,6 +15,13 @@ import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { CreateInterventionRequestModal } from '@/components/tablet/CreateInterventionRequestModal';
 import { toast } from 'sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export type RequestStatus = 'ouverte' | 'assignee' | 'en_cours' | 'en_attente' | 'terminee' | 'annulee';
 
@@ -316,16 +323,24 @@ const TabletInterventionRequests: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [requests, setRequests] = useState(interventionRequests);
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [driverFilter, setDriverFilter] = useState<string>('all');
 
-  // Filter out completed requests and apply search
+  // Get unique drivers for the filter
+  const drivers = [...new Set(requests.map(r => r.createdBy))];
+
+  // Filter out completed requests and apply search + filters
   const activeRequests = requests.filter(r => 
     r.status !== 'terminee' && r.status !== 'annulee'
   );
 
-  const filteredRequests = activeRequests.filter(request =>
-    request.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    request.equipment.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredRequests = activeRequests.filter(request => {
+    const matchesSearch = request.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.equipment.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesPriority = priorityFilter === 'all' || request.priority === priorityFilter;
+    const matchesDriver = driverFilter === 'all' || request.createdBy === driverFilter;
+    return matchesSearch && matchesPriority && matchesDriver;
+  });
 
   // Group by status for Kanban columns
   const ouvertes = filteredRequests.filter(r => r.status === 'ouverte');
@@ -390,15 +405,40 @@ const TabletInterventionRequests: React.FC = () => {
         onSubmit={handleCreateRequest}
       />
 
-      {/* Recherche */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-        <Input
-          placeholder="Rechercher une demande..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-12 h-14 text-base"
-        />
+      {/* Recherche et filtres */}
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher une demande..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-12 h-14 text-base"
+          />
+        </div>
+        <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+          <SelectTrigger className="w-[180px] h-14">
+            <SelectValue placeholder="Criticité" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toutes criticités</SelectItem>
+            <SelectItem value="critical">Critique</SelectItem>
+            <SelectItem value="high">Haute</SelectItem>
+            <SelectItem value="medium">Moyenne</SelectItem>
+            <SelectItem value="low">Basse</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={driverFilter} onValueChange={setDriverFilter}>
+          <SelectTrigger className="w-[200px] h-14">
+            <SelectValue placeholder="Chauffeur" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous les chauffeurs</SelectItem>
+            {drivers.map(driver => (
+              <SelectItem key={driver} value={driver}>{driver}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
 
