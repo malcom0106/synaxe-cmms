@@ -249,11 +249,6 @@ const InterventionRequests: React.FC = () => {
   const enCours = filteredRequests.filter(r => r.status === 'en_cours');
   const enAttente = filteredRequests.filter(r => r.status === 'en_attente');
 
-  // Stats (on all requests)
-  const statsOuvertes = requests.filter(r => r.status === 'ouverte').length;
-  const statsAssignees = requests.filter(r => r.status === 'assignee').length;
-  const statsEnCours = requests.filter(r => r.status === 'en_cours').length;
-  const statsTerminees = requests.filter(r => r.status === 'terminee').length;
 
   const handleCreateRequest = (data: {
     title: string;
@@ -319,33 +314,6 @@ const InterventionRequests: React.FC = () => {
         />
       </div>
 
-      {/* Stats rapides */}
-      <div className="grid grid-cols-4 gap-4">
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">
-            {statsOuvertes}
-          </div>
-          <div className="text-sm text-muted-foreground">Ouvertes</div>
-        </Card>
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-indigo-600">
-            {statsAssignees}
-          </div>
-          <div className="text-sm text-muted-foreground">Assignées</div>
-        </Card>
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-purple-600">
-            {statsEnCours}
-          </div>
-          <div className="text-sm text-muted-foreground">En cours</div>
-        </Card>
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-green-600">
-            {statsTerminees}
-          </div>
-          <div className="text-sm text-muted-foreground">Résolues</div>
-        </Card>
-      </div>
 
       {/* Kanban columns */}
       <div className="flex-1 grid grid-cols-4 gap-4 min-h-0">
