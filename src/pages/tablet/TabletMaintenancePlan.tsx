@@ -3,13 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   Calendar, 
   ChevronLeft, 
   ChevronRight as ChevronRightIcon, 
   Clock, 
   User,
-  Play
+  Play,
+  Search
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -53,6 +62,12 @@ const TabletMaintenancePlan: React.FC = () => {
     const diff = today.getDate() - day + (day === 0 ? -6 : 1);
     return new Date(today.setDate(diff));
   });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [equipmentFilter, setEquipmentFilter] = useState('all');
+
+  // Liste unique des équipements
+  const uniqueEquipments = [...new Set(plannedInterventions.map(i => i.equipment))];
 
   const getWeekDays = () => {
     const days = [];
@@ -78,7 +93,18 @@ const TabletMaintenancePlan: React.FC = () => {
 
   const getInterventionsForDate = (date: Date) => {
     const dateStr = formatDate(date);
-    return plannedInterventions.filter(i => i.date === dateStr);
+    return plannedInterventions.filter(intervention => {
+      const matchesDate = intervention.date === dateStr;
+      const matchesSearch = searchQuery === '' || 
+        intervention.equipment.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        intervention.gamme.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        intervention.assignedTo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        intervention.id.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || intervention.status === statusFilter;
+      const matchesEquipment = equipmentFilter === 'all' || intervention.equipment === equipmentFilter;
+      
+      return matchesDate && matchesSearch && matchesStatus && matchesEquipment;
+    });
   };
 
   const isToday = (date: Date) => {
@@ -124,6 +150,43 @@ const TabletMaintenancePlan: React.FC = () => {
           </Button>
         </div>
       </Card>
+
+      {/* Filtres */}
+      <div className="space-y-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 h-12"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="h-12">
+              <SelectValue placeholder="Statut" />
+            </SelectTrigger>
+            <SelectContent className="bg-background border z-50">
+              <SelectItem value="all">Tous statuts</SelectItem>
+              <SelectItem value="planned">Planifié</SelectItem>
+              <SelectItem value="completed">Terminé</SelectItem>
+              <SelectItem value="late">En retard</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
+            <SelectTrigger className="h-12">
+              <SelectValue placeholder="Équipement" />
+            </SelectTrigger>
+            <SelectContent className="bg-background border z-50">
+              <SelectItem value="all">Tous équipements</SelectItem>
+              {uniqueEquipments.map(equipment => (
+                <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
       {/* Vue par jour */}
       <div className="space-y-4">

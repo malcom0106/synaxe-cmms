@@ -3,15 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { 
   Calendar, 
   Clock, 
@@ -21,8 +13,7 @@ import {
   CheckCircle2,
   AlertCircle,
   PlayCircle,
-  Wrench,
-  Search
+  Wrench
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -194,10 +185,6 @@ const InterventionCard: React.FC<{ intervention: Intervention; onClick: () => vo
 const TabletDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('me');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [equipmentFilter, setEquipmentFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('today');
   
   const today = new Date().toLocaleDateString('fr-FR', { 
     weekday: 'long', 
@@ -207,23 +194,7 @@ const TabletDashboard: React.FC = () => {
   });
 
   const myInterventions = todayInterventions.filter(i => i.assignedTo === currentUser);
-  
-  // Liste unique des équipements
-  const uniqueEquipments = [...new Set(todayInterventions.map(i => i.equipment))];
-  
-  // Filtrage des interventions équipe
-  const teamInterventions = todayInterventions.filter(intervention => {
-    const matchesSearch = searchQuery === '' || 
-      intervention.equipment.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      intervention.gamme.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      intervention.assignedTo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      intervention.id.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || intervention.status === statusFilter;
-    const matchesEquipment = equipmentFilter === 'all' || intervention.equipment === equipmentFilter;
-    
-    return matchesSearch && matchesStatus && matchesEquipment;
-  });
+  const teamInterventions = todayInterventions;
 
   const getStats = (interventions: Intervention[]) => ({
     total: interventions.length,
@@ -308,55 +279,6 @@ const TabletDashboard: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="team" className="mt-4 space-y-4">
-          {/* Filtres */}
-          <div className="space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-12"
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <Select value={dateFilter} onValueChange={setDateFilter}>
-                <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Date" />
-                </SelectTrigger>
-                <SelectContent className="bg-background border z-50">
-                  <SelectItem value="today">Aujourd'hui</SelectItem>
-                  <SelectItem value="yesterday">Hier</SelectItem>
-                  <SelectItem value="week">Cette semaine</SelectItem>
-                  <SelectItem value="month">Ce mois</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Statut" />
-                </SelectTrigger>
-                <SelectContent className="bg-background border z-50">
-                  <SelectItem value="all">Tous statuts</SelectItem>
-                  <SelectItem value="planned">Planifié</SelectItem>
-                  <SelectItem value="in-progress">En cours</SelectItem>
-                  <SelectItem value="completed">Terminé</SelectItem>
-                  <SelectItem value="late">En retard</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
-                <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Équipement" />
-                </SelectTrigger>
-                <SelectContent className="bg-background border z-50">
-                  <SelectItem value="all">Tous équipements</SelectItem>
-                  {uniqueEquipments.map(equipment => (
-                    <SelectItem key={equipment} value={equipment}>{equipment}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
           {/* Stats rapides équipe */}
           <div className="grid grid-cols-4 gap-3">
             <Card className="p-3 text-center bg-muted/30">
@@ -381,7 +303,7 @@ const TabletDashboard: React.FC = () => {
           <div className="space-y-3">
             {teamInterventions.length === 0 ? (
               <Card className="p-8 text-center">
-                <Search className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                <Users className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
                 <p className="text-muted-foreground">Aucune intervention trouvée</p>
               </Card>
             ) : (
