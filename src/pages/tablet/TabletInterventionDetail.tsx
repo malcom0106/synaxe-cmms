@@ -187,6 +187,7 @@ const TabletInterventionDetail: React.FC = () => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [showSignature, setShowSignature] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [hasSignature, setHasSignature] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Lors du démarrage ou reprise, aller à la première étape non complétée
@@ -341,6 +342,7 @@ const TabletInterventionDetail: React.FC = () => {
     ctx.strokeStyle = '#1a1a1a';
     ctx.lineTo(x, y);
     ctx.stroke();
+    setHasSignature(true);
   };
 
   const stopDrawing = () => {
@@ -353,14 +355,24 @@ const TabletInterventionDetail: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setHasSignature(false);
   };
 
   const handleSignAndValidate = () => {
-    setStatus('locked');
+    if (!hasSignature) {
+      toast({ 
+        title: "Signature obligatoire", 
+        description: "Veuillez signer avant de valider l'intervention.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setStatus('completed');
     setShowSignature(false);
+    setHasSignature(false);
     toast({ 
-      title: "Intervention validée et verrouillée", 
-      description: "Les données ont été enregistrées et synchronisées" 
+      title: "Intervention terminée", 
+      description: "L'intervention a été validée et ne peut plus être modifiée" 
     });
   };
 
@@ -734,8 +746,8 @@ const TabletInterventionDetail: React.FC = () => {
                 className="w-full h-14 text-lg bg-green-600 hover:bg-green-700"
                 onClick={handleCompleteIntervention}
               >
-                <Pen className="h-6 w-6 mr-2" />
-                Signer et finaliser
+                <CheckCircle2 className="h-6 w-6 mr-2" />
+                Terminer l'intervention
               </Button>
             </div>
           </Card>
@@ -777,14 +789,13 @@ const TabletInterventionDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal de signature */}
       {showSignature && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <Card className="w-full max-w-lg p-6 space-y-4">
-            <h2 className="text-xl font-bold text-foreground text-center">Validation finale</h2>
+            <h2 className="text-xl font-bold text-foreground text-center">Signature obligatoire</h2>
             <p className="text-sm text-muted-foreground text-center">
-              En signant, vous confirmez avoir réalisé toutes les étapes de l'intervention. 
-              L'intervention sera verrouillée et ne pourra plus être modifiée.
+              Signez ci-dessous pour confirmer la réalisation de l'intervention. 
+              Une fois terminée, l'intervention ne pourra plus être modifiée.
             </p>
             
             <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg overflow-hidden">
@@ -810,16 +821,21 @@ const TabletInterventionDetail: React.FC = () => {
               <Button 
                 variant="outline" 
                 className="flex-1 h-12"
-                onClick={() => setShowSignature(false)}
+                onClick={() => {
+                  setShowSignature(false);
+                  setHasSignature(false);
+                  clearSignature();
+                }}
               >
                 Annuler
               </Button>
               <Button 
                 className="flex-1 h-12 bg-green-600 hover:bg-green-700"
                 onClick={handleSignAndValidate}
+                disabled={!hasSignature}
               >
-                <Lock className="h-5 w-5 mr-2" />
-                Signer et valider
+                <CheckCircle2 className="h-5 w-5 mr-2" />
+                Terminer
               </Button>
             </div>
           </Card>
