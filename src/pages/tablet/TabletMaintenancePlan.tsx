@@ -33,9 +33,9 @@ interface PlannedIntervention {
 }
 
 const plannedInterventions: PlannedIntervention[] = [
-  { id: 'P001', date: '2025-12-04', time: '08:00', equipment: 'Oléoserveur 201', gamme: 'Maintenance préventive', assignedTo: 'Jean Martin', status: 'completed' },
-  { id: 'P002', date: '2025-12-04', time: '14:00', equipment: 'Compteur Zone 1', gamme: 'Calibration', assignedTo: 'Jean Martin', status: 'planned' },
-  { id: 'P003', date: '2025-12-05', time: '09:00', equipment: 'Pompe principale', gamme: 'Contrôle visuel', assignedTo: 'Sophie Bernard', status: 'planned' },
+  { id: 'INT001', date: '2025-12-04', time: '08:00', equipment: 'Oléoserveur 201', gamme: 'Maintenance préventive', assignedTo: 'Jean Martin', status: 'completed' },
+  { id: 'INT003', date: '2025-12-04', time: '14:00', equipment: 'Compteur Zone 1', gamme: 'Calibration', assignedTo: 'Jean Martin', status: 'planned' },
+  { id: 'INT002', date: '2025-12-05', time: '09:00', equipment: 'Pompe principale Zone A', gamme: 'Contrôle visuel', assignedTo: 'Sophie Bernard', status: 'planned' },
   { id: 'P004', date: '2025-12-05', time: '11:00', equipment: 'Vanne sécurité A', gamme: 'Inspection', assignedTo: 'Jean Martin', status: 'planned' },
   { id: 'P005', date: '2025-12-06', time: '08:30', equipment: 'Filtre Station B', gamme: 'Remplacement', assignedTo: 'Pierre Lefebvre', status: 'planned' },
   { id: 'P006', date: '2025-12-06', time: '10:00', equipment: 'Oléoserveur 202', gamme: 'Maintenance préventive', assignedTo: 'Jean Martin', status: 'planned' },
