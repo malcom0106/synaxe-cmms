@@ -784,34 +784,49 @@ const InterventionRequestDetail: React.FC = () => {
                 </div>
               </Card>
 
-              <div className="flex flex-col gap-3">
+              {/* Liste des actions */}
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Actions de la gamme :</p>
+                <div className="space-y-1 max-h-48 overflow-y-auto">
+                  {selectedRange.steps.map((step, index) => (
+                    <div key={step.id} className="flex items-center gap-2 p-2 rounded bg-muted/20 text-sm">
+                      <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-medium">
+                        {index + 1}
+                      </span>
+                      <span className="text-foreground">{step.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Boutons sur la même ligne */}
+              <div className="flex gap-2 pt-4">
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start h-14"
+                  className="flex-1"
                   onClick={() => {
                     setRangeModalStep('select');
                     setSelectedRange(null);
                   }}
                 >
-                  <ArrowLeft className="h-4 w-4 mr-3" />
-                  Annuler et choisir une autre gamme
+                  Annuler
                 </Button>
                 
                 <Button 
                   variant="outline"
-                  className="w-full justify-start h-14 border-primary/30 hover:bg-primary/10"
+                  className="flex-1"
                   onClick={() => setRangeModalStep('assign')}
                 >
-                  <CalendarIcon className="h-4 w-4 mr-3 text-primary" />
-                  Assigner l'intervention (planifier pour plus tard)
+                  <CalendarIcon className="h-4 w-4 mr-2" />
+                  Assigner
                 </Button>
                 
                 <Button 
-                  className="w-full justify-start h-14 bg-green-600 hover:bg-green-700"
+                  className="flex-1 bg-green-600 hover:bg-green-700"
                   onClick={handleStartExecution}
                 >
-                  <Play className="h-4 w-4 mr-3" />
-                  Démarrer l'intervention maintenant
+                  <Play className="h-4 w-4 mr-2" />
+                  Démarrer
                 </Button>
               </div>
             </div>
