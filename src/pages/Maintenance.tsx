@@ -287,19 +287,8 @@ const Maintenance: React.FC = () => {
                   <td className="px-4 py-3 text-sm text-foreground">
                     {intervention.gamme}
                   </td>
-                  <td className="px-4 py-3">
-                    <Badge 
-                      variant="outline"
-                      className={
-                        intervention.type === 'Corrective' 
-                          ? 'bg-red-500/10 text-red-600 border-red-200' 
-                          : intervention.type === 'Préventive'
-                          ? 'bg-green-500/10 text-green-600 border-green-200'
-                          : 'bg-amber-500/10 text-amber-600 border-amber-200'
-                      }
-                    >
-                      {intervention.type}
-                    </Badge>
+                  <td className="px-4 py-3 text-sm text-foreground">
+                    {intervention.type}
                   </td>
                   <td className="px-4 py-3 text-sm text-muted-foreground">
                     {intervention.operateur}
