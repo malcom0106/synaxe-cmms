@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -22,17 +22,23 @@ interface Equipment {
   subFamily: string;
 }
 
+export interface InterventionRequestFormData {
+  id?: string;
+  title: string;
+  description: string;
+  equipmentId: string;
+  equipmentName: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  operator?: string;
+  photo?: string;
+}
+
 interface CreateInterventionRequestModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: {
-    title: string;
-    description: string;
-    equipmentId: string;
-    equipmentName: string;
-    priority: 'low' | 'medium' | 'high' | 'critical';
-    photo?: string;
-  }) => void;
+  onSubmit: (data: InterventionRequestFormData) => void;
+  editData?: InterventionRequestFormData | null;
+  mode?: 'create' | 'edit';
 }
 
 const equipmentList: Equipment[] = [
@@ -70,6 +76,17 @@ const equipmentList: Equipment[] = [
   },
 ];
 
+const operators = [
+  'Jean Martin',
+  'Sophie Bernard',
+  'Pierre Lefebvre',
+  'Marie Dubois',
+  'Luc Moreau',
+  'Anne Petit',
+  'Marc Durand',
+  'Claire Fontaine',
+];
+
 const families = ['Camion', 'Cuve', 'Escabeau'];
 const subFamilies: Record<string, string[]> = {
   'Camion': ['Oléoserveur', 'Citerne'],
@@ -81,16 +98,43 @@ export const CreateInterventionRequestModal: React.FC<CreateInterventionRequestM
   open,
   onOpenChange,
   onSubmit,
+  editData,
+  mode = 'create',
 }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high' | 'critical'>('medium');
+  const [operator, setOperator] = useState<string>('');
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [familyFilter, setFamilyFilter] = useState<string>('');
   const [subFamilyFilter, setSubFamilyFilter] = useState<string>('');
   const [photo, setPhoto] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Populate form when editing
+  useEffect(() => {
+    if (editData && mode === 'edit') {
+      setTitle(editData.title);
+      setDescription(editData.description);
+      setPriority(editData.priority);
+      setOperator(editData.operator || '');
+      setPhoto(editData.photo || null);
+      const foundEquipment = equipmentList.find(eq => eq.id === editData.equipmentId);
+      if (foundEquipment) {
+        setSelectedEquipment(foundEquipment);
+      } else if (editData.equipmentName) {
+        setSelectedEquipment({
+          id: editData.equipmentId,
+          name: editData.equipmentName,
+          referenceExterne: '',
+          type: '',
+          family: '',
+          subFamily: ''
+        });
+      }
+    }
+  }, [editData, mode, open]);
 
   const availableSubFamilies = familyFilter ? subFamilies[familyFilter] || [] : [];
 
@@ -121,35 +165,34 @@ export const CreateInterventionRequestModal: React.FC<CreateInterventionRequestM
     if (!title || !selectedEquipment) return;
     
     onSubmit({
+      id: editData?.id,
       title,
       description,
       equipmentId: selectedEquipment.id,
       equipmentName: selectedEquipment.name,
       priority,
+      operator: operator || undefined,
       photo: photo || undefined,
     });
 
-    // Reset form
-    setTitle('');
-    setDescription('');
-    setPriority('medium');
-    setSelectedEquipment(null);
-    setSearchQuery('');
-    setFamilyFilter('');
-    setSubFamilyFilter('');
-    setPhoto(null);
+    resetForm();
     onOpenChange(false);
   };
 
-  const handleClose = () => {
+  const resetForm = () => {
     setTitle('');
     setDescription('');
     setPriority('medium');
+    setOperator('');
     setSelectedEquipment(null);
     setSearchQuery('');
     setFamilyFilter('');
     setSubFamilyFilter('');
     setPhoto(null);
+  };
+
+  const handleClose = () => {
+    resetForm();
     onOpenChange(false);
   };
 
@@ -157,7 +200,9 @@ export const CreateInterventionRequestModal: React.FC<CreateInterventionRequestM
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">Nouvelle demande d'intervention</DialogTitle>
+          <DialogTitle className="text-xl">
+            {mode === 'edit' ? "Modifier la demande d'intervention" : "Nouvelle demande d'intervention"}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
@@ -277,6 +322,22 @@ export const CreateInterventionRequestModal: React.FC<CreateInterventionRequestM
             />
           </div>
 
+          {/* Opérateur */}
+          <div className="space-y-2">
+            <Label className="text-base font-medium">Opérateur</Label>
+            <Select value={operator} onValueChange={setOperator}>
+              <SelectTrigger className="bg-background h-12">
+                <SelectValue placeholder="Sélectionner un opérateur" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Aucun opérateur</SelectItem>
+                {operators.map((op) => (
+                  <SelectItem key={op} value={op}>{op}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Criticité */}
           <div className="space-y-2">
             <Label className="text-base font-medium">Criticité *</Label>
@@ -390,7 +451,7 @@ export const CreateInterventionRequestModal: React.FC<CreateInterventionRequestM
             onClick={handleSubmit}
             disabled={!title || !selectedEquipment}
           >
-            Créer la demande
+            {mode === 'edit' ? 'Enregistrer les modifications' : 'Créer la demande'}
           </Button>
         </div>
       </DialogContent>
