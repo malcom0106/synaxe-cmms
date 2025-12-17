@@ -29,7 +29,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Check,
-  Pen
+  Pen,
+  Download,
+  Printer
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -476,8 +478,183 @@ const TabletInterventionDetail: React.FC = () => {
     }
   };
 
+  const handleExportPDF = () => {
+    window.print();
+    toast({ title: "Export PDF", description: "Utilisez la boîte de dialogue d'impression pour sauvegarder en PDF" });
+  };
+
+  const getValueDisplay = (step: InterventionStep) => {
+    switch (step.inputType) {
+      case 'boolean':
+        return step.value ? '✓ Conforme' : '✗ Non conforme';
+      case 'numeric':
+        return `${step.value}${step.unit ? ` ${step.unit}` : ''}`;
+      case 'comment':
+        return step.value || '-';
+      case 'photo':
+        return step.value ? `📷 ${step.value}` : '-';
+      case 'checkbox':
+        return step.value ? '✓ Effectué' : '✗ Non effectué';
+      default:
+        return step.value || '-';
+    }
+  };
+
+  // Vue terminée (affichage du récapitulatif)
+  if (status === 'completed' || status === 'locked') {
+    return (
+      <div className="p-4 pb-8 space-y-4 print:p-0 print:space-y-2">
+        {/* Header */}
+        <div className="flex items-center gap-3 print:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-12 w-12"
+            onClick={() => navigate('/tablet')}
+          >
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+          <div className="flex-1">
+            <h1 className="text-xl font-bold text-foreground">{intervention.equipment}</h1>
+            <p className="text-sm text-muted-foreground">{intervention.id}</p>
+          </div>
+          <Badge className={cn("text-sm px-3 py-1", statusConfig.className)}>
+            <StatusIcon className="h-4 w-4 mr-1" />
+            {statusConfig.label}
+          </Badge>
+        </div>
+
+        {/* Header pour impression */}
+        <div className="hidden print:block print:mb-4">
+          <h1 className="text-2xl font-bold text-center">Rapport d'intervention</h1>
+          <p className="text-center text-gray-600">{intervention.id} - {intervention.equipment}</p>
+        </div>
+
+        {/* Informations générales */}
+        <Card className="p-4 print:border print:shadow-none">
+          <h2 className="text-lg font-semibold text-foreground mb-3 print:text-base">Informations générales</h2>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="flex items-center gap-2">
+              <Wrench className="h-4 w-4 text-muted-foreground print:hidden" />
+              <span className="text-muted-foreground">Gamme:</span>
+              <span className="text-foreground font-medium">{intervention.gamme}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-muted-foreground print:hidden" />
+              <span className="text-muted-foreground">Lieu:</span>
+              <span className="text-foreground font-medium">{intervention.location}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground print:hidden" />
+              <span className="text-muted-foreground">Date:</span>
+              <span className="text-foreground font-medium">{intervention.plannedDate}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground print:hidden" />
+              <span className="text-muted-foreground">Technicien:</span>
+              <span className="text-foreground font-medium">{intervention.assignedTo}</span>
+            </div>
+            {intervention.startedAt && (
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground print:hidden" />
+                <span className="text-muted-foreground">Début:</span>
+                <span className="text-foreground font-medium">{intervention.startedAt}</span>
+              </div>
+            )}
+            {intervention.completedAt && (
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-muted-foreground print:hidden" />
+                <span className="text-muted-foreground">Fin:</span>
+                <span className="text-foreground font-medium">{intervention.completedAt}</span>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Récapitulatif des actions */}
+        <Card className="p-4 print:border print:shadow-none">
+          <h2 className="text-lg font-semibold text-foreground mb-3 print:text-base">Récapitulatif des actions</h2>
+          <div className="space-y-2">
+            <div className="grid grid-cols-12 gap-2 text-xs font-semibold text-muted-foreground border-b pb-2 print:text-[10px]">
+              <div className="col-span-1">#</div>
+              <div className="col-span-5">Action</div>
+              <div className="col-span-3">Résultat</div>
+              <div className="col-span-3">Heure</div>
+            </div>
+            {steps.map((step) => (
+              <div 
+                key={step.id}
+                className={cn(
+                  "grid grid-cols-12 gap-2 text-sm py-2 border-b border-muted/50 last:border-0 print:text-xs print:py-1",
+                  step.completed ? "bg-green-50/50" : "bg-orange-50/50"
+                )}
+              >
+                <div className="col-span-1 font-medium">{step.order}</div>
+                <div className="col-span-5">
+                  <span className="font-medium">{step.label}</span>
+                  {step.stepComment && (
+                    <p className="text-xs text-muted-foreground mt-0.5 italic">"{step.stepComment}"</p>
+                  )}
+                </div>
+                <div className="col-span-3">
+                  <span className={cn(
+                    "text-xs px-2 py-0.5 rounded",
+                    step.completed ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-800"
+                  )}>
+                    {getValueDisplay(step)}
+                  </span>
+                </div>
+                <div className="col-span-3 text-muted-foreground">
+                  {step.completedAt || '-'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Résumé */}
+        <Card className="p-4 print:border print:shadow-none">
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <p className="text-2xl font-bold text-green-600 print:text-lg">{completedSteps}</p>
+              <p className="text-xs text-muted-foreground">Étapes réalisées</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-foreground print:text-lg">{steps.length}</p>
+              <p className="text-xs text-muted-foreground">Total étapes</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-primary print:text-lg">{progress}%</p>
+              <p className="text-xs text-muted-foreground">Complétion</p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Zone signature */}
+        {intervention.signature && (
+          <Card className="p-4 print:border print:shadow-none">
+            <h2 className="text-lg font-semibold text-foreground mb-2 print:text-base">Signature</h2>
+            <div className="h-20 bg-muted/20 rounded flex items-center justify-center">
+              <Pen className="h-6 w-6 text-muted-foreground mr-2" />
+              <span className="text-muted-foreground">Intervention signée</span>
+            </div>
+          </Card>
+        )}
+
+        {/* Bouton export PDF */}
+        <Button 
+          className="w-full h-14 text-lg print:hidden"
+          onClick={handleExportPDF}
+        >
+          <Download className="h-6 w-6 mr-3" />
+          Exporter en PDF
+        </Button>
+      </div>
+    );
+  }
+
   // Vue non active (planifié ou en pause)
-  if (!isActive && !isLocked) {
+  if (!isActive) {
     return (
       <div className="p-4 pb-8 space-y-4">
         {/* Header */}
