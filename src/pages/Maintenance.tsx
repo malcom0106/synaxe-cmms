@@ -18,6 +18,7 @@ interface Intervention {
   id: string;
   equipment: string;
   gamme: string;
+  type: 'Contrôle' | 'Corrective' | 'Préventive';
   operateur: string;
   datePlanifiee: string;
   dateRealisee: string | null;
@@ -29,6 +30,7 @@ const interventions: Intervention[] = [
     id: '#411',
     equipment: 'Pompe distribution 202',
     gamme: 'Test Maintenance',
+    type: 'Préventive',
     operateur: '-',
     datePlanifiee: '27/11/2025 01:00',
     dateRealisee: null,
@@ -38,6 +40,7 @@ const interventions: Intervention[] = [
     id: '#566',
     equipment: 'Pompe distribution 202',
     gamme: 'Test Maintenance',
+    type: 'Contrôle',
     operateur: '-',
     datePlanifiee: '27/11/2025 01:00',
     dateRealisee: null,
@@ -47,6 +50,7 @@ const interventions: Intervention[] = [
     id: '#596',
     equipment: 'Pompe distribution 202',
     gamme: 'Test Maintenance',
+    type: 'Corrective',
     operateur: '-',
     datePlanifiee: '27/11/2025 01:00',
     dateRealisee: null,
@@ -56,6 +60,7 @@ const interventions: Intervention[] = [
     id: '#1',
     equipment: 'Oléoserveur 202',
     gamme: 'Check Quotidienne Oléoserveur',
+    type: 'Contrôle',
     operateur: 'Non attribué',
     datePlanifiee: '26/11/2025 01:00',
     dateRealisee: '26/11/2025 11:29',
@@ -65,6 +70,7 @@ const interventions: Intervention[] = [
     id: '#2',
     equipment: 'Oléoserveur 202',
     gamme: 'Check Quotidienne Oléoserveur',
+    type: 'Préventive',
     operateur: 'Non attribué',
     datePlanifiee: '28/11/2025 01:00',
     dateRealisee: null,
@@ -74,6 +80,7 @@ const interventions: Intervention[] = [
     id: '#3',
     equipment: 'Oléoserveur 202',
     gamme: 'Check Quotidienne Oléoserveur',
+    type: 'Préventive',
     operateur: 'Non attribué',
     datePlanifiee: '29/11/2025 01:00',
     dateRealisee: null,
@@ -83,6 +90,7 @@ const interventions: Intervention[] = [
     id: '#4',
     equipment: 'Oléoserveur 202',
     gamme: 'Check Quotidienne Oléoserveur',
+    type: 'Corrective',
     operateur: 'Non attribué',
     datePlanifiee: '30/11/2025 01:00',
     dateRealisee: null,
@@ -173,6 +181,17 @@ const Maintenance: React.FC = () => {
 
         <Select>
           <SelectTrigger className="w-[200px] bg-card">
+            <SelectValue placeholder="Type d'intervention" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="controle">Contrôle</SelectItem>
+            <SelectItem value="corrective">Corrective</SelectItem>
+            <SelectItem value="preventive">Préventive</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select>
+          <SelectTrigger className="w-[200px] bg-card">
             <Target className="h-4 w-4 mr-2" />
             <SelectValue placeholder="Sélectionner une famille" />
           </SelectTrigger>
@@ -231,6 +250,9 @@ const Maintenance: React.FC = () => {
                   Gamme
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
+                  Type
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
                   Opérateur
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
@@ -264,6 +286,20 @@ const Maintenance: React.FC = () => {
                   </td>
                   <td className="px-4 py-3 text-sm text-foreground">
                     {intervention.gamme}
+                  </td>
+                  <td className="px-4 py-3">
+                    <Badge 
+                      variant="outline"
+                      className={
+                        intervention.type === 'Corrective' 
+                          ? 'bg-red-500/10 text-red-600 border-red-200' 
+                          : intervention.type === 'Préventive'
+                          ? 'bg-green-500/10 text-green-600 border-green-200'
+                          : 'bg-amber-500/10 text-amber-600 border-amber-200'
+                      }
+                    >
+                      {intervention.type}
+                    </Badge>
                   </td>
                   <td className="px-4 py-3 text-sm text-muted-foreground">
                     {intervention.operateur}
