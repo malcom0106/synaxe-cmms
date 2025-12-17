@@ -12,6 +12,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { 
   ArrowLeft, 
   AlertTriangle, 
@@ -28,13 +41,24 @@ import {
   Search,
   Play,
   Pause,
-  Plus
+  Plus,
+  CalendarIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import RangeExecutionPanel from '@/components/tablet/RangeExecutionPanel';
 
 type RequestStatus = 'ouverte' | 'assignee' | 'en_cours' | 'en_attente' | 'terminee' | 'annulee';
+
+interface AssignmentInfo {
+  rangeId: string;
+  rangeName: string;
+  date?: Date;
+  time?: string;
+  operator?: string;
+}
 
 interface InterventionRequest {
   id: string;
@@ -48,6 +72,7 @@ interface InterventionRequest {
   createdBy: string;
   createdAt: string;
   assignedRange?: string;
+  assignment?: AssignmentInfo;
   diagnostic?: string;
   cancelReason?: string;
 }
@@ -80,6 +105,17 @@ interface MaintenanceRange {
   tasksCount: number;
   steps: MaintenanceStep[];
 }
+
+const operators = [
+  'Jean Martin',
+  'Sophie Bernard',
+  'Pierre Lefebvre',
+  'Marie Dubois',
+  'Luc Moreau',
+  'Anne Petit',
+  'Marc Durand',
+  'Claire Fontaine',
+];
 
 const maintenanceRanges: MaintenanceRange[] = [
   {
@@ -282,13 +318,19 @@ const InterventionRequestDetail: React.FC = () => {
   const [finishModalOpen, setFinishModalOpen] = useState(false);
   const [executingRange, setExecutingRange] = useState<MaintenanceRange | null>(null);
   
+  // Range selection states
+  const [selectedRange, setSelectedRange] = useState<MaintenanceRange | null>(null);
+  const [rangeModalStep, setRangeModalStep] = useState<'select' | 'actions' | 'assign'>('select');
+  const [assignmentDate, setAssignmentDate] = useState<Date | undefined>(undefined);
+  const [assignmentTime, setAssignmentTime] = useState<string>('');
+  const [assignmentOperator, setAssignmentOperator] = useState<string>('');
+  
   // Form states
   const [cancelComment, setCancelComment] = useState('');
   const [cancelPhoto, setCancelPhoto] = useState<string | null>(null);
   const [diagnosticComment, setDiagnosticComment] = useState('');
   const [diagnosticPhoto, setDiagnosticPhoto] = useState<string | null>(null);
   const [rangeSearchQuery, setRangeSearchQuery] = useState('');
-  const [selectedRange, setSelectedRange] = useState<MaintenanceRange | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const diagnosticFileInputRef = useRef<HTMLInputElement>(null);
@@ -333,15 +375,67 @@ const InterventionRequestDetail: React.FC = () => {
 
   const handleSelectRange = (range: MaintenanceRange) => {
     setSelectedRange(range);
+    setRangeModalStep('actions');
+  };
+
+  const handleStartExecution = () => {
+    if (!selectedRange) return;
     setRangeModalOpen(false);
-    setExecutingRange(range);
-    setRequest({ ...request, assignedRange: range.id, status: 'en_cours' });
-    toast.success(`Gamme "${range.name}" assignée`);
+    setExecutingRange(selectedRange);
+    setRequest({ ...request, assignedRange: selectedRange.id, status: 'en_cours' });
+    resetRangeModal();
+    toast.success(`Exécution de la gamme "${selectedRange.name}" démarrée`);
+  };
+
+  const handleAssignRange = () => {
+    if (!selectedRange) return;
+    
+    const assignment: AssignmentInfo = {
+      rangeId: selectedRange.id,
+      rangeName: selectedRange.name,
+      date: assignmentDate,
+      time: assignmentTime || undefined,
+      operator: assignmentOperator || undefined,
+    };
+    
+    setRequest({ 
+      ...request, 
+      assignedRange: selectedRange.id, 
+      assignment,
+      status: 'assignee' 
+    });
+    setRangeModalOpen(false);
+    resetRangeModal();
+    toast.success(`Intervention assignée avec la gamme "${selectedRange.name}"`);
+  };
+
+  const handleStartAssignedIntervention = () => {
+    if (!request.assignment) return;
+    const range = maintenanceRanges.find(r => r.id === request.assignment?.rangeId);
+    if (range) {
+      setExecutingRange(range);
+      setRequest({ ...request, status: 'en_cours' });
+    }
+  };
+
+  const resetRangeModal = () => {
+    setSelectedRange(null);
+    setRangeModalStep('select');
+    setAssignmentDate(undefined);
+    setAssignmentTime('');
+    setAssignmentOperator('');
+    setRangeSearchQuery('');
+  };
+
+  const handleRangeModalClose = () => {
+    setRangeModalOpen(false);
+    resetRangeModal();
   };
 
   const handleRangeExecutionComplete = () => {
     setExecutingRange(null);
-    toast.success('Gamme exécutée avec succès');
+    setRequest({ ...request, status: 'terminee' });
+    toast.success('Intervention terminée avec succès');
   };
 
   const handleRangeExecutionCancel = () => {
@@ -487,8 +581,53 @@ const InterventionRequestDetail: React.FC = () => {
           <p className="text-sm text-muted-foreground">{request.description}</p>
         </Card>
 
-        {/* Assigned range if exists */}
-        {request.assignedRange && (
+        {/* Assigned range/intervention if exists */}
+        {request.assignment && (
+          <Card className="p-4 border-primary/20 bg-primary/5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-primary">
+                <FileText className="h-5 w-5" />
+                <span className="font-medium">Intervention assignée</span>
+              </div>
+              {request.status === 'assignee' && (
+                <Button 
+                  size="sm"
+                  onClick={handleStartAssignedIntervention}
+                  className="gap-2"
+                >
+                  <Play className="h-4 w-4" />
+                  Démarrer l'intervention
+                </Button>
+              )}
+            </div>
+            <p className="text-sm font-medium text-foreground mb-2">
+              {request.assignment.rangeName}
+            </p>
+            <div className="grid grid-cols-3 gap-3 text-xs">
+              {request.assignment.date && (
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <CalendarIcon className="h-3 w-3" />
+                  <span>{format(request.assignment.date, 'dd/MM/yyyy', { locale: fr })}</span>
+                </div>
+              )}
+              {request.assignment.time && (
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  <span>{request.assignment.time}</span>
+                </div>
+              )}
+              {request.assignment.operator && (
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <User className="h-3 w-3" />
+                  <span>{request.assignment.operator}</span>
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+
+        {/* Assigned range without full assignment info (legacy) */}
+        {request.assignedRange && !request.assignment && (
           <Card className="p-4 border-primary/20 bg-primary/5">
             <div className="flex items-center gap-2 text-primary mb-2">
               <FileText className="h-5 w-5" />
@@ -571,59 +710,192 @@ const InterventionRequestDetail: React.FC = () => {
       )}
 
       {/* Modal: Sélection de gamme */}
-      <Dialog open={rangeModalOpen} onOpenChange={setRangeModalOpen}>
+      <Dialog open={rangeModalOpen} onOpenChange={handleRangeModalClose}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Assigner une gamme de maintenance</DialogTitle>
+            <DialogTitle>
+              {rangeModalStep === 'select' && 'Assigner une gamme de maintenance'}
+              {rangeModalStep === 'actions' && `Gamme sélectionnée : ${selectedRange?.name}`}
+              {rangeModalStep === 'assign' && 'Planifier l\'intervention'}
+            </DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4 py-4">
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Rechercher une gamme..."
-                  value={rangeSearchQuery}
-                  onChange={(e) => setRangeSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Button 
-                variant="outline"
-                onClick={() => {
-                  setRangeModalOpen(false);
-                  navigate('/maintenance/ranges/new');
-                }}
-                className="gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Créer une gamme
-              </Button>
-            </div>
-            
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {filteredRanges.map((range) => (
-                <Card 
-                  key={range.id}
-                  className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => handleSelectRange(range)}
+          {/* Step 1: Select range */}
+          {rangeModalStep === 'select' && (
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Rechercher une gamme..."
+                    value={rangeSearchQuery}
+                    onChange={(e) => setRangeSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    handleRangeModalClose();
+                    navigate('/maintenance/ranges/new');
+                  }}
+                  className="gap-2"
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-foreground">{range.name}</p>
-                      <p className="text-sm text-muted-foreground">{range.code} • {range.family}</p>
-                      <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
-                        <span>{range.frequency}</span>
-                        <span>{range.estimatedTime}</span>
-                        <span>{range.tasksCount} tâches</span>
+                  <Plus className="h-4 w-4" />
+                  Créer une gamme
+                </Button>
+              </div>
+              
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {filteredRanges.map((range) => (
+                  <Card 
+                    key={range.id}
+                    className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => handleSelectRange(range)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-foreground">{range.name}</p>
+                        <p className="text-sm text-muted-foreground">{range.code} • {range.family}</p>
+                        <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
+                          <span>{range.frequency}</span>
+                          <span>{range.estimatedTime}</span>
+                          <span>{range.tasksCount} tâches</span>
+                        </div>
                       </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
                     </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Step 2: Choose action */}
+          {rangeModalStep === 'actions' && selectedRange && (
+            <div className="space-y-4 py-4">
+              <Card className="p-4 bg-muted/30">
+                <p className="font-medium text-foreground">{selectedRange.name}</p>
+                <p className="text-sm text-muted-foreground">{selectedRange.code} • {selectedRange.family}</p>
+                <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                  <span>{selectedRange.frequency}</span>
+                  <span>{selectedRange.estimatedTime}</span>
+                  <span>{selectedRange.tasksCount} tâches</span>
+                </div>
+              </Card>
+
+              <div className="flex flex-col gap-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start h-14"
+                  onClick={() => {
+                    setRangeModalStep('select');
+                    setSelectedRange(null);
+                  }}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-3" />
+                  Annuler et choisir une autre gamme
+                </Button>
+                
+                <Button 
+                  variant="outline"
+                  className="w-full justify-start h-14 border-primary/30 hover:bg-primary/10"
+                  onClick={() => setRangeModalStep('assign')}
+                >
+                  <CalendarIcon className="h-4 w-4 mr-3 text-primary" />
+                  Assigner l'intervention (planifier pour plus tard)
+                </Button>
+                
+                <Button 
+                  className="w-full justify-start h-14 bg-green-600 hover:bg-green-700"
+                  onClick={handleStartExecution}
+                >
+                  <Play className="h-4 w-4 mr-3" />
+                  Démarrer l'intervention maintenant
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Assignment form */}
+          {rangeModalStep === 'assign' && selectedRange && (
+            <div className="space-y-4 py-4">
+              <Card className="p-3 bg-muted/30">
+                <p className="font-medium text-foreground text-sm">{selectedRange.name}</p>
+                <p className="text-xs text-muted-foreground">{selectedRange.code}</p>
+              </Card>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Date d'intervention</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !assignmentDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {assignmentDate ? format(assignmentDate, 'PPP', { locale: fr }) : 'Sélectionner une date'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={assignmentDate}
+                        onSelect={setAssignmentDate}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Heure d'intervention</Label>
+                  <Input
+                    type="time"
+                    value={assignmentTime}
+                    onChange={(e) => setAssignmentTime(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Opérateur</Label>
+                  <Select value={assignmentOperator} onValueChange={setAssignmentOperator}>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Sélectionner un opérateur" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Non assigné</SelectItem>
+                      {operators.map((op) => (
+                        <SelectItem key={op} value={op}>{op}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => setRangeModalStep('actions')}
+                >
+                  Retour
+                </Button>
+                <Button 
+                  className="flex-1"
+                  onClick={handleAssignRange}
+                >
+                  Assigner l'intervention
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
