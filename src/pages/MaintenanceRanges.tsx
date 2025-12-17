@@ -153,6 +153,7 @@ const MaintenanceRanges: React.FC = () => {
   // États pour les équipements
   const [equipmentSearchQuery, setEquipmentSearchQuery] = useState('');
   const [selectedEquipments, setSelectedEquipments] = useState<string[]>([]);
+  const [excludedEquipments, setExcludedEquipments] = useState<string[]>([]);
   const [familyFilter, setFamilyFilter] = useState<string>('all');
   const [subFamilyFilter, setSubFamilyFilter] = useState<string>('all');
 
@@ -224,20 +225,26 @@ const MaintenanceRanges: React.FC = () => {
 
   // Calculer les interventions générées
   const generatedInterventions = useMemo((): GeneratedIntervention[] => {
-    if (!startDate || !endDate || selectedEquipments.length === 0) return [];
+    if (!startDate || !endDate) return [];
 
     const interventions: GeneratedIntervention[] = [];
     const rangesToUse = isMassDialogOpen 
       ? maintenanceRanges.filter(r => selectedRanges.includes(r.id))
       : selectedRange ? [selectedRange] : [];
 
-    const frequency = selectedFrequency || (selectedRange?.frequency || 'Mensuel');
+    // Pour la génération en masse, utiliser tous les équipements sauf exclus
+    // Pour la génération simple, utiliser les équipements sélectionnés
+    const equipmentsToUse = isMassDialogOpen 
+      ? availableEquipments.filter(e => !excludedEquipments.includes(e.id))
+      : equipmentList.filter(e => selectedEquipments.includes(e.id));
+
+    if (equipmentsToUse.length === 0) return [];
 
     rangesToUse.forEach(range => {
-      selectedEquipments.forEach(equipmentId => {
-        const equipment = equipmentList.find(e => e.id === equipmentId);
-        if (!equipment) return;
+      // Utiliser la fréquence de chaque gamme pour la génération en masse
+      const frequency = isMassDialogOpen ? range.frequency : (selectedFrequency || range.frequency);
 
+      equipmentsToUse.forEach(equipment => {
         let currentDate = new Date(startDate);
         while (currentDate <= endDate) {
           let interventionDate = new Date(currentDate);
@@ -295,7 +302,7 @@ const MaintenanceRanges: React.FC = () => {
     });
 
     return interventions;
-  }, [startDate, endDate, selectedEquipments, selectedRange, selectedRanges, isMassDialogOpen, selectedFrequency, excludeWeekends, excludePeriod, excludeStartDate, excludeEndDate]);
+  }, [startDate, endDate, selectedEquipments, excludedEquipments, availableEquipments, selectedRange, selectedRanges, isMassDialogOpen, selectedFrequency, excludeWeekends, excludePeriod, excludeStartDate, excludeEndDate]);
 
   // Dates avec interventions pour le calendrier
   const interventionDates = useMemo(() => {
@@ -333,6 +340,22 @@ const MaintenanceRanges: React.FC = () => {
     );
   };
 
+  const handleToggleExcludedEquipment = (equipmentId: string) => {
+    setExcludedEquipments(prev => 
+      prev.includes(equipmentId) 
+        ? prev.filter(id => id !== equipmentId)
+        : [...prev, equipmentId]
+    );
+  };
+
+  const handleSelectAllExcluded = (checked: boolean) => {
+    if (checked) {
+      setExcludedEquipments(filteredEquipments.map(e => e.id));
+    } else {
+      setExcludedEquipments([]);
+    }
+  };
+
   const handleToggleRange = (rangeId: number) => {
     setSelectedRanges(prev =>
       prev.includes(rangeId)
@@ -353,6 +376,7 @@ const MaintenanceRanges: React.FC = () => {
     setStartDate(undefined);
     setEndDate(undefined);
     setSelectedEquipments([]);
+    setExcludedEquipments([]);
     setEquipmentSearchQuery('');
     setFamilyFilter('all');
     setSubFamilyFilter('all');
@@ -389,6 +413,9 @@ const MaintenanceRanges: React.FC = () => {
   const allFilteredEquipmentsSelected = filteredEquipments.length > 0 && 
     filteredEquipments.every(e => selectedEquipments.includes(e.id));
 
+  const allFilteredEquipmentsExcluded = filteredEquipments.length > 0 && 
+    filteredEquipments.every(e => excludedEquipments.includes(e.id));
+
   const allFilteredRangesSelected = filteredRanges.length > 0 &&
     filteredRanges.every(r => selectedRanges.includes(r.id));
 
@@ -396,7 +423,11 @@ const MaintenanceRanges: React.FC = () => {
     ? selectedRanges.length > 0 
     : true;
 
-  const canProceedStep2 = startDate && endDate && selectedEquipments.length > 0;
+  // Pour la génération en masse: au moins un équipement non exclu
+  // Pour la génération simple: au moins un équipement sélectionné
+  const canProceedStep2 = isMassDialogOpen 
+    ? startDate && endDate && (availableEquipments.length - excludedEquipments.length) > 0
+    : startDate && endDate && selectedEquipments.length > 0;
 
   // Nombre de gammes impactées
   const impactedRangesCount = isMassDialogOpen 
@@ -432,7 +463,9 @@ const MaintenanceRanges: React.FC = () => {
 
   const renderEquipmentSelection = () => (
     <div className="space-y-3">
-      <Label className="text-sm font-medium text-foreground">Équipements</Label>
+      <Label className="text-sm font-medium text-foreground">
+        {isMassDialogOpen ? 'Équipements à exclure' : 'Équipements'}
+      </Label>
       
       {!hasSelectedRange ? (
         <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
@@ -443,9 +476,17 @@ const MaintenanceRanges: React.FC = () => {
       ) : (
         <>
           <div className="p-2 rounded-lg bg-muted/30 text-xs text-muted-foreground">
-            Équipements filtrés par famille : <span className="font-medium">{allowedFamiliesAndSubFamilies.families.join(', ')}</span>
-            {' / Sous-famille : '}
-            <span className="font-medium">{allowedFamiliesAndSubFamilies.subFamilies.join(', ')}</span>
+            {isMassDialogOpen ? (
+              <>
+                Tous les équipements compatibles seront inclus. Cochez ceux à <span className="font-medium text-destructive">exclure</span>.
+              </>
+            ) : (
+              <>
+                Équipements filtrés par famille : <span className="font-medium">{allowedFamiliesAndSubFamilies.families.join(', ')}</span>
+                {' / Sous-famille : '}
+                <span className="font-medium">{allowedFamiliesAndSubFamilies.subFamilies.join(', ')}</span>
+              </>
+            )}
           </div>
           
           <div className="space-y-2">
@@ -487,49 +528,105 @@ const MaintenanceRanges: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-            <Checkbox 
-              id="select-all-equipment"
-              checked={allFilteredEquipmentsSelected}
-              onCheckedChange={handleSelectAllEquipments}
-              disabled={!hasSelectedRange}
-            />
-            <Label htmlFor="select-all-equipment" className="text-sm cursor-pointer">
-              Tout sélectionner ({filteredEquipments.length} équipement(s))
-            </Label>
-          </div>
+          {isMassDialogOpen ? (
+            <>
+              <div className="flex items-center gap-2 p-2 bg-destructive/10 rounded-lg">
+                <Checkbox 
+                  id="exclude-all-equipment"
+                  checked={allFilteredEquipmentsExcluded}
+                  onCheckedChange={handleSelectAllExcluded}
+                  disabled={!hasSelectedRange}
+                />
+                <Label htmlFor="exclude-all-equipment" className="text-sm cursor-pointer text-destructive">
+                  Tout exclure ({filteredEquipments.length} équipement(s))
+                </Label>
+              </div>
 
-          <ScrollArea className="h-[150px] border border-border rounded-lg">
-            <div className="p-2 space-y-1">
-              {filteredEquipments.map(equipment => (
-                <div 
-                  key={equipment.id}
-                  className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 transition-colors"
-                >
-                  <Checkbox 
-                    id={`equipment-${equipment.id}`}
-                    checked={selectedEquipments.includes(equipment.id)}
-                    onCheckedChange={() => handleToggleEquipment(equipment.id)}
-                  />
-                  <Label htmlFor={`equipment-${equipment.id}`} className="flex-1 cursor-pointer">
-                    <span className="text-sm font-medium">{equipment.name}</span>
-                    <span className="text-xs text-muted-foreground ml-2">
-                      {equipment.family} &gt; {equipment.subFamily}
-                    </span>
-                  </Label>
+              <ScrollArea className="h-[150px] border border-border rounded-lg">
+                <div className="p-2 space-y-1">
+                  {filteredEquipments.map(equipment => (
+                    <div 
+                      key={equipment.id}
+                      className={cn(
+                        "flex items-center gap-3 p-2 rounded hover:bg-muted/50 transition-colors",
+                        excludedEquipments.includes(equipment.id) && "bg-destructive/10"
+                      )}
+                    >
+                      <Checkbox 
+                        id={`exclude-equipment-${equipment.id}`}
+                        checked={excludedEquipments.includes(equipment.id)}
+                        onCheckedChange={() => handleToggleExcludedEquipment(equipment.id)}
+                      />
+                      <Label htmlFor={`exclude-equipment-${equipment.id}`} className="flex-1 cursor-pointer">
+                        <span className={cn(
+                          "text-sm font-medium",
+                          excludedEquipments.includes(equipment.id) && "text-destructive line-through"
+                        )}>{equipment.name}</span>
+                        <span className="text-xs text-muted-foreground ml-2">
+                          {equipment.family} &gt; {equipment.subFamily}
+                        </span>
+                      </Label>
+                    </div>
+                  ))}
+                  {filteredEquipments.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      Aucun équipement correspondant trouvé
+                    </p>
+                  )}
                 </div>
-              ))}
-              {filteredEquipments.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Aucun équipement correspondant trouvé
-                </p>
-              )}
-            </div>
-          </ScrollArea>
+              </ScrollArea>
 
-          <p className="text-xs text-muted-foreground">
-            {selectedEquipments.length} équipement(s) sélectionné(s)
-          </p>
+              <p className="text-xs text-muted-foreground">
+                {excludedEquipments.length} équipement(s) exclu(s) sur {availableEquipments.length} disponibles
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
+                <Checkbox 
+                  id="select-all-equipment"
+                  checked={allFilteredEquipmentsSelected}
+                  onCheckedChange={handleSelectAllEquipments}
+                  disabled={!hasSelectedRange}
+                />
+                <Label htmlFor="select-all-equipment" className="text-sm cursor-pointer">
+                  Tout sélectionner ({filteredEquipments.length} équipement(s))
+                </Label>
+              </div>
+
+              <ScrollArea className="h-[150px] border border-border rounded-lg">
+                <div className="p-2 space-y-1">
+                  {filteredEquipments.map(equipment => (
+                    <div 
+                      key={equipment.id}
+                      className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 transition-colors"
+                    >
+                      <Checkbox 
+                        id={`equipment-${equipment.id}`}
+                        checked={selectedEquipments.includes(equipment.id)}
+                        onCheckedChange={() => handleToggleEquipment(equipment.id)}
+                      />
+                      <Label htmlFor={`equipment-${equipment.id}`} className="flex-1 cursor-pointer">
+                        <span className="text-sm font-medium">{equipment.name}</span>
+                        <span className="text-xs text-muted-foreground ml-2">
+                          {equipment.family} &gt; {equipment.subFamily}
+                        </span>
+                      </Label>
+                    </div>
+                  ))}
+                  {filteredEquipments.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      Aucun équipement correspondant trouvé
+                    </p>
+                  )}
+                </div>
+              </ScrollArea>
+
+              <p className="text-xs text-muted-foreground">
+                {selectedEquipments.length} équipement(s) sélectionné(s)
+              </p>
+            </>
+          )}
         </>
       )}
     </div>
@@ -537,20 +634,31 @@ const MaintenanceRanges: React.FC = () => {
 
   const renderPeriodAndOptions = () => (
     <>
-      {/* Périodicité */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-foreground">Périodicité</Label>
-        <Select value={selectedFrequency} onValueChange={setSelectedFrequency}>
-          <SelectTrigger>
-            <SelectValue placeholder="Sélectionner la périodicité" />
-          </SelectTrigger>
-          <SelectContent>
-            {frequencyOptions.map(option => (
-              <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {/* Périodicité - uniquement pour génération simple */}
+      {!isMassDialogOpen && (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-foreground">Périodicité</Label>
+          <Select value={selectedFrequency} onValueChange={setSelectedFrequency}>
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner la périodicité" />
+            </SelectTrigger>
+            <SelectContent>
+              {frequencyOptions.map(option => (
+                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Info périodicité pour génération masse */}
+      {isMassDialogOpen && (
+        <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
+          <p className="text-sm text-blue-700">
+            La périodicité de chaque gamme sera utilisée automatiquement pour générer les interventions.
+          </p>
+        </div>
+      )}
 
       {/* Période de génération */}
       <div className="space-y-3">
@@ -1142,7 +1250,9 @@ const MaintenanceRanges: React.FC = () => {
               {currentStep < 3 ? (
                 <Button
                   onClick={() => setCurrentStep(prev => prev + 1)}
-                  disabled={currentStep === 1 ? !canProceedStep1 || selectedEquipments.length === 0 : !canProceedStep2}
+                  disabled={currentStep === 1 
+                    ? !canProceedStep1 || (isMassDialogOpen ? availableEquipments.length === excludedEquipments.length : selectedEquipments.length === 0) 
+                    : !canProceedStep2}
                 >
                   Suivant
                   <ChevronRight className="h-4 w-4 ml-2" />
