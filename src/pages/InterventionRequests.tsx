@@ -9,11 +9,12 @@ import {
   Plus, 
   AlertTriangle, 
   Clock, 
-  User
+  User,
+  Pencil
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
-import { CreateInterventionRequestModal } from '@/components/tablet/CreateInterventionRequestModal';
+import { CreateInterventionRequestModal, InterventionRequestFormData } from '@/components/tablet/CreateInterventionRequestModal';
 import { toast } from 'sonner';
 import {
   Select,
@@ -36,6 +37,7 @@ export interface InterventionRequest {
   status: RequestStatus;
   createdBy: string;
   createdAt: string;
+  operator?: string;
 }
 
 const interventionRequests: InterventionRequest[] = [
@@ -174,10 +176,11 @@ interface KanbanColumnProps {
   status: RequestStatus;
   requests: InterventionRequest[];
   onCardClick: (id: string) => void;
+  onEditClick: (request: InterventionRequest) => void;
   headerColor: string;
 }
 
-const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, requests, onCardClick, headerColor }) => {
+const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, requests, onCardClick, onEditClick, headerColor }) => {
   return (
     <div className="flex flex-col h-full min-w-0">
       <div className={cn("p-3 rounded-t-lg font-semibold text-sm", headerColor)}>
@@ -190,13 +193,24 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, requests, onCardClic
             <Card 
               key={request.id}
               className={cn(
-                "p-3 border-l-4 cursor-pointer transition-all hover:shadow-md",
+                "p-3 border-l-4 cursor-pointer transition-all hover:shadow-md relative group",
                 priorityConfig.borderColor
               )}
               onClick={() => onCardClick(request.id)}
             >
+              {/* Edit button */}
+              <button
+                className="absolute top-2 right-2 p-1.5 rounded-md bg-muted/80 hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditClick(request);
+                }}
+              >
+                <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+
               <div className="space-y-2">
-                <div className="flex items-center gap-1 flex-wrap">
+                <div className="flex items-center gap-1 flex-wrap pr-8">
                   <Badge className={cn("text-xs", priorityConfig.className)}>
                     <AlertTriangle className="h-3 w-3 mr-1" />
                     {priorityConfig.label}
@@ -237,7 +251,9 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, requests, onCardClic
 const InterventionRequests: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [editingRequest, setEditingRequest] = useState<InterventionRequestFormData | null>(null);
   const [requests, setRequests] = useState(interventionRequests);
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [driverFilter, setDriverFilter] = useState<string>('all');
@@ -265,38 +281,72 @@ const InterventionRequests: React.FC = () => {
   const enAttente = filteredRequests.filter(r => r.status === 'en_attente');
 
 
-  const handleCreateRequest = (data: {
-    title: string;
-    description: string;
-    equipmentId: string;
-    equipmentName: string;
-    priority: 'low' | 'medium' | 'high' | 'critical';
-    photo?: string;
-  }) => {
-    const newRequest: InterventionRequest = {
-      id: `DI${String(requests.length + 1).padStart(3, '0')}`,
-      title: data.title,
-      equipment: data.equipmentName,
-      equipmentCode: data.equipmentId,
-      location: 'Zone à définir',
-      description: data.description,
-      priority: data.priority,
-      status: 'ouverte',
-      createdBy: 'Adélaïde Brunin',
-      createdAt: new Date().toLocaleString('fr-FR', { 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }),
-    };
-    setRequests([newRequest, ...requests]);
-    toast.success('Demande d\'Intervention créée avec succès');
+  const handleSubmit = (data: InterventionRequestFormData) => {
+    if (modalMode === 'edit' && data.id) {
+      // Update existing request
+      setRequests(requests.map(req => 
+        req.id === data.id 
+          ? {
+              ...req,
+              title: data.title,
+              description: data.description,
+              equipment: data.equipmentName,
+              equipmentCode: data.equipmentId,
+              priority: data.priority,
+              operator: data.operator,
+            }
+          : req
+      ));
+      toast.success('Demande d\'Intervention modifiée avec succès');
+    } else {
+      // Create new request
+      const newRequest: InterventionRequest = {
+        id: `DI${String(requests.length + 1).padStart(3, '0')}`,
+        title: data.title,
+        equipment: data.equipmentName,
+        equipmentCode: data.equipmentId,
+        location: 'Zone à définir',
+        description: data.description,
+        priority: data.priority,
+        status: 'ouverte',
+        createdBy: 'Adélaïde Brunin',
+        createdAt: new Date().toLocaleString('fr-FR', { 
+          day: '2-digit', 
+          month: '2-digit', 
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        operator: data.operator,
+      };
+      setRequests([newRequest, ...requests]);
+      toast.success('Demande d\'Intervention créée avec succès');
+    }
+    setEditingRequest(null);
   };
 
   const handleCardClick = (id: string) => {
     navigate(`/intervention-requests/${id}`);
+  };
+
+  const handleEditClick = (request: InterventionRequest) => {
+    setEditingRequest({
+      id: request.id,
+      title: request.title,
+      description: request.description,
+      equipmentId: request.equipmentCode,
+      equipmentName: request.equipment,
+      priority: request.priority,
+      operator: request.operator,
+    });
+    setModalMode('edit');
+    setModalOpen(true);
+  };
+
+  const handleCreateClick = () => {
+    setEditingRequest(null);
+    setModalMode('create');
+    setModalOpen(true);
   };
 
   return (
@@ -305,7 +355,7 @@ const InterventionRequests: React.FC = () => {
         title="Demandes d'Intervention" 
         subtitle="Anomalies et demandes signalées"
         action={
-          <Button onClick={() => setCreateModalOpen(true)}>
+          <Button onClick={handleCreateClick}>
             <Plus className="h-4 w-4 mr-2" />
             Nouvelle Demande d'Intervention
           </Button>
@@ -313,9 +363,11 @@ const InterventionRequests: React.FC = () => {
       />
 
       <CreateInterventionRequestModal
-        open={createModalOpen}
-        onOpenChange={setCreateModalOpen}
-        onSubmit={handleCreateRequest}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        onSubmit={handleSubmit}
+        editData={editingRequest}
+        mode={modalMode}
       />
 
       {/* Recherche et filtres */}
@@ -362,6 +414,7 @@ const InterventionRequests: React.FC = () => {
           status="ouverte"
           requests={ouvertes}
           onCardClick={handleCardClick}
+          onEditClick={handleEditClick}
           headerColor="bg-blue-100 text-blue-800"
         />
         <KanbanColumn
@@ -369,6 +422,7 @@ const InterventionRequests: React.FC = () => {
           status="assignee"
           requests={assignees}
           onCardClick={handleCardClick}
+          onEditClick={handleEditClick}
           headerColor="bg-indigo-100 text-indigo-800"
         />
         <KanbanColumn
@@ -376,6 +430,7 @@ const InterventionRequests: React.FC = () => {
           status="en_cours"
           requests={enCours}
           onCardClick={handleCardClick}
+          onEditClick={handleEditClick}
           headerColor="bg-purple-100 text-purple-800"
         />
         <KanbanColumn
@@ -383,6 +438,7 @@ const InterventionRequests: React.FC = () => {
           status="en_attente"
           requests={enAttente}
           onCardClick={handleCardClick}
+          onEditClick={handleEditClick}
           headerColor="bg-amber-100 text-amber-800"
         />
       </div>
