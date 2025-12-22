@@ -4,97 +4,128 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format, startOfWeek, endOfWeek, eachDayOfInterval, addDays, addWeeks, subWeeks, addMonths, subMonths, startOfMonth, endOfMonth, isSameMonth, isSameDay, addYears, subYears } from "date-fns";
+import { format, startOfWeek, endOfWeek, eachDayOfInterval, addDays, addWeeks, subWeeks, addMonths, subMonths, startOfMonth, endOfMonth, isSameMonth, isSameDay, isAfter, isBefore, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Filter, Settings } from "lucide-react";
+
+type InterventionStatus = 'en_retard' | 'bientot_du' | 'cette_semaine' | 'planifie' | 'complete';
 
 interface ScheduledIntervention {
   id: string;
-  title: string;
   equipment: string;
-  type: 'Préventive' | 'Corrective' | 'Contrôle';
-  operator: string;
+  status: InterventionStatus;
+  gamme: string;
   date: Date;
-  startTime: string;
-  endTime: string;
+  note: string;
 }
 
 const mockInterventions: ScheduledIntervention[] = [
   {
     id: "1",
-    title: "Maintenance pompe hydraulique",
-    equipment: "Pompe P-001",
-    type: "Préventive",
-    operator: "Jean Dupont",
-    date: new Date(),
-    startTime: "08:00",
-    endTime: "10:00",
+    equipment: "camion 456",
+    status: "complete",
+    gamme: "Test camion Renault",
+    date: new Date(2025, 9, 29),
+    note: "Généré depuis la gamme: Test camion Renault",
   },
   {
     id: "2",
-    title: "Contrôle compresseur",
-    equipment: "Compresseur C-002",
-    type: "Contrôle",
-    operator: "Marie Martin",
-    date: new Date(),
-    startTime: "14:00",
-    endTime: "15:30",
+    equipment: "camion 793",
+    status: "planifie",
+    gamme: "Test camion Renault",
+    date: new Date(2025, 9, 29),
+    note: "Généré depuis la gamme: Test camion Renault",
   },
   {
     id: "3",
-    title: "Réparation convoyeur",
-    equipment: "Convoyeur CV-003",
-    type: "Corrective",
-    operator: "Pierre Durand",
-    date: addDays(new Date(), 2),
-    startTime: "09:00",
-    endTime: "12:00",
+    equipment: "camion 456",
+    status: "planifie",
+    gamme: "Test camion Renault",
+    date: new Date(2025, 9, 30),
+    note: "Généré depuis la gamme: Test camion Renault",
   },
   {
     id: "4",
-    title: "Vidange moteur",
-    equipment: "Moteur M-004",
-    type: "Préventive",
-    operator: "Jean Dupont",
-    date: addDays(new Date(), 5),
-    startTime: "10:00",
-    endTime: "11:00",
+    equipment: "camion 793",
+    status: "planifie",
+    gamme: "Test camion Renault",
+    date: new Date(2025, 9, 30),
+    note: "Généré depuis la gamme: Test camion Renault",
   },
   {
     id: "5",
-    title: "Inspection générale",
-    equipment: "Ligne de production L-001",
-    type: "Contrôle",
-    operator: "Sophie Bernard",
-    date: addDays(new Date(), -3),
-    startTime: "08:00",
-    endTime: "17:00",
+    equipment: "Pompe P-001",
+    status: "en_retard",
+    gamme: "Maintenance pompe",
+    date: addDays(new Date(), -5),
+    note: "Généré depuis la gamme: Maintenance pompe",
+  },
+  {
+    id: "6",
+    equipment: "Compresseur C-002",
+    status: "bientot_du",
+    gamme: "Contrôle compresseur",
+    date: addDays(new Date(), 2),
+    note: "Généré depuis la gamme: Contrôle compresseur",
+  },
+  {
+    id: "7",
+    equipment: "Convoyeur CV-003",
+    status: "cette_semaine",
+    gamme: "Inspection convoyeur",
+    date: addDays(new Date(), 4),
+    note: "Généré depuis la gamme: Inspection convoyeur",
   },
 ];
 
-const getTypeColor = (type: string) => {
-  switch (type) {
-    case 'Corrective':
-      return 'bg-red-500 text-white';
-    case 'Préventive':
-      return 'bg-green-500 text-white';
-    case 'Contrôle':
-      return 'bg-amber-500 text-white';
+const getStatusColor = (status: InterventionStatus) => {
+  switch (status) {
+    case 'en_retard':
+      return 'bg-red-100 text-red-700 border-red-200';
+    case 'bientot_du':
+      return 'bg-orange-100 text-orange-700 border-orange-200';
+    case 'cette_semaine':
+      return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+    case 'planifie':
+      return 'bg-blue-100 text-blue-700 border-blue-200';
+    case 'complete':
+      return 'bg-green-100 text-green-700 border-green-200';
     default:
       return 'bg-muted text-muted-foreground';
   }
 };
 
-const getTypeBorderColor = (type: string) => {
-  switch (type) {
-    case 'Corrective':
-      return 'border-l-red-500';
-    case 'Préventive':
-      return 'border-l-green-500';
-    case 'Contrôle':
-      return 'border-l-amber-500';
+const getStatusLabel = (status: InterventionStatus) => {
+  switch (status) {
+    case 'en_retard':
+      return 'En retard';
+    case 'bientot_du':
+      return 'Bientôt dû';
+    case 'cette_semaine':
+      return 'Cette semaine';
+    case 'planifie':
+      return 'Planifié';
+    case 'complete':
+      return 'Terminé';
     default:
-      return 'border-l-muted';
+      return status;
+  }
+};
+
+const getLegendDotColor = (status: InterventionStatus) => {
+  switch (status) {
+    case 'en_retard':
+      return 'bg-red-500';
+    case 'bientot_du':
+      return 'bg-orange-500';
+    case 'cette_semaine':
+      return 'bg-yellow-500';
+    case 'planifie':
+      return 'bg-blue-500';
+    case 'complete':
+      return 'bg-green-500';
+    default:
+      return 'bg-muted';
   }
 };
 
@@ -104,66 +135,65 @@ const getInterventionsForDate = (date: Date) => {
   );
 };
 
-// Annual View Component
-const AnnualView = ({ currentDate, onMonthClick }: { currentDate: Date; onMonthClick: (month: number) => void }) => {
-  const months = Array.from({ length: 12 }, (_, i) => i);
+const getInterventionsForMonth = (date: Date) => {
+  return mockInterventions.filter((intervention) =>
+    isSameMonth(intervention.date, date)
+  );
+};
 
+// Stats calculation
+const getStats = (interventions: ScheduledIntervention[]) => {
+  return {
+    total: interventions.length,
+    complete: interventions.filter(i => i.status === 'complete').length,
+    en_cours: interventions.filter(i => i.status === 'cette_semaine' || i.status === 'bientot_du').length,
+    en_retard: interventions.filter(i => i.status === 'en_retard').length,
+  };
+};
+
+// List View Component
+const ListView = ({ currentDate }: { currentDate: Date }) => {
+  const interventions = getInterventionsForMonth(currentDate);
+  
   return (
-    <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
-      {months.map((month) => {
-        const monthDate = new Date(currentDate.getFullYear(), month, 1);
-        const daysInMonth = eachDayOfInterval({
-          start: startOfMonth(monthDate),
-          end: endOfMonth(monthDate),
-        });
-        const interventionsInMonth = mockInterventions.filter(
-          (i) => i.date.getMonth() === month && i.date.getFullYear() === currentDate.getFullYear()
-        );
-
-        return (
-          <Card
-            key={month}
-            className="cursor-pointer hover:bg-accent/50 transition-colors"
-            onClick={() => onMonthClick(month)}
-          >
+    <div className="space-y-4">
+      {interventions.length === 0 ? (
+        <Card>
+          <CardContent className="p-8 text-center text-muted-foreground">
+            Aucune intervention pour cette période
+          </CardContent>
+        </Card>
+      ) : (
+        interventions.map((intervention) => (
+          <Card key={intervention.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-4">
-              <h3 className="font-semibold text-foreground mb-2 capitalize">
-                {format(monthDate, "MMMM", { locale: fr })}
-              </h3>
-              <div className="grid grid-cols-7 gap-0.5 text-xs">
-                {["L", "M", "M", "J", "V", "S", "D"].map((day, i) => (
-                  <div key={i} className="text-center text-muted-foreground font-medium">
-                    {day}
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">{intervention.equipment}</span>
+                    <Badge className={getStatusColor(intervention.status)}>
+                      {getStatusLabel(intervention.status)}
+                    </Badge>
                   </div>
-                ))}
-                {Array.from({ length: (daysInMonth[0].getDay() + 6) % 7 }).map((_, i) => (
-                  <div key={`empty-${i}`} />
-                ))}
-                {daysInMonth.map((day) => {
-                  const hasIntervention = interventionsInMonth.some((i) =>
-                    isSameDay(i.date, day)
-                  );
-                  return (
-                    <div
-                      key={day.toISOString()}
-                      className={`text-center p-0.5 rounded-sm ${
-                        hasIntervention ? "bg-primary text-primary-foreground" : ""
-                      } ${isSameDay(day, new Date()) ? "ring-1 ring-primary" : ""}`}
-                    >
-                      {format(day, "d")}
-                    </div>
-                  );
-                })}
+                  <div className="text-sm text-muted-foreground">
+                    Gamme: {intervention.gamme}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CalendarIcon className="h-4 w-4" />
+                    {format(intervention.date, "dd/MM/yyyy", { locale: fr })}
+                  </div>
+                  <div className="text-sm text-muted-foreground italic">
+                    "{intervention.note}"
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon">
+                  <Settings className="h-4 w-4 text-muted-foreground" />
+                </Button>
               </div>
-              {interventionsInMonth.length > 0 && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  {interventionsInMonth.length} intervention(s)
-                </p>
-              )}
             </CardContent>
           </Card>
-        );
-      })}
+        ))
+      )}
     </div>
   );
 };
@@ -203,9 +233,9 @@ const MonthlyView = ({ currentDate, onDayClick }: { currentDate: Date; onDayClic
                   {interventions.slice(0, 2).map((intervention) => (
                     <div
                       key={intervention.id}
-                      className={`text-xs p-1 rounded truncate ${getTypeColor(intervention.type)}`}
+                      className={`text-xs p-1 rounded truncate ${getStatusColor(intervention.status)}`}
                     >
-                      {intervention.title}
+                      {intervention.equipment}
                     </div>
                   ))}
                   {interventions.length > 2 && (
@@ -230,7 +260,7 @@ const WeeklyView = ({ currentDate }: { currentDate: Date }) => {
     start: weekStart,
     end: addDays(weekStart, 6),
   });
-  const hours = Array.from({ length: 12 }, (_, i) => i + 7); // 7h to 18h
+  const hours = Array.from({ length: 12 }, (_, i) => i + 7);
 
   return (
     <Card>
@@ -254,33 +284,26 @@ const WeeklyView = ({ currentDate }: { currentDate: Date }) => {
           </div>
           <div className="grid grid-cols-8 gap-1">
             {hours.map((hour) => (
-              <>
-                <div key={`hour-${hour}`} className="text-right pr-2 text-sm text-muted-foreground py-4 border-t">
+              <div key={`row-${hour}`} className="contents">
+                <div className="text-right pr-2 text-sm text-muted-foreground py-4 border-t">
                   {hour}:00
                 </div>
                 {days.map((day) => {
-                  const interventions = getInterventionsForDate(day).filter((i) => {
-                    const startHour = parseInt(i.startTime.split(":")[0]);
-                    return startHour === hour;
-                  });
-
+                  const interventions = getInterventionsForDate(day);
                   return (
-                    <div key={`${day.toISOString()}-${hour}`} className="border-t min-h-16 relative">
-                      {interventions.map((intervention) => (
+                    <div key={`${day.toISOString()}-${hour}`} className="border-t min-h-16 relative p-1">
+                      {hour === 8 && interventions.map((intervention) => (
                         <div
                           key={intervention.id}
-                          className={`absolute left-0 right-0 mx-0.5 p-1 rounded text-xs border-l-4 bg-card shadow-sm ${getTypeBorderColor(intervention.type)}`}
+                          className={`p-1 rounded text-xs mb-1 ${getStatusColor(intervention.status)}`}
                         >
-                          <div className="font-medium truncate">{intervention.title}</div>
-                          <div className="text-muted-foreground">
-                            {intervention.startTime} - {intervention.endTime}
-                          </div>
+                          <div className="font-medium truncate">{intervention.equipment}</div>
                         </div>
                       ))}
                     </div>
                   );
                 })}
-              </>
+              </div>
             ))}
           </div>
         </div>
@@ -292,7 +315,6 @@ const WeeklyView = ({ currentDate }: { currentDate: Date }) => {
 // Daily View Component
 const DailyView = ({ currentDate }: { currentDate: Date }) => {
   const interventions = getInterventionsForDate(currentDate);
-  const hours = Array.from({ length: 12 }, (_, i) => i + 7); // 7h to 18h
 
   return (
     <Card>
@@ -302,43 +324,39 @@ const DailyView = ({ currentDate }: { currentDate: Date }) => {
             {format(currentDate, "EEEE d MMMM yyyy", { locale: fr })}
           </h3>
         </div>
-        <div className="grid grid-cols-1 gap-0">
-          {hours.map((hour) => {
-            const hourInterventions = interventions.filter((i) => {
-              const startHour = parseInt(i.startTime.split(":")[0]);
-              return startHour === hour;
-            });
-
-            return (
-              <div key={hour} className="flex border-t min-h-20">
-                <div className="w-20 text-right pr-4 py-2 text-sm text-muted-foreground">
-                  {hour}:00
-                </div>
-                <div className="flex-1 relative py-1">
-                  {hourInterventions.map((intervention) => (
-                    <div
-                      key={intervention.id}
-                      className={`p-3 rounded-md border-l-4 bg-accent/30 mb-1 ${getTypeBorderColor(intervention.type)}`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="font-medium text-foreground">{intervention.title}</div>
-                          <div className="text-sm text-muted-foreground">{intervention.equipment}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {intervention.startTime} - {intervention.endTime} • {intervention.operator}
-                          </div>
-                        </div>
-                        <Badge className={getTypeColor(intervention.type)}>
-                          {intervention.type}
+        {interventions.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8">
+            Aucune intervention pour ce jour
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {interventions.map((intervention) => (
+              <Card key={intervention.id} className="border">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-foreground">{intervention.equipment}</span>
+                        <Badge className={getStatusColor(intervention.status)}>
+                          {getStatusLabel(intervention.status)}
                         </Badge>
                       </div>
+                      <div className="text-sm text-muted-foreground">
+                        Gamme: {intervention.gamme}
+                      </div>
+                      <div className="text-sm text-muted-foreground italic">
+                        "{intervention.note}"
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                    <Button variant="ghost" size="icon">
+                      <Settings className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -346,49 +364,21 @@ const DailyView = ({ currentDate }: { currentDate: Date }) => {
 
 const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [activeView, setActiveView] = useState<string>("monthly");
+  const [activeView, setActiveView] = useState<string>("list");
+
+  const interventions = getInterventionsForMonth(currentDate);
+  const stats = getStats(interventions);
 
   const navigatePrevious = () => {
-    switch (activeView) {
-      case "annual":
-        setCurrentDate(subYears(currentDate, 1));
-        break;
-      case "monthly":
-        setCurrentDate(subMonths(currentDate, 1));
-        break;
-      case "weekly":
-        setCurrentDate(subWeeks(currentDate, 1));
-        break;
-      case "daily":
-        setCurrentDate(addDays(currentDate, -1));
-        break;
-    }
+    setCurrentDate(subMonths(currentDate, 1));
   };
 
   const navigateNext = () => {
-    switch (activeView) {
-      case "annual":
-        setCurrentDate(addYears(currentDate, 1));
-        break;
-      case "monthly":
-        setCurrentDate(addMonths(currentDate, 1));
-        break;
-      case "weekly":
-        setCurrentDate(addWeeks(currentDate, 1));
-        break;
-      case "daily":
-        setCurrentDate(addDays(currentDate, 1));
-        break;
-    }
+    setCurrentDate(addMonths(currentDate, 1));
   };
 
   const goToToday = () => {
     setCurrentDate(new Date());
-  };
-
-  const handleMonthClick = (month: number) => {
-    setCurrentDate(new Date(currentDate.getFullYear(), month, 1));
-    setActiveView("monthly");
   };
 
   const handleDayClick = (date: Date) => {
@@ -396,82 +386,116 @@ const CalendarPage = () => {
     setActiveView("daily");
   };
 
-  const getNavigationLabel = () => {
-    switch (activeView) {
-      case "annual":
-        return format(currentDate, "yyyy");
-      case "monthly":
-        return format(currentDate, "MMMM yyyy", { locale: fr });
-      case "weekly":
-        const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
-        const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
-        return `${format(weekStart, "d MMM", { locale: fr })} - ${format(weekEnd, "d MMM yyyy", { locale: fr })}`;
-      case "daily":
-        return format(currentDate, "EEEE d MMMM yyyy", { locale: fr });
-      default:
-        return "";
-    }
-  };
-
   return (
     <div className="p-6 space-y-6">
       <PageTitle 
-        title="Calendrier de maintenance" 
-        subtitle="Visualisez et gérez les interventions planifiées"
+        title="Calendrier de Maintenance" 
+        subtitle="Planifier et suivre les interventions de maintenance"
       />
 
+      {/* Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <Tabs value={activeView} onValueChange={setActiveView}>
-          <TabsList>
-            <TabsTrigger value="annual">Annuel</TabsTrigger>
-            <TabsTrigger value="monthly">Mensuel</TabsTrigger>
-            <TabsTrigger value="weekly">Semaine</TabsTrigger>
-            <TabsTrigger value="daily">Jour</TabsTrigger>
-          </TabsList>
-        </Tabs>
-
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={navigatePrevious}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" onClick={navigateNext}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <span className="font-semibold text-lg capitalize min-w-40">
+            {format(currentDate, "MMMM yyyy", { locale: fr })}
+          </span>
           <Button variant="outline" size="sm" onClick={goToToday}>
-            <CalendarIcon className="h-4 w-4 mr-2" />
             Aujourd'hui
           </Button>
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" onClick={navigatePrevious}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <div className="min-w-48 text-center font-medium capitalize">
-              {getNavigationLabel()}
-            </div>
-            <Button variant="outline" size="icon" onClick={navigateNext}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Tabs value={activeView} onValueChange={setActiveView}>
+            <TabsList>
+              <TabsTrigger value="monthly" className="flex items-center gap-1">
+                <CalendarIcon className="h-4 w-4" />
+                Mois
+              </TabsTrigger>
+              <TabsTrigger value="weekly" className="flex items-center gap-1">
+                <CalendarIcon className="h-4 w-4" />
+                Semaine
+              </TabsTrigger>
+              <TabsTrigger value="daily" className="flex items-center gap-1">
+                <CalendarIcon className="h-4 w-4" />
+                Jour
+              </TabsTrigger>
+              <TabsTrigger value="list" className="flex items-center gap-1">
+                <List className="h-4 w-4" />
+                Liste
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Button variant="outline" size="sm">
+            <Filter className="h-4 w-4 mr-2" />
+            Filtres
+          </Button>
         </div>
       </div>
 
-      <div className="flex gap-4 text-sm">
+      {/* Legend */}
+      <div className="flex flex-wrap gap-4 text-sm">
+        <span className="font-medium">Légende</span>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-green-500"></div>
-          <span>Préventive</span>
+          <div className={`w-3 h-3 rounded-full ${getLegendDotColor('en_retard')}`}></div>
+          <span>En retard</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-red-500"></div>
-          <span>Corrective</span>
+          <div className={`w-3 h-3 rounded-full ${getLegendDotColor('bientot_du')}`}></div>
+          <span>Bientôt dû</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-amber-500"></div>
-          <span>Contrôle</span>
+          <div className={`w-3 h-3 rounded-full ${getLegendDotColor('cette_semaine')}`}></div>
+          <span>Cette semaine</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className={`w-3 h-3 rounded-full ${getLegendDotColor('planifie')}`}></div>
+          <span>Planifié</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className={`w-3 h-3 rounded-full ${getLegendDotColor('complete')}`}></div>
+          <span>Complété</span>
         </div>
       </div>
 
-      {activeView === "annual" && (
-        <AnnualView currentDate={currentDate} onMonthClick={handleMonthClick} />
-      )}
-      {activeView === "monthly" && (
-        <MonthlyView currentDate={currentDate} onDayClick={handleDayClick} />
-      )}
+      {/* Views */}
+      {activeView === "list" && <ListView currentDate={currentDate} />}
+      {activeView === "monthly" && <MonthlyView currentDate={currentDate} onDayClick={handleDayClick} />}
       {activeView === "weekly" && <WeeklyView currentDate={currentDate} />}
       {activeView === "daily" && <DailyView currentDate={currentDate} />}
+
+      {/* Stats Footer */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-foreground">{stats.total}</div>
+            <div className="text-sm text-muted-foreground">Interventions totales</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-foreground">{stats.complete}</div>
+            <div className="text-sm text-muted-foreground">Complété</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-foreground">{stats.en_cours}</div>
+            <div className="text-sm text-muted-foreground">En cours</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-red-500">{stats.en_retard}</div>
+            <div className="text-sm text-muted-foreground">En retard</div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
