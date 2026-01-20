@@ -472,9 +472,6 @@ const TabletHistory: React.FC = () => {
                       </div>
                     </div>
 
-                    {item.comments && (
-                      <p className="text-sm text-muted-foreground italic">"{item.comments}"</p>
-                    )}
                   </div>
 
                   {/* Action Buttons - Right side */}
