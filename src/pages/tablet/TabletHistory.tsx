@@ -327,21 +327,21 @@ const TabletHistory: React.FC = () => {
       </div>
 
       {/* Filtres */}
-      <Card className="p-4 space-y-3">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher par nom d'intervention..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 h-12"
-          />
-        </div>
-        
-        <div className="grid grid-cols-2 gap-3">
+      <Card className="p-3">
+        <div className="flex gap-2 items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-10"
+            />
+          </div>
+          
           <Select value={equipmentFilter} onValueChange={setEquipmentFilter}>
-            <SelectTrigger className="h-12">
-              <Truck className="h-4 w-4 mr-2 text-muted-foreground" />
+            <SelectTrigger className="h-10 w-[160px]">
+              <Truck className="h-4 w-4 mr-1 text-muted-foreground" />
               <SelectValue placeholder="Camion" />
             </SelectTrigger>
             <SelectContent>
@@ -354,8 +354,8 @@ const TabletHistory: React.FC = () => {
           </Select>
 
           <Select value={operatorFilter} onValueChange={setOperatorFilter}>
-            <SelectTrigger className="h-12">
-              <User className="h-4 w-4 mr-2 text-muted-foreground" />
+            <SelectTrigger className="h-10 w-[160px]">
+              <User className="h-4 w-4 mr-1 text-muted-foreground" />
               <SelectValue placeholder="Opérateur" />
             </SelectTrigger>
             <SelectContent>
@@ -366,27 +366,25 @@ const TabletHistory: React.FC = () => {
               ))}
             </SelectContent>
           </Select>
-        </div>
 
-        <div className="flex gap-3">
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="flex-1 h-12 justify-start text-left font-normal">
-                <CalendarIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+              <Button variant="outline" className="h-10 w-[220px] justify-start text-left font-normal">
+                <CalendarIcon className="h-4 w-4 mr-1 text-muted-foreground" />
                 {dateRange?.from ? (
                   dateRange.to ? (
-                    <>
-                      {format(dateRange.from, "dd/MM/yyyy", { locale: fr })} - {format(dateRange.to, "dd/MM/yyyy", { locale: fr })}
-                    </>
+                    <span className="text-sm">
+                      {format(dateRange.from, "dd/MM", { locale: fr })} - {format(dateRange.to, "dd/MM", { locale: fr })}
+                    </span>
                   ) : (
-                    format(dateRange.from, "dd/MM/yyyy", { locale: fr })
+                    <span className="text-sm">{format(dateRange.from, "dd/MM/yyyy", { locale: fr })}</span>
                   )
                 ) : (
-                  <span className="text-muted-foreground">Sélectionner une période</span>
+                  <span className="text-muted-foreground text-sm">Période</span>
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0" align="end">
               <Calendar
                 initialFocus
                 mode="range"
@@ -402,11 +400,11 @@ const TabletHistory: React.FC = () => {
           {hasActiveFilters && (
             <Button 
               variant="ghost" 
-              className="h-12 px-4 text-muted-foreground"
+              size="icon"
+              className="h-10 w-10 text-muted-foreground"
               onClick={clearFilters}
             >
-              <XCircle className="h-4 w-4 mr-2" />
-              Effacer
+              <XCircle className="h-4 w-4" />
             </Button>
           )}
         </div>
