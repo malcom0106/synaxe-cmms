@@ -68,7 +68,25 @@ const MaintenanceRangeDetail: React.FC = () => {
 
   const [actions, setActions] = useState(initialActions);
 
-  const range = {
+  const range: {
+    id: number;
+    name: string;
+    type: string;
+    operationType: string;
+    frequency: string;
+    estimatedDuration: string;
+    familyEquipment: string;
+    subFamily: string;
+    description: string;
+    createdDate: string;
+    interventionsPlanned: number;
+    interventionsCompleted: number;
+    equipmentConcerned: number;
+    periodicityType: 'temporal' | 'referential';
+    referentialAction?: 'kilometres' | 'temps' | 'litrage';
+    thresholdMin?: number;
+    thresholdMax?: number;
+  } = {
     id: 1,
     name: 'Check Quotidienne Oléoserveur',
     type: 'Programme de maintenance préventive',
@@ -82,6 +100,11 @@ const MaintenanceRangeDetail: React.FC = () => {
     interventionsPlanned: 94,
     interventionsCompleted: 2,
     equipmentConcerned: 2,
+    // Nouveaux champs pour périodicité référentielle
+    periodicityType: 'referential',
+    referentialAction: 'kilometres',
+    thresholdMin: 10000,
+    thresholdMax: 50000,
   };
 
   const handleDeleteAction = (actionId: number) => {
@@ -190,13 +213,63 @@ const MaintenanceRangeDetail: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <p className="text-sm text-muted-foreground mb-2">Périodicité</p>
-                        <p className="text-sm font-medium text-foreground">{range.frequency}</p>
+                        {range.periodicityType === 'referential' ? (
+                          <div className="space-y-1">
+                            <Badge className="bg-primary/10 text-primary hover:bg-primary/10 border-0">
+                              {range.referentialAction === 'kilometres' && 'Kilomètres'}
+                              {range.referentialAction === 'temps' && 'Temps moteur'}
+                              {range.referentialAction === 'litrage' && 'Litrage'}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <p className="text-sm font-medium text-foreground">{range.frequency}</p>
+                        )}
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground mb-2">Durée estimée</p>
                         <p className="text-sm font-medium text-foreground">{range.estimatedDuration}</p>
                       </div>
                     </div>
+
+                    {/* Ligne 2bis : Seuils (uniquement pour périodicité référentielle) */}
+                    {range.periodicityType === 'referential' && (range.thresholdMin !== undefined || range.thresholdMax !== undefined) && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Seuil minimum</p>
+                          <p className="text-sm font-medium text-foreground">
+                            {range.thresholdMin !== undefined ? (
+                              <>
+                                {range.thresholdMin.toLocaleString('fr-FR')}{' '}
+                                <span className="text-muted-foreground">
+                                  {range.referentialAction === 'kilometres' && 'km'}
+                                  {range.referentialAction === 'temps' && 'h'}
+                                  {range.referentialAction === 'litrage' && 'L'}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-muted-foreground">Non défini</span>
+                            )}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Seuil maximum</p>
+                          <p className="text-sm font-medium text-foreground">
+                            {range.thresholdMax !== undefined ? (
+                              <>
+                                {range.thresholdMax.toLocaleString('fr-FR')}{' '}
+                                <span className="text-muted-foreground">
+                                  {range.referentialAction === 'kilometres' && 'km'}
+                                  {range.referentialAction === 'temps' && 'h'}
+                                  {range.referentialAction === 'litrage' && 'L'}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-muted-foreground">Non défini</span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Ligne 3 : Famille / Sous-famille */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
