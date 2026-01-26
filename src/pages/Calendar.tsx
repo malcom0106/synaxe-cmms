@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addDays, addWeeks, subWeeks, addMonths, subMonths, startOfMonth, endOfMonth, isSameMonth, isSameDay, isAfter, isBefore, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Filter, Settings } from "lucide-react";
+import { ThresholdNotifications, ThresholdNotification } from "@/components/calendar/ThresholdNotifications";
+import { CreateUnitInterventionModal } from "@/components/calendar/CreateUnitInterventionModal";
 
 type InterventionStatus = 'en_retard' | 'bientot_du' | 'cette_semaine' | 'planifie' | 'complete';
 
@@ -86,6 +88,73 @@ const mockInterventions: ScheduledIntervention[] = [
   },
 ];
 
+// Mock notifications de seuils référentiels
+const mockThresholdNotifications: ThresholdNotification[] = [
+  {
+    id: 'notif-1',
+    equipmentId: 'eq-456',
+    equipmentName: 'Camion 456',
+    equipmentCode: 'CAM-456',
+    gammeId: 'gamme-1',
+    gammeName: 'Check Quotidienne Oléoserveur',
+    gammeCode: 'GAM-001',
+    referentialType: 'kilometres',
+    thresholdLevel: 'maxi',
+    thresholdValue: 50000,
+    currentValue: 52340,
+    unit: 'km',
+    detectionDate: new Date(2025, 0, 24, 14, 32),
+    isAcknowledged: false,
+  },
+  {
+    id: 'notif-2',
+    equipmentId: 'eq-793',
+    equipmentName: 'Camion 793',
+    equipmentCode: 'CAM-793',
+    gammeId: 'gamme-2',
+    gammeName: 'Maintenance préventive mensuelle',
+    gammeCode: 'GAM-002',
+    referentialType: 'temps',
+    thresholdLevel: 'mini',
+    thresholdValue: 500,
+    currentValue: 485,
+    unit: 'h',
+    detectionDate: new Date(2025, 0, 23, 9, 15),
+    isAcknowledged: false,
+  },
+  {
+    id: 'notif-3',
+    equipmentId: 'eq-001',
+    equipmentName: 'Oléoserveur 201',
+    equipmentCode: 'OLE-201',
+    gammeId: 'gamme-3',
+    gammeName: 'Contrôle litrage',
+    gammeCode: 'GAM-003',
+    referentialType: 'litrage',
+    thresholdLevel: 'maxi',
+    thresholdValue: 100000,
+    currentValue: 105230,
+    unit: 'L',
+    detectionDate: new Date(2025, 0, 22, 16, 45),
+    isAcknowledged: false,
+  },
+  {
+    id: 'notif-4',
+    equipmentId: 'eq-002',
+    equipmentName: 'Pompe P-001',
+    equipmentCode: 'PMP-001',
+    gammeId: 'gamme-4',
+    gammeName: 'Maintenance pompe',
+    gammeCode: 'GAM-004',
+    referentialType: 'temps',
+    thresholdLevel: 'mini',
+    thresholdValue: 200,
+    currentValue: 195,
+    unit: 'h',
+    detectionDate: new Date(2025, 0, 20, 11, 0),
+    isAcknowledged: false,
+  },
+];
 const getStatusColor = (status: InterventionStatus) => {
   switch (status) {
     case 'en_retard':
@@ -373,6 +442,9 @@ const DailyView = ({ currentDate }: { currentDate: Date }) => {
 const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeView, setActiveView] = useState<string>("list");
+  const [notifications, setNotifications] = useState<ThresholdNotification[]>(mockThresholdNotifications);
+  const [selectedNotification, setSelectedNotification] = useState<ThresholdNotification | null>(null);
+  const [isInterventionModalOpen, setIsInterventionModalOpen] = useState(false);
 
   const interventions = getInterventionsForMonth(currentDate);
   const stats = getStats(interventions);
@@ -392,6 +464,27 @@ const CalendarPage = () => {
   const handleDayClick = (date: Date) => {
     setCurrentDate(date);
     setActiveView("daily");
+  };
+
+  const handleNotificationClick = (notification: ThresholdNotification) => {
+    setSelectedNotification(notification);
+    setIsInterventionModalOpen(true);
+  };
+
+  const handleCreateIntervention = (data: {
+    notificationId: string;
+    date: Date;
+    operatorId?: string;
+  }) => {
+    // Acquitter la notification (la supprimer de la liste)
+    setNotifications(prev => 
+      prev.map(n => 
+        n.id === data.notificationId 
+          ? { ...n, isAcknowledged: true }
+          : n
+      )
+    );
+    setSelectedNotification(null);
   };
 
   return (
@@ -443,8 +536,22 @@ const CalendarPage = () => {
             <Filter className="h-4 w-4 mr-2" />
             Filtres
           </Button>
+          
+          {/* Notifications de seuils */}
+          <ThresholdNotifications 
+            notifications={notifications}
+            onNotificationClick={handleNotificationClick}
+          />
         </div>
       </div>
+
+      {/* Modal de création d'intervention */}
+      <CreateUnitInterventionModal
+        open={isInterventionModalOpen}
+        onOpenChange={setIsInterventionModalOpen}
+        notification={selectedNotification}
+        onCreateIntervention={handleCreateIntervention}
+      />
 
       {/* Legend */}
       <div className="flex flex-wrap gap-4 text-sm">
