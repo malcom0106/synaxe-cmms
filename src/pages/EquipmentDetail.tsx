@@ -306,6 +306,66 @@ const EquipmentDetail: React.FC = () => {
             </Card>
           </div>
 
+          {/* Valeurs référentielles - Pleine largeur */}
+          <Card className="p-6 mt-6">
+            <h2 className="text-lg font-semibold text-foreground mb-4">Valeurs référentielles</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Kilométrage */}
+              <div className="p-4 rounded-lg bg-muted/30 border border-border">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm">🚗</span>
+                  </div>
+                  <div className="text-sm font-medium text-foreground">Kilométrage</div>
+                </div>
+                <div className="text-2xl font-bold text-foreground mb-2">245 890 km</div>
+                <div className="text-xs text-muted-foreground space-y-0.5">
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    15/01/2024 à 14:32
+                  </div>
+                  <div>Par Jean Martin • Intervention #363</div>
+                </div>
+              </div>
+
+              {/* Temps moteur */}
+              <div className="p-4 rounded-lg bg-muted/30 border border-border">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm">⏱️</span>
+                  </div>
+                  <div className="text-sm font-medium text-foreground">Temps moteur</div>
+                </div>
+                <div className="text-2xl font-bold text-foreground mb-2">12 458 h</div>
+                <div className="text-xs text-muted-foreground space-y-0.5">
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    10/01/2024 à 09:15
+                  </div>
+                  <div>Par Sophie Bernard • Intervention #364</div>
+                </div>
+              </div>
+
+              {/* Dernier index */}
+              <div className="p-4 rounded-lg bg-muted/30 border border-border">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm">📊</span>
+                  </div>
+                  <div className="text-sm font-medium text-foreground">Dernier index</div>
+                </div>
+                <div className="text-2xl font-bold text-foreground mb-2">1 547 203</div>
+                <div className="text-xs text-muted-foreground space-y-0.5">
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    08/01/2024 à 16:45
+                  </div>
+                  <div>Par Pierre Lefebvre • Intervention #367</div>
+                </div>
+              </div>
+            </div>
+          </Card>
+
           {/* Documents additionnels - Pleine largeur */}
           <Card className="p-6 mt-6">
             <div className="flex items-center justify-between mb-4">
