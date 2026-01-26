@@ -140,7 +140,7 @@ export const CreateUnitInterventionModal: React.FC<CreateUnitInterventionModalPr
     onCreateIntervention({
       notificationId: notification.id,
       date: selectedDate,
-      operatorId: selectedOperator || undefined,
+      operatorId: selectedOperator === 'none' ? undefined : selectedOperator || undefined,
     });
 
     toast({
@@ -265,7 +265,7 @@ export const CreateUnitInterventionModal: React.FC<CreateUnitInterventionModalPr
                 <SelectValue placeholder="Sélectionner un opérateur" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Non attribué</SelectItem>
+                <SelectItem value="none">Non attribué</SelectItem>
                 {mockOperators.map((operator) => (
                   <SelectItem key={operator.id} value={operator.id}>
                     {operator.name}
