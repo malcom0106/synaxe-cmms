@@ -22,6 +22,7 @@ import EquipmentFamilies from "./pages/EquipmentFamilies";
 import EquipmentSubFamilies from "./pages/EquipmentSubFamilies";
 import InterventionRequests from "./pages/InterventionRequests";
 import InterventionRequestDetail from "./pages/InterventionRequestDetail";
+import InterventionDetail from "./pages/InterventionDetail";
 import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
 
@@ -72,6 +73,7 @@ const App = () => (
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/maintenance" element={<Maintenance />} />
+                    <Route path="/maintenance/:id" element={<InterventionDetail />} />
                     <Route path="/maintenance/ranges" element={<MaintenanceRanges />} />
                     <Route path="/maintenance/ranges/:id" element={<MaintenanceRangeDetail />} />
                     <Route path="/maintenance/actions" element={<MaintenanceActions />} />

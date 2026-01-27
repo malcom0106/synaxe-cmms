@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,7 +12,8 @@ import {
   User,
   Circle,
   Target,
-  Settings
+  Settings,
+  ChevronRight
 } from 'lucide-react';
 
 interface Intervention {
@@ -99,6 +101,7 @@ const interventions: Intervention[] = [
 ];
 
 const Maintenance: React.FC = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInterventions, setSelectedInterventions] = useState<string[]>([]);
 
@@ -270,7 +273,8 @@ const Maintenance: React.FC = () => {
               {interventions.map((intervention) => (
                 <tr 
                   key={intervention.id} 
-                  className="border-b border-border hover:bg-muted/30 transition-colors"
+                  className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/maintenance/${intervention.id.replace('#', '')}`)}
                 >
                   <td className="px-4 py-3">
                     <Checkbox 
