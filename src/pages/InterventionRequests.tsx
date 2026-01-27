@@ -4,13 +4,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageTitle } from '@/components/ui/PageTitle';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Search, 
   Plus, 
   AlertTriangle, 
   Clock, 
   User,
-  Pencil
+  Pencil,
+  History,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +27,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export type RequestStatus = 'ouverte' | 'assignee' | 'en_cours' | 'en_attente' | 'terminee' | 'annulee';
 
@@ -251,12 +263,16 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, requests, onCardClic
 const InterventionRequests: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [historySearchQuery, setHistorySearchQuery] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [editingRequest, setEditingRequest] = useState<InterventionRequestFormData | null>(null);
   const [requests, setRequests] = useState(interventionRequests);
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [driverFilter, setDriverFilter] = useState<string>('all');
+  const [historyPriorityFilter, setHistoryPriorityFilter] = useState<string>('all');
+  const [historyDriverFilter, setHistoryDriverFilter] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<string>('active');
 
   // Get unique drivers for the filter
   const drivers = [...new Set(requests.map(r => r.createdBy))];
@@ -271,6 +287,19 @@ const InterventionRequests: React.FC = () => {
       request.equipment.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesPriority = priorityFilter === 'all' || request.priority === priorityFilter;
     const matchesDriver = driverFilter === 'all' || request.createdBy === driverFilter;
+    return matchesSearch && matchesPriority && matchesDriver;
+  });
+
+  // History requests (terminated and cancelled)
+  const historyRequests = requests.filter(r => 
+    r.status === 'terminee' || r.status === 'annulee'
+  );
+
+  const filteredHistoryRequests = historyRequests.filter(request => {
+    const matchesSearch = request.title.toLowerCase().includes(historySearchQuery.toLowerCase()) ||
+      request.equipment.toLowerCase().includes(historySearchQuery.toLowerCase());
+    const matchesPriority = historyPriorityFilter === 'all' || request.priority === historyPriorityFilter;
+    const matchesDriver = historyDriverFilter === 'all' || request.createdBy === historyDriverFilter;
     return matchesSearch && matchesPriority && matchesDriver;
   });
 
@@ -370,78 +399,199 @@ const InterventionRequests: React.FC = () => {
         mode={modalMode}
       />
 
-      {/* Recherche et filtres */}
-      <div className="flex gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher une demande..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Criticité" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Toutes criticités</SelectItem>
-            <SelectItem value="critical">Critique</SelectItem>
-            <SelectItem value="high">Haute</SelectItem>
-            <SelectItem value="medium">Moyenne</SelectItem>
-            <SelectItem value="low">Basse</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={driverFilter} onValueChange={setDriverFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Chauffeur" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les chauffeurs</SelectItem>
-            {drivers.map(driver => (
-              <SelectItem key={driver} value={driver}>{driver}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+        <TabsList className="w-fit">
+          <TabsTrigger value="active" className="gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            Demandes actives
+          </TabsTrigger>
+          <TabsTrigger value="history" className="gap-2">
+            <History className="h-4 w-4" />
+            Historique
+          </TabsTrigger>
+        </TabsList>
 
+        <TabsContent value="active" className="flex-1 flex flex-col space-y-4 mt-4">
+          {/* Recherche et filtres */}
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher une demande..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Criticité" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes criticités</SelectItem>
+                <SelectItem value="critical">Critique</SelectItem>
+                <SelectItem value="high">Haute</SelectItem>
+                <SelectItem value="medium">Moyenne</SelectItem>
+                <SelectItem value="low">Basse</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={driverFilter} onValueChange={setDriverFilter}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Chauffeur" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les chauffeurs</SelectItem>
+                {drivers.map(driver => (
+                  <SelectItem key={driver} value={driver}>{driver}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      {/* Kanban columns */}
-      <div className="flex-1 grid grid-cols-4 gap-4 min-h-0">
-        <KanbanColumn
-          title="Nouvelles"
-          status="ouverte"
-          requests={ouvertes}
-          onCardClick={handleCardClick}
-          onEditClick={handleEditClick}
-          headerColor="bg-blue-100 text-blue-800"
-        />
-        <KanbanColumn
-          title="Assignées"
-          status="assignee"
-          requests={assignees}
-          onCardClick={handleCardClick}
-          onEditClick={handleEditClick}
-          headerColor="bg-indigo-100 text-indigo-800"
-        />
-        <KanbanColumn
-          title="En cours"
-          status="en_cours"
-          requests={enCours}
-          onCardClick={handleCardClick}
-          onEditClick={handleEditClick}
-          headerColor="bg-purple-100 text-purple-800"
-        />
-        <KanbanColumn
-          title="En attente"
-          status="en_attente"
-          requests={enAttente}
-          onCardClick={handleCardClick}
-          onEditClick={handleEditClick}
-          headerColor="bg-amber-100 text-amber-800"
-        />
-      </div>
+          {/* Kanban columns */}
+          <div className="flex-1 grid grid-cols-4 gap-4 min-h-0">
+            <KanbanColumn
+              title="Nouvelles"
+              status="ouverte"
+              requests={ouvertes}
+              onCardClick={handleCardClick}
+              onEditClick={handleEditClick}
+              headerColor="bg-blue-100 text-blue-800"
+            />
+            <KanbanColumn
+              title="Assignées"
+              status="assignee"
+              requests={assignees}
+              onCardClick={handleCardClick}
+              onEditClick={handleEditClick}
+              headerColor="bg-indigo-100 text-indigo-800"
+            />
+            <KanbanColumn
+              title="En cours"
+              status="en_cours"
+              requests={enCours}
+              onCardClick={handleCardClick}
+              onEditClick={handleEditClick}
+              headerColor="bg-purple-100 text-purple-800"
+            />
+            <KanbanColumn
+              title="En attente"
+              status="en_attente"
+              requests={enAttente}
+              onCardClick={handleCardClick}
+              onEditClick={handleEditClick}
+              headerColor="bg-amber-100 text-amber-800"
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="history" className="flex-1 flex flex-col space-y-4 mt-4">
+          {/* Recherche et filtres pour l'historique */}
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher dans l'historique..."
+                value={historySearchQuery}
+                onChange={(e) => setHistorySearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={historyPriorityFilter} onValueChange={setHistoryPriorityFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Criticité" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes criticités</SelectItem>
+                <SelectItem value="critical">Critique</SelectItem>
+                <SelectItem value="high">Haute</SelectItem>
+                <SelectItem value="medium">Moyenne</SelectItem>
+                <SelectItem value="low">Basse</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={historyDriverFilter} onValueChange={setHistoryDriverFilter}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Chauffeur" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les chauffeurs</SelectItem>
+                {drivers.map(driver => (
+                  <SelectItem key={driver} value={driver}>{driver}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* History table */}
+          <div className="flex-1 rounded-lg border bg-card overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Référence</TableHead>
+                  <TableHead>Titre</TableHead>
+                  <TableHead>Équipement</TableHead>
+                  <TableHead>Demandeur</TableHead>
+                  <TableHead>Date création</TableHead>
+                  <TableHead>Criticité</TableHead>
+                  <TableHead>Statut</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredHistoryRequests.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      Aucune demande dans l'historique
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredHistoryRequests.map((request) => {
+                    const priorityConfig = getPriorityConfig(request.priority);
+                    const statusConfig = getStatusConfig(request.status);
+                    return (
+                      <TableRow 
+                        key={request.id} 
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => handleCardClick(request.id)}
+                      >
+                        <TableCell className="font-mono text-sm">{request.id}</TableCell>
+                        <TableCell className="font-medium">{request.title}</TableCell>
+                        <TableCell className="text-primary">{request.equipment}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5">
+                            <User className="h-3.5 w-3.5 text-muted-foreground" />
+                            {request.createdBy}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                            {request.createdAt}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={cn("text-xs", priorityConfig.className)}>
+                            {priorityConfig.label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={cn("text-xs gap-1", statusConfig.className)}>
+                            {request.status === 'terminee' ? (
+                              <CheckCircle className="h-3 w-3" />
+                            ) : (
+                              <XCircle className="h-3 w-3" />
+                            )}
+                            {statusConfig.label}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
