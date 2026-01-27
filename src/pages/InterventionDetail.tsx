@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import InterventionExecutionPanel from '@/components/intervention/InterventionExecutionPanel';
 import { 
   ArrowLeft, 
   Clock, 
@@ -23,6 +24,7 @@ import {
   Timer
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 type InterventionStatus = 'planifie' | 'en_cours' | 'termine' | 'en_retard';
 
@@ -192,17 +194,40 @@ const ActionCard: React.FC<{ action: MaintenanceAction; index: number }> = ({ ac
   );
 };
 
+// Mock steps for execution panel
+const mockExecutionSteps = [
+  { id: 's1', order: 1, label: 'Vérification niveau huile', description: 'Contrôler le niveau dans le réservoir principal', inputType: 'boolean' as const, required: true, value: null, completed: false },
+  { id: 's2', order: 2, label: 'Relevé pression', description: 'Mesurer la pression du circuit', inputType: 'numeric' as const, required: true, unit: 'bar', minValue: 150, maxValue: 200, value: null, completed: false },
+  { id: 's3', order: 3, label: 'Contrôle connexions', description: 'Vérifier les câbles et connexions', inputType: 'checkbox' as const, required: true, value: null, completed: false },
+  { id: 's4', order: 4, label: 'Photo compteur', description: 'Prendre photo pour archivage', inputType: 'photo' as const, required: false, value: null, completed: false },
+  { id: 's5', order: 5, label: 'Observations', description: 'Noter les anomalies constatées', inputType: 'comment' as const, required: false, value: null, completed: false },
+];
+
 const InterventionDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [isExecuting, setIsExecuting] = useState(false);
   
   // In real app, fetch by id
   const intervention = mockIntervention;
   const statusConfig = getStatusConfig(intervention.status);
   const StatusIcon = statusConfig.icon;
 
+  const handleStartExecution = () => {
+    setIsExecuting(true);
+  };
+
+  const handleCompleteExecution = () => {
+    setIsExecuting(false);
+    toast.success("Intervention terminée avec succès");
+  };
+
+  const handleCancelExecution = () => {
+    setIsExecuting(false);
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-4">
       {/* Header compact */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -234,20 +259,33 @@ const InterventionDetail: React.FC = () => {
             <Tablet className="h-4 w-4" />
             Accès tablette
           </Button>
-          <Button size="sm" className="gap-2">
-            <Play className="h-4 w-4" />
-            Exécuter l'intervention
-          </Button>
+          {!isExecuting && intervention.status !== 'termine' && (
+            <Button size="sm" className="gap-2" onClick={handleStartExecution}>
+              <Play className="h-4 w-4" />
+              Exécuter
+            </Button>
+          )}
           <Button variant="outline" size="sm" className="gap-2">
             <Pencil className="h-4 w-4" />
             Modifier
           </Button>
           <Button variant="outline" size="sm" className="gap-2">
             <FileDown className="h-4 w-4" />
-            Aperçu du PDF
+            PDF
           </Button>
         </div>
       </div>
+
+      {/* Execution Panel - displayed when executing */}
+      {isExecuting && (
+        <InterventionExecutionPanel
+          interventionId={intervention.id}
+          rangeName={intervention.gamme}
+          steps={mockExecutionSteps}
+          onComplete={handleCompleteExecution}
+          onCancel={handleCancelExecution}
+        />
+      )}
 
       {/* 3 cards in a row - optimized layout */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
