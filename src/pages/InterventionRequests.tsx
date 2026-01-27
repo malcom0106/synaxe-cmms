@@ -379,7 +379,7 @@ const InterventionRequests: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6 h-full flex flex-col">
+    <div className="p-6 space-y-6">
       <PageTitle 
         title="Demandes d'Intervention" 
         subtitle="Anomalies et demandes signalées"
@@ -399,7 +399,7 @@ const InterventionRequests: React.FC = () => {
         mode={modalMode}
       />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-fit">
           <TabsTrigger value="active" className="gap-2">
             <AlertTriangle className="h-4 w-4" />
@@ -411,7 +411,7 @@ const InterventionRequests: React.FC = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="active" className="flex-1 flex flex-col space-y-4 mt-4">
+        <TabsContent value="active" className="flex flex-col space-y-4 mt-4">
           {/* Recherche et filtres */}
           <div className="flex gap-4">
             <div className="relative flex-1">
@@ -449,7 +449,7 @@ const InterventionRequests: React.FC = () => {
           </div>
 
           {/* Kanban columns */}
-          <div className="flex-1 grid grid-cols-4 gap-4 min-h-0">
+          <div className="grid grid-cols-4 gap-4">
             <KanbanColumn
               title="Nouvelles"
               status="ouverte"
