@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import InterventionExecutionPanel from '@/components/intervention/InterventionExecutionPanel';
 import { 
   ArrowLeft, 
@@ -11,7 +11,6 @@ import {
   Calendar,
   User,
   Wrench,
-  Settings,
   FileText,
   MessageSquare,
   CheckCircle2,
@@ -19,9 +18,8 @@ import {
   Pencil,
   FileDown,
   Tablet,
-  ChevronDown,
-  ChevronRight,
-  Timer
+  Timer,
+  CircleDashed
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -125,74 +123,6 @@ const getStatusConfig = (status: InterventionStatus) => {
   }
 };
 
-const ActionCard: React.FC<{ action: MaintenanceAction; index: number }> = ({ action, index }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  
-  return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="border rounded-lg overflow-hidden">
-      <CollapsibleTrigger className="w-full">
-        <div className="flex items-center justify-between px-3 py-2 hover:bg-muted/30 transition-colors">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className="text-xs text-muted-foreground w-5">{index + 1}.</span>
-            <div className={cn(
-              "h-5 w-5 rounded-full flex items-center justify-center flex-shrink-0",
-              action.status === 'completed' ? "bg-green-100" : "bg-amber-100"
-            )}>
-              <CheckCircle2 className={cn(
-                "h-3 w-3",
-                action.status === 'completed' ? "text-green-600" : "text-amber-600"
-              )} />
-            </div>
-            <span className="font-medium text-sm truncate">{action.name}</span>
-          </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {action.completedAt && (
-              <span className="text-xs text-muted-foreground hidden lg:block">
-                {action.completedAt}
-              </span>
-            )}
-            <Badge className={cn(
-              "text-[10px] px-1.5 py-0",
-              action.status === 'completed' 
-                ? "bg-green-100 text-green-700 hover:bg-green-100" 
-                : "bg-amber-100 text-amber-700 hover:bg-amber-100"
-            )}>
-              {action.status === 'completed' ? 'OK' : 'En attente'}
-            </Badge>
-            {isOpen ? <ChevronDown className="h-3 w-3 text-muted-foreground" /> : <ChevronRight className="h-3 w-3 text-muted-foreground" />}
-          </div>
-        </div>
-      </CollapsibleTrigger>
-      <CollapsibleContent>
-        <div className="px-3 pb-2 pt-0 border-t bg-muted/10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 py-2">
-            {action.variables && action.variables.length > 0 && (
-              <div className="text-xs space-y-0.5">
-                {action.variables.map((variable, idx) => (
-                  <div key={idx} className="flex gap-1">
-                    <span className="text-muted-foreground">{variable.name}:</span>
-                    <span className="font-medium">{variable.value || '-'}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            {action.comment && (
-              <div className="text-xs">
-                <span className="text-muted-foreground">Note: </span>
-                <span>{action.comment}</span>
-              </div>
-            )}
-          </div>
-          {action.completedBy && (
-            <div className="text-[10px] text-muted-foreground pt-1 border-t">
-              Par {action.completedBy}
-            </div>
-          )}
-        </div>
-      </CollapsibleContent>
-    </Collapsible>
-  );
-};
 
 // Mock steps for execution panel
 const mockExecutionSteps = [
@@ -362,17 +292,70 @@ const InterventionDetail: React.FC = () => {
         </Card>
       </div>
 
-      {/* Actions de maintenance - section compacte */}
+      {/* Actions de maintenance - tableau */}
       <Card className="p-4">
-        <h3 className="flex items-center gap-2 font-semibold text-foreground mb-4">
+        <h3 className="flex items-center gap-2 font-semibold text-foreground mb-3">
           <Wrench className="h-4 w-4 text-primary" />
           Actions de maintenance ({intervention.actions.length})
         </h3>
-        <div className="space-y-1">
-          {intervention.actions.map((action, index) => (
-            <ActionCard key={action.id} action={action} index={index} />
-          ))}
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-10">#</TableHead>
+              <TableHead>Action</TableHead>
+              <TableHead>Statut</TableHead>
+              <TableHead>Variables</TableHead>
+              <TableHead>Commentaire</TableHead>
+              <TableHead>Opérateur</TableHead>
+              <TableHead className="text-right">Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {intervention.actions.map((action, index) => (
+              <TableRow key={action.id}>
+                <TableCell className="text-muted-foreground font-medium">{index + 1}</TableCell>
+                <TableCell className="font-medium">{action.name}</TableCell>
+                <TableCell>
+                  <Badge className={cn(
+                    "text-xs",
+                    action.status === 'completed' 
+                      ? "bg-green-100 text-green-700 hover:bg-green-100" 
+                      : "bg-amber-100 text-amber-700 hover:bg-amber-100"
+                  )}>
+                    {action.status === 'completed' ? (
+                      <><CheckCircle2 className="h-3 w-3 mr-1" />OK</>
+                    ) : (
+                      <><CircleDashed className="h-3 w-3 mr-1" />En attente</>
+                    )}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-xs">
+                  {action.variables && action.variables.length > 0 ? (
+                    <div className="space-y-0.5">
+                      {action.variables.map((v, idx) => (
+                        <div key={idx}>
+                          <span className="text-muted-foreground">{v.name}:</span>{' '}
+                          <span className="font-medium">{v.value || '-'}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground">-</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-xs max-w-32 truncate">
+                  {action.comment || <span className="text-muted-foreground">-</span>}
+                </TableCell>
+                <TableCell className="text-xs">
+                  {action.completedBy || <span className="text-muted-foreground">-</span>}
+                </TableCell>
+                <TableCell className="text-xs text-right text-muted-foreground">
+                  {action.completedAt || '-'}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </Card>
     </div>
   );
