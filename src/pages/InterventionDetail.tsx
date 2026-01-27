@@ -123,91 +123,72 @@ const getStatusConfig = (status: InterventionStatus) => {
   }
 };
 
-const ActionCard: React.FC<{ action: MaintenanceAction }> = ({ action }) => {
-  const [isOpen, setIsOpen] = useState(true);
+const ActionCard: React.FC<{ action: MaintenanceAction; index: number }> = ({ action, index }) => {
+  const [isOpen, setIsOpen] = useState(false);
   
   return (
-    <Card className="overflow-hidden">
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger className="w-full">
-          <div className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors">
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "h-6 w-6 rounded-full flex items-center justify-center",
-                action.status === 'completed' ? "bg-green-100" : "bg-amber-100"
-              )}>
-                <CheckCircle2 className={cn(
-                  "h-4 w-4",
-                  action.status === 'completed' ? "text-green-600" : "text-amber-600"
-                )} />
-              </div>
-              <div className="text-left">
-                <h4 className="font-medium text-foreground">{action.name}</h4>
-                <p className="text-xs text-muted-foreground">{action.description}</p>
-              </div>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="border rounded-lg overflow-hidden">
+      <CollapsibleTrigger className="w-full">
+        <div className="flex items-center justify-between px-3 py-2 hover:bg-muted/30 transition-colors">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <span className="text-xs text-muted-foreground w-5">{index + 1}.</span>
+            <div className={cn(
+              "h-5 w-5 rounded-full flex items-center justify-center flex-shrink-0",
+              action.status === 'completed' ? "bg-green-100" : "bg-amber-100"
+            )}>
+              <CheckCircle2 className={cn(
+                "h-3 w-3",
+                action.status === 'completed' ? "text-green-600" : "text-amber-600"
+              )} />
             </div>
-            <div className="flex items-center gap-3">
-              {action.completedAt && (
-                <span className="text-xs text-muted-foreground hidden sm:block">
-                  Complétée le {action.completedAt} par {action.completedBy}
-                </span>
-              )}
-              <Badge className={cn(
-                "text-xs",
-                action.status === 'completed' 
-                  ? "bg-green-100 text-green-700 hover:bg-green-100" 
-                  : "bg-amber-100 text-amber-700 hover:bg-amber-100"
-              )}>
-                {action.status === 'completed' ? 'Terminé' : 'En attente'}
-              </Badge>
-              {isOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-            </div>
+            <span className="font-medium text-sm truncate">{action.name}</span>
           </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="px-4 pb-4 pt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Variables */}
-              {action.variables && action.variables.length > 0 && (
-                <div className="bg-blue-50/50 rounded-lg p-3">
-                  <div className="flex items-center gap-2 text-blue-700 mb-2">
-                    <Settings className="h-4 w-4" />
-                    <span className="text-sm font-medium">Variables</span>
-                  </div>
-                  <div className="space-y-1.5">
-                    {action.variables.map((variable, idx) => (
-                      <div key={idx} className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">{variable.name} :</span>
-                        <span className="font-medium text-foreground">{variable.value || '-'}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Comment */}
-              {action.comment && (
-                <div className="bg-amber-50/50 rounded-lg p-3">
-                  <div className="flex items-center gap-2 text-amber-700 mb-2">
-                    <MessageSquare className="h-4 w-4" />
-                    <span className="text-sm font-medium">Commentaire</span>
-                  </div>
-                  <p className="text-sm text-foreground">{action.comment}</p>
-                </div>
-              )}
-            </div>
-            
-            {/* Completion info on mobile */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             {action.completedAt && (
-              <div className="mt-3 pt-3 border-t text-xs text-muted-foreground sm:hidden">
-                <Clock className="h-3 w-3 inline mr-1" />
-                Complétée le {action.completedAt} par {action.completedBy}
+              <span className="text-xs text-muted-foreground hidden lg:block">
+                {action.completedAt}
+              </span>
+            )}
+            <Badge className={cn(
+              "text-[10px] px-1.5 py-0",
+              action.status === 'completed' 
+                ? "bg-green-100 text-green-700 hover:bg-green-100" 
+                : "bg-amber-100 text-amber-700 hover:bg-amber-100"
+            )}>
+              {action.status === 'completed' ? 'OK' : 'En attente'}
+            </Badge>
+            {isOpen ? <ChevronDown className="h-3 w-3 text-muted-foreground" /> : <ChevronRight className="h-3 w-3 text-muted-foreground" />}
+          </div>
+        </div>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="px-3 pb-2 pt-0 border-t bg-muted/10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 py-2">
+            {action.variables && action.variables.length > 0 && (
+              <div className="text-xs space-y-0.5">
+                {action.variables.map((variable, idx) => (
+                  <div key={idx} className="flex gap-1">
+                    <span className="text-muted-foreground">{variable.name}:</span>
+                    <span className="font-medium">{variable.value || '-'}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {action.comment && (
+              <div className="text-xs">
+                <span className="text-muted-foreground">Note: </span>
+                <span>{action.comment}</span>
               </div>
             )}
           </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </Card>
+          {action.completedBy && (
+            <div className="text-[10px] text-muted-foreground pt-1 border-t">
+              Par {action.completedBy}
+            </div>
+          )}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 
@@ -349,9 +330,9 @@ const InterventionDetail: React.FC = () => {
           <Wrench className="h-4 w-4 text-primary" />
           Actions de maintenance ({intervention.actions.length})
         </h3>
-        <div className="space-y-3">
-          {intervention.actions.map((action) => (
-            <ActionCard key={action.id} action={action} />
+        <div className="space-y-1">
+          {intervention.actions.map((action, index) => (
+            <ActionCard key={action.id} action={action} index={index} />
           ))}
         </div>
       </Card>
