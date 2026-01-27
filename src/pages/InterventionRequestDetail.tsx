@@ -629,9 +629,27 @@ const InterventionRequestDetail: React.FC = () => {
         {/* Assigned range without full assignment info (legacy) */}
         {request.assignedRange && !request.assignment && (
           <Card className="p-4 border-primary/20 bg-primary/5">
-            <div className="flex items-center gap-2 text-primary mb-2">
-              <FileText className="h-5 w-5" />
-              <span className="font-medium">Gamme assignée</span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 text-primary">
+                <FileText className="h-5 w-5" />
+                <span className="font-medium">Gamme assignée</span>
+              </div>
+              {(request.status === 'assignee' || request.status === 'en_cours') && (
+                <Button 
+                  size="sm"
+                  onClick={() => {
+                    const range = maintenanceRanges.find(r => r.id === request.assignedRange);
+                    if (range) {
+                      setExecutingRange(range);
+                      setRequest({ ...request, status: 'en_cours' });
+                    }
+                  }}
+                  className="gap-2"
+                >
+                  <Play className="h-4 w-4" />
+                  Réaliser l'intervention
+                </Button>
+              )}
             </div>
             <p className="text-sm text-foreground">
               {maintenanceRanges.find(r => r.id === request.assignedRange)?.name || request.assignedRange}
