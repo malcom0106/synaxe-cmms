@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   Camera,
   CheckCircle2,
@@ -21,7 +22,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Pen,
-  X
+  X,
+  Paperclip,
+  File
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -41,6 +44,7 @@ interface MaintenanceStep {
   value: any;
   completed: boolean;
   completedAt?: string;
+  documents?: string[];
 }
 
 interface InterventionExecutionPanelProps {
@@ -65,6 +69,7 @@ const InterventionExecutionPanel: React.FC<InterventionExecutionPanelProps> = ({
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const completedSteps = steps.filter(s => s.completed).length;
   const progress = Math.round((completedSteps / steps.length) * 100);
@@ -157,6 +162,33 @@ const InterventionExecutionPanel: React.FC<InterventionExecutionPanelProps> = ({
     }
     toast.success("Intervention terminée avec succès");
     onComplete();
+  };
+
+  const handleAddDocument = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const currentDocs = steps[currentStepIndex].documents || [];
+    setSteps(steps.map((s, i) => 
+      i === currentStepIndex 
+        ? { ...s, documents: [...currentDocs, file.name] } 
+        : s
+    ));
+    toast.success(`Document "${file.name}" ajouté`);
+    e.target.value = '';
+  };
+
+  const handleRemoveDocument = (docIndex: number) => {
+    const currentDocs = steps[currentStepIndex].documents || [];
+    setSteps(steps.map((s, i) => 
+      i === currentStepIndex 
+        ? { ...s, documents: currentDocs.filter((_, di) => di !== docIndex) } 
+        : s
+    ));
   };
 
   const renderStepInput = () => {
@@ -301,12 +333,59 @@ const InterventionExecutionPanel: React.FC<InterventionExecutionPanelProps> = ({
                 {currentStep.completed ? <CheckCircle2 className="h-4 w-4" /> : currentStepIndex + 1}
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-sm">{currentStep.label}</h4>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-medium text-sm">{currentStep.label}</h4>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6"
+                        onClick={handleAddDocument}
+                      >
+                        <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Ajouter un document</TooltipContent>
+                  </Tooltip>
+                  {currentStep.documents && currentStep.documents.length > 0 && (
+                    <Badge variant="secondary" className="text-[10px] h-5">
+                      {currentStep.documents.length} doc{currentStep.documents.length > 1 ? 's' : ''}
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground">{currentStep.description}</p>
                 {currentStep.required && (
                   <Badge variant="outline" className="text-[10px] mt-1">Obligatoire</Badge>
                 )}
+                {/* Documents attachés */}
+                {currentStep.documents && currentStep.documents.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {currentStep.documents.map((doc, docIndex) => (
+                      <div 
+                        key={docIndex}
+                        className="flex items-center gap-1 bg-muted/50 rounded px-1.5 py-0.5 text-[10px] group"
+                      >
+                        <File className="h-3 w-3 text-muted-foreground" />
+                        <span className="max-w-[100px] truncate">{doc}</span>
+                        <button 
+                          onClick={() => handleRemoveDocument(docIndex)}
+                          className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                onChange={handleFileChange}
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              />
             </div>
 
             {/* Input de l'étape */}
