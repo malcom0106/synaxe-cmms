@@ -13,7 +13,8 @@ import {
   ChevronLeft,
   ChevronDown,
   Package,
-  Cog
+  Cog,
+  ClipboardCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -43,6 +44,7 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon: Icon, label, expanded }) =>
 export const Sidebar: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [maintenanceOpen, setMaintenanceOpen] = useState(true);
+  const [stockOpen, setStockOpen] = useState(true);
 
   return (
     <aside 
@@ -93,7 +95,28 @@ export const Sidebar: React.FC = () => {
         <NavItem to="/calendar" icon={Calendar} label="Calendrier" expanded={!collapsed} />
         <NavItem to="/equipment" icon={Box} label="Équipements" expanded={!collapsed} />
         <NavItem to="/intervention-requests" icon={TriangleAlert} label="Demandes d'Intervention" expanded={!collapsed} />
-        <NavItem to="/inventory" icon={Package} label="Stock" expanded={!collapsed} />
+        
+        {/* Stock with submenu */}
+        <div>
+          <button
+            onClick={() => setStockOpen(!stockOpen)}
+            className="flex items-center justify-between w-full gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-md text-foreground hover:bg-muted"
+          >
+            <div className="flex items-center gap-3">
+              <Package className="h-5 w-5 shrink-0" />
+              <span>Stock</span>
+            </div>
+            <ChevronDown className={cn("h-4 w-4 transition-transform", stockOpen && "rotate-180")} />
+          </button>
+          
+          {stockOpen && (
+            <div className="ml-4 mt-1 space-y-1 border-l-2 border-border pl-4">
+              <NavItem to="/inventory/parts" icon={Package} label="Pièces" expanded={!collapsed} />
+              <NavItem to="/inventory/counts" icon={ClipboardCheck} label="Inventaires" expanded={!collapsed} />
+            </div>
+          )}
+        </div>
+
         <NavItem to="/settings" icon={Settings} label="Paramètres" expanded={!collapsed} />
       </nav>
 

@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
 import Dashboard from "./pages/Dashboard";
 import Maintenance from "./pages/Maintenance";
@@ -11,7 +11,8 @@ import PreventiveMaintenance from "./pages/PreventiveMaintenance";
 import CorrectiveMaintenance from "./pages/CorrectiveMaintenance";
 import Equipment from "./pages/Equipment";
 import EquipmentDetail from "./pages/EquipmentDetail";
-import Inventory from "./pages/Inventory";
+import InventoryParts from "./pages/InventoryParts";
+import InventoryCounts from "./pages/InventoryCounts";
 import Documents from "./pages/Documents";
 import Settings from "./pages/Settings";
 import MaintenanceRanges from "./pages/MaintenanceRanges";
@@ -82,7 +83,9 @@ const App = () => (
                     <Route path="/corrective" element={<CorrectiveMaintenance />} />
                     <Route path="/equipment" element={<Equipment />} />
                     <Route path="/equipment/:id" element={<EquipmentDetail />} />
-                    <Route path="/inventory" element={<Inventory />} />
+                    <Route path="/inventory" element={<Navigate to="/inventory/parts" replace />} />
+                    <Route path="/inventory/parts" element={<InventoryParts />} />
+                    <Route path="/inventory/counts" element={<InventoryCounts />} />
                     <Route path="/documents" element={<Documents />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/settings/equipment-families" element={<EquipmentFamilies />} />
