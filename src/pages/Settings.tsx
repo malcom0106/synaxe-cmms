@@ -11,7 +11,8 @@ import {
   User,
   Shield,
   Sliders,
-  Key
+  Key,
+  Package
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -54,7 +55,7 @@ const Settings: React.FC = () => {
         <div className="flex items-center gap-3 mb-4">
           <Monitor className="h-6 w-6 text-foreground" />
           <div>
-            <h2 className="text-lg font-semibold text-foreground">Équipements et Infrastructure</h2>
+            <h2 className="text-lg font-semibold text-foreground">Équipements</h2>
             <p className="text-sm text-muted-foreground">Configuration des types et catégories d'équipements</p>
           </div>
         </div>
@@ -70,6 +71,31 @@ const Settings: React.FC = () => {
             title="Sous-Familles d'Équipements"
             description="Gérer les sous-familles d'équipements"
             to="/settings/equipment-subfamilies"
+          />
+        </div>
+      </div>
+
+      {/* Pièces */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <Package className="h-6 w-6 text-foreground" />
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Pièces</h2>
+            <p className="text-sm text-muted-foreground">Configuration des familles et catégories de pièces</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <SettingCard
+            icon={<Package className="h-5 w-5" />}
+            title="Familles de Pièces"
+            description="Gérer les familles de pièces"
+            to="/settings/part-families"
+          />
+          <SettingCard
+            icon={<Package className="h-5 w-5" />}
+            title="Sous-Familles de Pièces"
+            description="Gérer les sous-familles de pièces"
+            to="/settings/part-subfamilies"
           />
         </div>
       </div>
