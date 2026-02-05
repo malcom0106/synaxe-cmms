@@ -146,12 +146,13 @@ const InventoryParts: React.FC = () => {
             <TableHeader>
               <TableRow className="bg-muted/50">
                 <TableHead>Libellé</TableHead>
-                <TableHead className="w-28 text-center">Quantité</TableHead>
-                <TableHead className="w-24">État</TableHead>
+                <TableHead className="w-24 text-center">En stock</TableHead>
+                <TableHead className="w-24 text-center">Réservée</TableHead>
                 <TableHead className="w-24 text-center">Seuil</TableHead>
+                <TableHead className="w-24">État</TableHead>
                 <TableHead className="w-32">Famille</TableHead>
                 <TableHead className="w-40">Emplacement</TableHead>
-                <TableHead className="w-28 text-right">Actions</TableHead>
+                <TableHead className="w-20 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -165,18 +166,18 @@ const InventoryParts: React.FC = () => {
                     <span className={item.quantity < item.minQuantity ? 'font-bold text-destructive' : item.quantity === item.minQuantity ? 'font-bold text-warning' : 'font-medium text-foreground'}>
                       {item.quantity}
                     </span>
-                    {item.reservedQuantity > 0 && (
-                      <div className="text-xs text-muted-foreground">({item.reservedQuantity} rés.)</div>
-                    )}
+                  </TableCell>
+                  <TableCell className="text-center text-sm text-muted-foreground">
+                    {item.reservedQuantity > 0 ? item.reservedQuantity : '-'}
+                  </TableCell>
+                  <TableCell className="text-center text-sm text-muted-foreground">
+                    {item.minQuantity}
                   </TableCell>
                   <TableCell>
                     <StatusBadge 
                       status={item.stockStatus === 'ok' ? 'success' : item.stockStatus === 'low' ? 'warning' : 'danger'} 
                       label={item.stockStatus === 'ok' ? 'OK' : item.stockStatus === 'low' ? 'Faible' : 'Critique'} 
                     />
-                  </TableCell>
-                  <TableCell className="text-center text-sm text-muted-foreground">
-                    {item.minQuantity}
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">{item.family}</div>
@@ -197,7 +198,7 @@ const InventoryParts: React.FC = () => {
               ))}
               {filteredItems.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
+                  <TableCell colSpan={8} className="text-center py-8">
                     <Package className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
                     <p className="text-muted-foreground">Aucune pièce trouvée</p>
                   </TableCell>
