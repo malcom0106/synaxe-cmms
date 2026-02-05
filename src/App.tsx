@@ -12,6 +12,7 @@ import CorrectiveMaintenance from "./pages/CorrectiveMaintenance";
 import Equipment from "./pages/Equipment";
 import EquipmentDetail from "./pages/EquipmentDetail";
 import InventoryParts from "./pages/InventoryParts";
+import PartDetail from "./pages/PartDetail";
 import InventoryCounts from "./pages/InventoryCounts";
 import Documents from "./pages/Documents";
 import Settings from "./pages/Settings";
@@ -85,6 +86,7 @@ const App = () => (
                     <Route path="/equipment/:id" element={<EquipmentDetail />} />
                     <Route path="/inventory" element={<Navigate to="/inventory/parts" replace />} />
                     <Route path="/inventory/parts" element={<InventoryParts />} />
+                    <Route path="/inventory/parts/:id" element={<PartDetail />} />
                     <Route path="/inventory/counts" element={<InventoryCounts />} />
                     <Route path="/documents" element={<Documents />} />
                     <Route path="/settings" element={<Settings />} />
