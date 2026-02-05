@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
@@ -23,7 +24,6 @@ import {
   Filter,
   Search,
   TruckIcon,
-  Edit,
   History
 } from 'lucide-react';
 import { CreateEditPartModal, PartData } from '@/components/inventory/CreateEditPartModal';
@@ -67,6 +67,7 @@ const demoConsumptionHistory = [
 ];
 
 const InventoryParts: React.FC = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [items, setItems] = useState<PartData[]>(initialInventoryItems);
   const [searchQuery, setSearchQuery] = useState('');
@@ -91,9 +92,8 @@ const InventoryParts: React.FC = () => {
     setEditingPart(null);
   };
 
-  const handleEditPart = (part: PartData) => {
-    setEditingPart(part);
-    setCreateEditModalOpen(true);
+  const handleViewPart = (part: PartData) => {
+    navigate(`/inventory/parts/${part.id}`);
   };
 
   const handleViewHistory = (part: PartData) => {
@@ -172,7 +172,7 @@ const InventoryParts: React.FC = () => {
             </TableHeader>
             <TableBody>
               {filteredItems.map((item) => (
-                <TableRow key={item.id} className="hover:bg-muted/30 cursor-pointer" onClick={() => handleEditPart(item)}>
+                <TableRow key={item.id} className="hover:bg-muted/30 cursor-pointer" onClick={() => handleViewPart(item)}>
                   <TableCell>
                     <div className="font-medium text-foreground">{item.name}</div>
                     <div className="text-xs text-muted-foreground">{item.internalRef}</div>
@@ -206,9 +206,6 @@ const InventoryParts: React.FC = () => {
                     <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleViewHistory(item)} title="Historique">
                         <History className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditPart(item)} title="Modifier">
-                        <Edit className="h-4 w-4 text-muted-foreground" />
                       </Button>
                     </div>
                   </TableCell>
