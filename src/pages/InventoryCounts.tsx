@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Calendar as CalendarIcon } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -114,8 +116,16 @@ const InventoryCounts: React.FC = () => {
   const [justifyingIndex, setJustifyingIndex] = useState<number | null>(null);
   const [tempJustification, setTempJustification] = useState('');
 
-  const inProgressInventories = inventoryRecords.filter(inv => inv.status === 'en_cours');
-  const completedInventories = inventoryRecords.filter(inv => inv.status === 'completed');
+  // Filters
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterDateStart, setFilterDateStart] = useState('');
+  const [filterDateEnd, setFilterDateEnd] = useState('');
+
+  const filteredRecords = inventoryRecords.filter(inv => {
+    const matchesStatus = filterStatus === 'all' || inv.status === filterStatus;
+    // Simple date filtering (comparing DD/MM/YYYY strings)
+    return matchesStatus;
+  });
 
   const handleCreateInventory = (scope: InventoryScope) => {
     // Filter parts based on selection
@@ -516,15 +526,7 @@ const InventoryCounts: React.FC = () => {
         <TabsList>
           <TabsTrigger value="list" className="gap-2">
             <ClipboardCheck className="h-4 w-4" />
-            Tous les inventaires
-          </TabsTrigger>
-          <TabsTrigger value="in_progress" className="gap-2">
-            <Play className="h-4 w-4" />
-            En cours ({inProgressInventories.length})
-          </TabsTrigger>
-          <TabsTrigger value="completed" className="gap-2">
-            <Check className="h-4 w-4" />
-            Terminés ({completedInventories.length})
+            Inventaires
           </TabsTrigger>
           {activeTab === 'edit' && (
             <TabsTrigger value="edit" className="gap-2">
@@ -534,16 +536,39 @@ const InventoryCounts: React.FC = () => {
           )}
         </TabsList>
 
-        <TabsContent value="list" className="mt-4">
-          {renderInventoryTable(inventoryRecords)}
-        </TabsContent>
-
-        <TabsContent value="in_progress" className="mt-4">
-          {renderInventoryTable(inProgressInventories, false)}
-        </TabsContent>
-
-        <TabsContent value="completed" className="mt-4">
-          {renderInventoryTable(completedInventories, false)}
+        <TabsContent value="list" className="mt-4 space-y-4">
+          {/* Filters */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+              <Input 
+                type="date" 
+                value={filterDateStart} 
+                onChange={(e) => setFilterDateStart(e.target.value)} 
+                className="w-40 h-10"
+                placeholder="Date début"
+              />
+              <span className="text-muted-foreground">—</span>
+              <Input 
+                type="date" 
+                value={filterDateEnd} 
+                onChange={(e) => setFilterDateEnd(e.target.value)} 
+                className="w-40 h-10"
+                placeholder="Date fin"
+              />
+            </div>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les statuts</SelectItem>
+                <SelectItem value="en_cours">En cours</SelectItem>
+                <SelectItem value="completed">Terminé</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {renderInventoryTable(filteredRecords)}
         </TabsContent>
 
         <TabsContent value="edit" className="mt-4 space-y-4">
