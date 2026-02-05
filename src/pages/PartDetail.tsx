@@ -50,6 +50,7 @@ interface PartData {
   location: string;
   stockStatus: 'ok' | 'low' | 'critical' | 'expired';
   expirationDate?: string;
+  lastStockUpdate?: string;
 }
 
 interface PartIntervention {
@@ -106,6 +107,7 @@ const mockPart: PartData = {
   location: 'Étagère A3', 
   stockStatus: 'low', 
   expirationDate: '2026-06-15',
+  lastStockUpdate: '2026-01-20',
 };
 
 const mockInterventions: PartIntervention[] = [
@@ -354,10 +356,21 @@ const PartDetail: React.FC = () => {
 
           {/* Quantités - full width card */}
           <Card className="p-4">
-            <h3 className="flex items-center gap-2 font-semibold text-foreground mb-4">
-              <AlertTriangle className="h-4 w-4 text-primary" />
-              Quantités et seuils
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="flex items-center gap-2 font-semibold text-foreground">
+                <AlertTriangle className="h-4 w-4 text-primary" />
+                Quantités et seuils
+              </h3>
+              {formData.lastStockUpdate && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span>Dernière MAJ stock :</span>
+                  <span className="font-medium text-foreground">
+                    {new Date(formData.lastStockUpdate).toLocaleDateString('fr-FR')}
+                  </span>
+                </div>
+              )}
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="quantity">Quantité en stock</Label>

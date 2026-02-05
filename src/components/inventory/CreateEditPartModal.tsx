@@ -19,23 +19,24 @@
  import { useToast } from '@/hooks/use-toast';
  import { Package, Save } from 'lucide-react';
  
- export interface PartData {
-   id?: string;
-   internalRef: string;
-   externalRef: string;
-   name: string;
-   family: string;
-   subFamily: string;
-   quantity: number;
-   reservedQuantity: number;
-   minQuantity: number;
-   maxQuantity: number;
-   warehouse: string;
-   location: string;
-   price: number;
-   stockStatus: 'ok' | 'low' | 'critical' | 'expired';
-   expirationDate?: string;
- }
+export interface PartData {
+  id?: string;
+  internalRef: string;
+  externalRef: string;
+  name: string;
+  family: string;
+  subFamily: string;
+  quantity: number;
+  reservedQuantity: number;
+  minQuantity: number;
+  maxQuantity: number;
+  warehouse: string;
+  location: string;
+  price: number;
+  stockStatus: 'ok' | 'low' | 'critical' | 'expired';
+  expirationDate?: string;
+  lastStockUpdate?: string; // ISO date string of last inventory/stock update
+}
  
  interface CreateEditPartModalProps {
    open: boolean;
