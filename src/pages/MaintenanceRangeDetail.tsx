@@ -46,6 +46,9 @@ const MaintenanceRangeDetail: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [documentsExpanded, setDocumentsExpanded] = useState(true);
   const [isEditingActions, setIsEditingActions] = useState(false);
+  const [isEditingParts, setIsEditingParts] = useState(false);
+  const [partsSearchQuery, setPartsSearchQuery] = useState('');
+  const [hasPartsChanges, setHasPartsChanges] = useState(false);
 
   // Mock data - remplacer par de vraies données plus tard
   const initialActions = [
@@ -66,7 +69,24 @@ const MaintenanceRangeDetail: React.FC = () => {
     }
   ];
 
+  const initialParts = [
+    {
+      id: 'PDR001',
+      name: 'Filtre à huile',
+      reference: 'SKF-FH2500',
+      quantity: 1,
+    },
+    {
+      id: 'PDR004',
+      name: 'Filtre à air',
+      reference: 'MANN-AF-500',
+      quantity: 1,
+    },
+  ];
+
   const [actions, setActions] = useState(initialActions);
+  const [parts, setParts] = useState(initialParts);
+
 
   const range: {
     id: number;
@@ -130,9 +150,37 @@ const MaintenanceRangeDetail: React.FC = () => {
     setIsEditingActions(false);
   };
 
+  const handleDeletePart = (partId: string) => {
+    setParts(prev => prev.filter(part => part.id !== partId));
+    setHasPartsChanges(true);
+  };
+
+  const handleMovePart = (index: number, direction: 'up' | 'down') => {
+    const newParts = [...parts];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= newParts.length) return;
+    [newParts[index], newParts[newIndex]] = [newParts[newIndex], newParts[index]];
+    setParts(newParts);
+    setHasPartsChanges(true);
+  };
+
+  const handleSavePartsChanges = () => {
+    toast({
+      title: "Modifications enregistrées",
+      description: "Les pièces ont été mises à jour avec succès.",
+    });
+    setHasPartsChanges(false);
+    setIsEditingParts(false);
+  };
+
   const filteredActions = actions.filter(action =>
     action.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     action.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredParts = parts.filter(part =>
+    part.name.toLowerCase().includes(partsSearchQuery.toLowerCase()) ||
+    part.reference.toLowerCase().includes(partsSearchQuery.toLowerCase())
   );
 
   return (
@@ -455,6 +503,142 @@ const MaintenanceRangeDetail: React.FC = () => {
                           size="sm"
                           disabled={!hasChanges}
                           onClick={handleSaveChanges}
+                          className="bg-primary hover:bg-primary/90 disabled:opacity-50"
+                        >
+                          Enregistrer
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Pièces */}
+              <Card className="flex flex-col">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Package className="h-4 w-4" />
+                      Pièces
+                    </CardTitle>
+                    {!isEditingParts ? (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => setIsEditingParts(true)}
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Modifier
+                      </Button>
+                    ) : (
+                      <Button 
+                        size="sm" 
+                        className="bg-primary hover:bg-primary/90"
+                      >
+                        Ajouter une pièce
+                      </Button>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col min-h-[200px]">
+                  {/* Barre de recherche - visible uniquement en mode édition */}
+                  {isEditingParts && (
+                    <div className="mb-4">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <input
+                          type="text"
+                          placeholder="Rechercher une pièce..."
+                          value={partsSearchQuery}
+                          onChange={(e) => setPartsSearchQuery(e.target.value)}
+                          className="h-10 w-full rounded-md border border-input bg-background pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Liste des pièces */}
+                  <div className="border border-border rounded-lg p-4 space-y-3 overflow-y-auto flex-1">
+                    {filteredParts.length === 0 ? (
+                      <div className="text-center py-8 text-sm text-muted-foreground">
+                        Aucune pièce configurée
+                      </div>
+                    ) : (
+                      filteredParts.map((part, index) => (
+                        <div 
+                          key={part.id}
+                          className="flex items-start gap-3 p-4 rounded-lg bg-orange-50 border border-orange-100"
+                        >
+                          {isEditingParts && (
+                            <div className="flex flex-col gap-1 mt-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0"
+                                onClick={() => handleMovePart(index, 'up')}
+                                disabled={index === 0}
+                              >
+                                <ChevronUp className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0"
+                                onClick={() => handleMovePart(index, 'down')}
+                                disabled={index === filteredParts.length - 1}
+                              >
+                                <ChevronDown className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+                          <div className="p-2 bg-orange-100 rounded-lg mt-1">
+                            <Package className="h-4 w-4 text-orange-600" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-sm font-medium text-foreground mb-1">
+                              {part.name}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              {part.reference} • Qté: {part.quantity}
+                            </p>
+                          </div>
+                          {isEditingParts && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => handleDeletePart(part.id)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between mt-4">
+                    <p className="text-xs text-muted-foreground">
+                      {parts.length} pièce(s) configurée(s)
+                    </p>
+                    {isEditingParts && (
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setParts(initialParts);
+                            setHasPartsChanges(false);
+                            setIsEditingParts(false);
+                          }}
+                        >
+                          Annuler
+                        </Button>
+                        <Button 
+                          size="sm"
+                          disabled={!hasPartsChanges}
+                          onClick={handleSavePartsChanges}
                           className="bg-primary hover:bg-primary/90 disabled:opacity-50"
                         >
                           Enregistrer
