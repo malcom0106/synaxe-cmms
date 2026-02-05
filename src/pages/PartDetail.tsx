@@ -64,15 +64,15 @@ interface PartIntervention {
   quantityUsed: number;
 }
 
-interface ConsumptionRecord {
+interface HistoryRecord {
   id: string;
   date: string;
-  type: 'consumption' | 'entry' | 'adjustment';
-  quantity: number;
-  interventionId?: string;
-  interventionTitle?: string;
-  operator: string;
-  notes?: string;
+  time: string;
+  userEmail: string;
+  userInitials: string;
+  field: string;
+  oldValue: string;
+  newValue: string;
 }
 
 const families = ['Filtres', 'Joints', 'Lubrifiants', 'Courroies', 'Roulements', 'Capteurs', 'Flexibles', 'Électrique', 'Pompes', 'Hydraulique'];
@@ -114,11 +114,12 @@ const mockInterventions: PartIntervention[] = [
   { id: '#456', equipment: 'Pompe hydraulique A', gamme: 'Remplacement filtres', type: 'Corrective', operateur: '-', datePlanifiee: '05/12/2025', dateRealisee: null, statut: 'Planifié', quantityUsed: 2 },
 ];
 
-const mockHistory: ConsumptionRecord[] = [
-  { id: 'C001', date: '27/11/2025', type: 'consumption', quantity: 2, interventionId: '#411', interventionTitle: 'Maintenance préventive', operator: 'J. Martin' },
-  { id: 'C002', date: '20/11/2025', type: 'entry', quantity: 10, operator: 'A. Dupont', notes: 'Réception commande BL-2025-089' },
-  { id: 'C003', date: '15/11/2025', type: 'consumption', quantity: 1, interventionId: '#389', interventionTitle: 'Contrôle mensuel', operator: 'P. Bernard' },
-  { id: 'C004', date: '01/11/2025', type: 'adjustment', quantity: -3, operator: 'J. Martin', notes: 'Correction inventaire' },
+const mockHistory: HistoryRecord[] = [
+  { id: 'H001', date: '05/02/2026', time: '09:43', userEmail: 'jmartin@synaxe.com', userInitials: 'JM', field: 'Quantité en stock', oldValue: '3', newValue: '5' },
+  { id: 'H002', date: '05/02/2026', time: '09:40', userEmail: 'jmartin@synaxe.com', userInitials: 'JM', field: 'Seuil d\'alerte', oldValue: '5', newValue: '10' },
+  { id: 'H003', date: '28/01/2026', time: '17:39', userEmail: 'adupont@synaxe.com', userInitials: 'AD', field: 'Emplacement', oldValue: 'Étagère A2', newValue: 'Étagère A3' },
+  { id: 'H004', date: '28/01/2026', time: '17:35', userEmail: 'adupont@synaxe.com', userInitials: 'AD', field: 'Magasin', oldValue: 'Magasin Secondaire', newValue: 'Magasin Principal' },
+  { id: 'H005', date: '15/01/2026', time: '14:22', userEmail: 'pbernard@synaxe.com', userInitials: 'PB', field: 'Libellé', oldValue: 'Filtre huile', newValue: 'Filtre à huile' },
 ];
 
 const PartDetail: React.FC = () => {
@@ -165,14 +166,6 @@ const PartDetail: React.FC = () => {
     }
   };
 
-  const getHistoryTypeLabel = (type: string) => {
-    switch (type) {
-      case 'consumption': return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">Consommation</Badge>;
-      case 'entry': return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Entrée</Badge>;
-      case 'adjustment': return <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">Ajustement</Badge>;
-      default: return <Badge variant="secondary">{type}</Badge>;
-    }
-  };
 
   return (
     <div className="p-6 space-y-4">
@@ -489,54 +482,37 @@ const PartDetail: React.FC = () => {
           <Card className="p-4">
             <h3 className="flex items-center gap-2 font-semibold text-foreground mb-4">
               <History className="h-4 w-4 text-primary" />
-              Historique des mouvements
+              Historique des modifications
             </h3>
-            <div className="rounded-lg border overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead className="w-28">Date</TableHead>
-                    <TableHead className="w-28">Type</TableHead>
-                    <TableHead className="w-24 text-center">Quantité</TableHead>
-                    <TableHead>Intervention</TableHead>
-                    <TableHead>Opérateur</TableHead>
-                    <TableHead>Notes</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockHistory.map((record) => (
-                    <TableRow key={record.id}>
-                      <TableCell className="text-sm">{record.date}</TableCell>
-                      <TableCell>{getHistoryTypeLabel(record.type)}</TableCell>
-                      <TableCell className={`text-center font-medium ${record.quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {record.quantity > 0 ? `+${record.quantity}` : record.quantity}
-                      </TableCell>
-                      <TableCell>
-                        {record.interventionId ? (
-                          <span 
-                            className="text-primary cursor-pointer hover:underline"
-                            onClick={() => navigate(`/maintenance/${record.interventionId?.replace('#', '')}`)}
-                          >
-                            {record.interventionId} - {record.interventionTitle}
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm">{record.operator}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{record.notes || '-'}</TableCell>
-                    </TableRow>
-                  ))}
-                  {mockHistory.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8">
-                        <History className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                        <p className="text-muted-foreground">Aucun mouvement enregistré</p>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+            <div className="divide-y">
+              {mockHistory.map((record) => (
+                <div key={record.id} className="py-4 first:pt-0 last:pb-0">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
+                      {record.userInitials}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm">
+                        <span className="font-medium text-foreground">{record.userEmail}</span>
+                        <span className="text-muted-foreground"> a mis à jour </span>
+                        <span className="font-medium text-primary">{record.field}</span>
+                        <span className="text-muted-foreground"> le {record.date} à {record.time}</span>
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        <span>{record.oldValue}</span>
+                        <span className="mx-2">→</span>
+                        <span>{record.newValue}</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {mockHistory.length === 0 && (
+                <div className="text-center py-8">
+                  <History className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-muted-foreground">Aucune modification enregistrée</p>
+                </div>
+              )}
             </div>
           </Card>
         </TabsContent>
