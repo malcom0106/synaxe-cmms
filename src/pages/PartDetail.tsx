@@ -371,7 +371,7 @@ const PartDetail: React.FC = () => {
                 </div>
               )}
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="quantity">Quantité en stock</Label>
                 <Input
@@ -414,23 +414,6 @@ const PartDetail: React.FC = () => {
                   value={formData.maxQuantity}
                   onChange={(e) => handleChange('maxQuantity', parseInt(e.target.value) || 0)}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>État du stock</Label>
-                <Select
-                  value={formData.stockStatus}
-                  onValueChange={(value) => handleChange('stockStatus', value as PartData['stockStatus'])}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ok">OK</SelectItem>
-                    <SelectItem value="low">Faible</SelectItem>
-                    <SelectItem value="critical">Critique</SelectItem>
-                    <SelectItem value="expired">Expiré</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
           </Card>
