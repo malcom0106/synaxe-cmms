@@ -5,6 +5,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
@@ -19,9 +28,10 @@ import {
   Save,
   MapPin,
   Layers,
-  Calendar,
   History,
-  AlertTriangle
+  AlertTriangle,
+  Wrench,
+  Calendar
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -42,6 +52,29 @@ interface PartData {
   expirationDate?: string;
 }
 
+interface PartIntervention {
+  id: string;
+  equipment: string;
+  gamme: string;
+  type: 'Contrôle' | 'Corrective' | 'Préventive';
+  operateur: string;
+  datePlanifiee: string;
+  dateRealisee: string | null;
+  statut: 'Terminé' | 'Planifié' | 'En cours';
+  quantityUsed: number;
+}
+
+interface ConsumptionRecord {
+  id: string;
+  date: string;
+  type: 'consumption' | 'entry' | 'adjustment';
+  quantity: number;
+  interventionId?: string;
+  interventionTitle?: string;
+  operator: string;
+  notes?: string;
+}
+
 const families = ['Filtres', 'Joints', 'Lubrifiants', 'Courroies', 'Roulements', 'Capteurs', 'Flexibles', 'Électrique', 'Pompes', 'Hydraulique'];
 const subFamilies: Record<string, string[]> = {
   'Filtres': ['Huile', 'Air', 'Carburant', 'Hydraulique'],
@@ -57,7 +90,7 @@ const subFamilies: Record<string, string[]> = {
 };
 const warehouses = ['Magasin Principal', 'Magasin Secondaire', 'Stock déporté'];
 
-// Mock data - would come from API
+// Mock data
 const mockPart: PartData = { 
   id: 'PDR001', 
   internalRef: 'PDR001', 
@@ -74,6 +107,19 @@ const mockPart: PartData = {
   stockStatus: 'low', 
   expirationDate: '2026-06-15',
 };
+
+const mockInterventions: PartIntervention[] = [
+  { id: '#411', equipment: 'Pompe distribution 202', gamme: 'Maintenance préventive', type: 'Préventive', operateur: 'J. Martin', datePlanifiee: '27/11/2025', dateRealisee: '27/11/2025', statut: 'Terminé', quantityUsed: 2 },
+  { id: '#389', equipment: 'Compresseur principal', gamme: 'Contrôle mensuel', type: 'Contrôle', operateur: 'P. Bernard', datePlanifiee: '15/11/2025', dateRealisee: '15/11/2025', statut: 'Terminé', quantityUsed: 1 },
+  { id: '#456', equipment: 'Pompe hydraulique A', gamme: 'Remplacement filtres', type: 'Corrective', operateur: '-', datePlanifiee: '05/12/2025', dateRealisee: null, statut: 'Planifié', quantityUsed: 2 },
+];
+
+const mockHistory: ConsumptionRecord[] = [
+  { id: 'C001', date: '27/11/2025', type: 'consumption', quantity: 2, interventionId: '#411', interventionTitle: 'Maintenance préventive', operator: 'J. Martin' },
+  { id: 'C002', date: '20/11/2025', type: 'entry', quantity: 10, operator: 'A. Dupont', notes: 'Réception commande BL-2025-089' },
+  { id: 'C003', date: '15/11/2025', type: 'consumption', quantity: 1, interventionId: '#389', interventionTitle: 'Contrôle mensuel', operator: 'P. Bernard' },
+  { id: 'C004', date: '01/11/2025', type: 'adjustment', quantity: -3, operator: 'J. Martin', notes: 'Correction inventaire' },
+];
 
 const PartDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -110,6 +156,24 @@ const PartDetail: React.FC = () => {
 
   const statusInfo = getStatusLabel();
 
+  const getInterventionStatusBadge = (statut: string) => {
+    switch (statut) {
+      case 'Terminé': return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Terminé</Badge>;
+      case 'Planifié': return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Planifié</Badge>;
+      case 'En cours': return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">En cours</Badge>;
+      default: return <Badge variant="secondary">{statut}</Badge>;
+    }
+  };
+
+  const getHistoryTypeLabel = (type: string) => {
+    switch (type) {
+      case 'consumption': return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">Consommation</Badge>;
+      case 'entry': return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Entrée</Badge>;
+      case 'adjustment': return <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">Ajustement</Badge>;
+      default: return <Badge variant="secondary">{type}</Badge>;
+    }
+  };
+
   return (
     <div className="p-6 space-y-4">
       {/* Header compact */}
@@ -137,10 +201,6 @@ const PartDetail: React.FC = () => {
         
         {/* Action buttons */}
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-2">
-            <History className="h-4 w-4" />
-            Historique
-          </Button>
           <Button 
             size="sm" 
             className="gap-2" 
@@ -153,202 +213,334 @@ const PartDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* 3 cards in a row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Identification */}
-        <Card className="p-4">
-          <h3 className="flex items-center gap-2 font-semibold text-foreground mb-4">
-            <Package className="h-4 w-4 text-primary" />
-            Identification
-          </h3>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="internalRef">Référence interne *</Label>
-              <Input
-                id="internalRef"
-                value={formData.internalRef}
-                onChange={(e) => handleChange('internalRef', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="externalRef">Référence externe</Label>
-              <Input
-                id="externalRef"
-                value={formData.externalRef}
-                onChange={(e) => handleChange('externalRef', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="name">Libellé *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
-              />
-            </div>
-          </div>
-        </Card>
+      {/* Tabs */}
+      <Tabs defaultValue="general" className="w-full">
+        <TabsList>
+          <TabsTrigger value="general" className="gap-2">
+            <Package className="h-4 w-4" />
+            Général
+          </TabsTrigger>
+          <TabsTrigger value="interventions" className="gap-2">
+            <Wrench className="h-4 w-4" />
+            Interventions
+          </TabsTrigger>
+          <TabsTrigger value="history" className="gap-2">
+            <History className="h-4 w-4" />
+            Historique
+          </TabsTrigger>
+        </TabsList>
 
-        {/* Classification */}
-        <Card className="p-4">
-          <h3 className="flex items-center gap-2 font-semibold text-foreground mb-4">
-            <Layers className="h-4 w-4 text-primary" />
-            Classification
-          </h3>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Famille *</Label>
-              <Select
-                value={formData.family}
-                onValueChange={(value) => {
-                  setFormData(prev => ({ ...prev, family: value, subFamily: '' }));
-                  setHasChanges(true);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {families.map(f => (
-                    <SelectItem key={f} value={f}>{f}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Sous-famille</Label>
-              <Select
-                value={formData.subFamily}
-                onValueChange={(value) => handleChange('subFamily', value)}
-                disabled={!formData.family}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableSubFamilies.map(sf => (
-                    <SelectItem key={sf} value={sf}>{sf}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="expirationDate">DLC</Label>
-              <Input
-                id="expirationDate"
-                type="date"
-                value={formData.expirationDate || ''}
-                onChange={(e) => handleChange('expirationDate', e.target.value)}
-              />
-            </div>
-          </div>
-        </Card>
+        {/* General Tab */}
+        <TabsContent value="general" className="space-y-4 mt-4">
+          {/* 3 cards in a row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Identification */}
+            <Card className="p-4">
+              <h3 className="flex items-center gap-2 font-semibold text-foreground mb-4">
+                <Package className="h-4 w-4 text-primary" />
+                Identification
+              </h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="internalRef">Référence interne *</Label>
+                  <Input
+                    id="internalRef"
+                    value={formData.internalRef}
+                    onChange={(e) => handleChange('internalRef', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="externalRef">Référence externe</Label>
+                  <Input
+                    id="externalRef"
+                    value={formData.externalRef}
+                    onChange={(e) => handleChange('externalRef', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Libellé *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => handleChange('name', e.target.value)}
+                  />
+                </div>
+              </div>
+            </Card>
 
-        {/* Emplacement */}
-        <Card className="p-4">
-          <h3 className="flex items-center gap-2 font-semibold text-foreground mb-4">
-            <MapPin className="h-4 w-4 text-primary" />
-            Emplacement
-          </h3>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Magasin</Label>
-              <Select
-                value={formData.warehouse}
-                onValueChange={(value) => handleChange('warehouse', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {warehouses.map(w => (
-                    <SelectItem key={w} value={w}>{w}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="location">Emplacement</Label>
-              <Input
-                id="location"
-                value={formData.location}
-                onChange={(e) => handleChange('location', e.target.value)}
-                placeholder="Étagère A3"
-              />
-            </div>
-          </div>
-        </Card>
-      </div>
+            {/* Classification */}
+            <Card className="p-4">
+              <h3 className="flex items-center gap-2 font-semibold text-foreground mb-4">
+                <Layers className="h-4 w-4 text-primary" />
+                Classification
+              </h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Famille *</Label>
+                  <Select
+                    value={formData.family}
+                    onValueChange={(value) => {
+                      setFormData(prev => ({ ...prev, family: value, subFamily: '' }));
+                      setHasChanges(true);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {families.map(f => (
+                        <SelectItem key={f} value={f}>{f}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Sous-famille</Label>
+                  <Select
+                    value={formData.subFamily}
+                    onValueChange={(value) => handleChange('subFamily', value)}
+                    disabled={!formData.family}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableSubFamilies.map(sf => (
+                        <SelectItem key={sf} value={sf}>{sf}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="expirationDate">DLC</Label>
+                  <Input
+                    id="expirationDate"
+                    type="date"
+                    value={formData.expirationDate || ''}
+                    onChange={(e) => handleChange('expirationDate', e.target.value)}
+                  />
+                </div>
+              </div>
+            </Card>
 
-      {/* Quantités - full width card */}
-      <Card className="p-4">
-        <h3 className="flex items-center gap-2 font-semibold text-foreground mb-4">
-          <AlertTriangle className="h-4 w-4 text-primary" />
-          Quantités et seuils
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="quantity">Quantité en stock</Label>
-            <Input
-              id="quantity"
-              type="number"
-              min="0"
-              value={formData.quantity}
-              onChange={(e) => handleChange('quantity', parseInt(e.target.value) || 0)}
-            />
+            {/* Emplacement */}
+            <Card className="p-4">
+              <h3 className="flex items-center gap-2 font-semibold text-foreground mb-4">
+                <MapPin className="h-4 w-4 text-primary" />
+                Emplacement
+              </h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Magasin</Label>
+                  <Select
+                    value={formData.warehouse}
+                    onValueChange={(value) => handleChange('warehouse', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {warehouses.map(w => (
+                        <SelectItem key={w} value={w}>{w}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="location">Emplacement</Label>
+                  <Input
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) => handleChange('location', e.target.value)}
+                    placeholder="Étagère A3"
+                  />
+                </div>
+              </div>
+            </Card>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="reservedQuantity">Quantité réservée</Label>
-            <Input
-              id="reservedQuantity"
-              type="number"
-              min="0"
-              value={formData.reservedQuantity}
-              onChange={(e) => handleChange('reservedQuantity', parseInt(e.target.value) || 0)}
-              disabled
-              className="bg-muted"
-            />
-            <p className="text-xs text-muted-foreground">Plans non démarrés</p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="minQuantity">Seuil d'alerte</Label>
-            <Input
-              id="minQuantity"
-              type="number"
-              min="0"
-              value={formData.minQuantity}
-              onChange={(e) => handleChange('minQuantity', parseInt(e.target.value) || 0)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="maxQuantity">Quantité max</Label>
-            <Input
-              id="maxQuantity"
-              type="number"
-              min="0"
-              value={formData.maxQuantity}
-              onChange={(e) => handleChange('maxQuantity', parseInt(e.target.value) || 0)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>État du stock</Label>
-            <Select
-              value={formData.stockStatus}
-              onValueChange={(value) => handleChange('stockStatus', value as PartData['stockStatus'])}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ok">OK</SelectItem>
-                <SelectItem value="low">Faible</SelectItem>
-                <SelectItem value="critical">Critique</SelectItem>
-                <SelectItem value="expired">Expiré</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </Card>
+
+          {/* Quantités - full width card */}
+          <Card className="p-4">
+            <h3 className="flex items-center gap-2 font-semibold text-foreground mb-4">
+              <AlertTriangle className="h-4 w-4 text-primary" />
+              Quantités et seuils
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="quantity">Quantité en stock</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  min="0"
+                  value={formData.quantity}
+                  onChange={(e) => handleChange('quantity', parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reservedQuantity">Quantité réservée</Label>
+                <Input
+                  id="reservedQuantity"
+                  type="number"
+                  min="0"
+                  value={formData.reservedQuantity}
+                  onChange={(e) => handleChange('reservedQuantity', parseInt(e.target.value) || 0)}
+                  disabled
+                  className="bg-muted"
+                />
+                <p className="text-xs text-muted-foreground">Plans non démarrés</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="minQuantity">Seuil d'alerte</Label>
+                <Input
+                  id="minQuantity"
+                  type="number"
+                  min="0"
+                  value={formData.minQuantity}
+                  onChange={(e) => handleChange('minQuantity', parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="maxQuantity">Quantité max</Label>
+                <Input
+                  id="maxQuantity"
+                  type="number"
+                  min="0"
+                  value={formData.maxQuantity}
+                  onChange={(e) => handleChange('maxQuantity', parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>État du stock</Label>
+                <Select
+                  value={formData.stockStatus}
+                  onValueChange={(value) => handleChange('stockStatus', value as PartData['stockStatus'])}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ok">OK</SelectItem>
+                    <SelectItem value="low">Faible</SelectItem>
+                    <SelectItem value="critical">Critique</SelectItem>
+                    <SelectItem value="expired">Expiré</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* Interventions Tab */}
+        <TabsContent value="interventions" className="mt-4">
+          <Card className="p-4">
+            <h3 className="flex items-center gap-2 font-semibold text-foreground mb-4">
+              <Wrench className="h-4 w-4 text-primary" />
+              Interventions utilisant cette pièce ({mockInterventions.length})
+            </h3>
+            <div className="rounded-lg border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="w-20">ID</TableHead>
+                    <TableHead>Équipement</TableHead>
+                    <TableHead>Gamme</TableHead>
+                    <TableHead className="w-24">Type</TableHead>
+                    <TableHead>Opérateur</TableHead>
+                    <TableHead className="w-28">Date planifiée</TableHead>
+                    <TableHead className="w-28">Date réalisée</TableHead>
+                    <TableHead className="w-24">Statut</TableHead>
+                    <TableHead className="w-24 text-center">Qté utilisée</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockInterventions.map((intervention) => (
+                    <TableRow 
+                      key={intervention.id} 
+                      className="cursor-pointer hover:bg-muted/30"
+                      onClick={() => navigate(`/maintenance/${intervention.id.replace('#', '')}`)}
+                    >
+                      <TableCell className="font-medium text-primary">{intervention.id}</TableCell>
+                      <TableCell>{intervention.equipment}</TableCell>
+                      <TableCell>{intervention.gamme}</TableCell>
+                      <TableCell className="text-sm">{intervention.type}</TableCell>
+                      <TableCell>{intervention.operateur}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{intervention.datePlanifiee}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{intervention.dateRealisee || '-'}</TableCell>
+                      <TableCell>{getInterventionStatusBadge(intervention.statut)}</TableCell>
+                      <TableCell className="text-center font-medium">{intervention.quantityUsed}</TableCell>
+                    </TableRow>
+                  ))}
+                  {mockInterventions.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={9} className="text-center py-8">
+                        <Wrench className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-muted-foreground">Aucune intervention liée à cette pièce</p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* History Tab */}
+        <TabsContent value="history" className="mt-4">
+          <Card className="p-4">
+            <h3 className="flex items-center gap-2 font-semibold text-foreground mb-4">
+              <History className="h-4 w-4 text-primary" />
+              Historique des mouvements
+            </h3>
+            <div className="rounded-lg border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="w-28">Date</TableHead>
+                    <TableHead className="w-28">Type</TableHead>
+                    <TableHead className="w-24 text-center">Quantité</TableHead>
+                    <TableHead>Intervention</TableHead>
+                    <TableHead>Opérateur</TableHead>
+                    <TableHead>Notes</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockHistory.map((record) => (
+                    <TableRow key={record.id}>
+                      <TableCell className="text-sm">{record.date}</TableCell>
+                      <TableCell>{getHistoryTypeLabel(record.type)}</TableCell>
+                      <TableCell className={`text-center font-medium ${record.quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {record.quantity > 0 ? `+${record.quantity}` : record.quantity}
+                      </TableCell>
+                      <TableCell>
+                        {record.interventionId ? (
+                          <span 
+                            className="text-primary cursor-pointer hover:underline"
+                            onClick={() => navigate(`/maintenance/${record.interventionId?.replace('#', '')}`)}
+                          >
+                            {record.interventionId} - {record.interventionTitle}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm">{record.operator}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{record.notes || '-'}</TableCell>
+                    </TableRow>
+                  ))}
+                  {mockHistory.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8">
+                        <History className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-muted-foreground">Aucun mouvement enregistré</p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
