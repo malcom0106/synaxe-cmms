@@ -21,8 +21,6 @@ import {
   Plus, 
   Package, 
   Filter,
-  ShoppingCart,
-  AlertTriangle,
   Search,
   TruckIcon,
   Edit,
@@ -118,9 +116,6 @@ const InventoryParts: React.FC = () => {
     setItems(updatedItems);
   };
 
-  const lowStockCount = items.filter(i => i.stockStatus === 'low').length;
-  const criticalCount = items.filter(i => i.stockStatus === 'critical' || i.quantity === 0).length;
-  const totalValue = items.reduce((sum, i) => sum + (i.quantity * i.price), 0);
 
   return (
     <div className="p-6 max-w-7xl mx-auto animate-fade-in">
@@ -132,10 +127,6 @@ const InventoryParts: React.FC = () => {
             <Button variant="outline" onClick={() => setGoodsReceiptModalOpen(true)}>
               <TruckIcon className="h-4 w-4 mr-2" />
               Entrée marchandise
-            </Button>
-            <Button variant="outline">
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Commander
             </Button>
             <Button className="btn-primary" onClick={() => { setEditingPart(null); setCreateEditModalOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" />
@@ -163,35 +154,6 @@ const InventoryParts: React.FC = () => {
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6">
-        <div className="card-dashboard card-hover">
-          <Package className="h-6 w-6 text-muted-foreground mb-3" />
-          <h3 className="text-sm font-medium text-muted-foreground">Total des références</h3>
-          <div className="text-2xl font-bold text-foreground mt-1">{items.length}</div>
-        </div>
-        <div className="card-dashboard card-hover">
-          <ShoppingCart className="h-6 w-6 text-muted-foreground mb-3" />
-          <h3 className="text-sm font-medium text-muted-foreground">Valeur du stock</h3>
-          <div className="text-2xl font-bold text-foreground mt-1">{totalValue.toLocaleString('fr-FR')} €</div>
-        </div>
-        <div className="card-dashboard card-hover">
-          <div className="flex justify-between mb-3">
-            <AlertTriangle className="h-6 w-6 text-warning" />
-            <StatusBadge status="warning" label="Attention" />
-          </div>
-          <h3 className="text-sm font-medium text-muted-foreground">Stock faible</h3>
-          <div className="text-2xl font-bold text-warning mt-1">{lowStockCount}</div>
-        </div>
-        <div className="card-dashboard card-hover">
-          <div className="flex justify-between mb-3">
-            <AlertTriangle className="h-6 w-6 text-destructive" />
-            <StatusBadge status="danger" label="Critique" />
-          </div>
-          <h3 className="text-sm font-medium text-muted-foreground">Rupture de stock</h3>
-          <div className="text-2xl font-bold text-destructive mt-1">{criticalCount}</div>
-        </div>
-      </div>
 
       {/* Table */}
       <div className="rounded-xl border bg-card overflow-hidden">
@@ -265,41 +227,6 @@ const InventoryParts: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom section */}
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border bg-card p-6">
-          <h3 className="text-lg font-medium text-foreground mb-4">Scanner une pièce</h3>
-          <div className="bg-muted/30 border border-dashed rounded-lg p-6 text-center">
-            <Search className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground mb-3">Scannez un code barre pour gérer le stock d'une pièce</p>
-            <Button className="btn-primary">Scanner un code barre</Button>
-          </div>
-        </div>
-        
-        <div className="rounded-xl border border-warning/20 bg-warning/5 p-6">
-          <div className="flex items-start">
-            <AlertTriangle className="h-6 w-6 text-warning mr-3 mt-1" />
-            <div>
-              <h4 className="text-md font-medium">Articles à réapprovisionner</h4>
-              <p className="text-sm text-muted-foreground mt-2 mb-4">Les articles suivants ont atteint leur seuil minimal :</p>
-              <ul className="space-y-2">
-                {items.filter(i => i.quantity <= i.minQuantity).slice(0, 3).map(item => (
-                  <li key={item.id} className="flex justify-between">
-                    <span className="text-sm">{item.name}</span>
-                    <StatusBadge status={item.quantity < item.minQuantity ? 'danger' : 'warning'} label={`${item.quantity} / ${item.minQuantity}`} />
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-4">
-                <Button variant="outline" className="bg-background">
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Créer une demande d'achat
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Modals */}
       <CreateEditPartModal open={createEditModalOpen} onOpenChange={setCreateEditModalOpen} part={editingPart} onSave={handleSavePart} />
