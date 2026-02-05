@@ -215,7 +215,7 @@ const PartDetail: React.FC = () => {
 
       {/* Tabs */}
       <Tabs defaultValue="general" className="w-full">
-        <TabsList>
+        <TabsList className="w-full grid grid-cols-3">
           <TabsTrigger value="general" className="gap-2">
             <Package className="h-4 w-4" />
             Général
