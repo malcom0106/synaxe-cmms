@@ -9,13 +9,6 @@ import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Table,
   TableBody,
   TableCell,
@@ -36,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { CreateInventoryModal, InventoryScope } from '@/components/inventory/CreateInventoryModal';
 
 interface InventoryLine {
   partId: string;
@@ -60,9 +54,6 @@ interface InventoryRecord {
   differences: number;
   notes: string;
   scope: string;
-  scopeType?: 'family' | 'subFamily' | 'warehouse' | '';
-  scopeValue?: string;
-  subFamilyValue?: string;
   lines?: InventoryLine[];
 }
 
@@ -75,11 +66,9 @@ const demoParts = [
   { id: 'PDR006', name: 'Filtre carburant', location: 'Étagère A4', quantity: 8, warehouse: 'Magasin Principal', family: 'Filtres', subFamily: 'Carburant' },
 ];
 
-// Demo data with lines for in-progress inventory
 const demoInventoryHistory: InventoryRecord[] = [
   { 
-    id: 'INV001', date: '20/01/2026', status: 'completed', operator: 'J. Martin', totalItems: 45, countedItems: 45, differences: 3, notes: 'Inventaire trimestriel Q1', scope: 'Magasin Principal',
-    scopeType: 'warehouse', scopeValue: 'Magasin Principal',
+    id: 'INV001', date: '20/01/2026', status: 'completed', operator: 'J. Martin', totalItems: 3, countedItems: 3, differences: 1, notes: 'Inventaire trimestriel Q1', scope: 'Magasin Principal',
     lines: [
       { partId: 'PDR001', partName: 'Filtre à huile', location: 'Étagère A3', warehouse: 'Magasin Principal', family: 'Filtres', subFamily: 'Huile', theoreticalQty: 5, actualQty: 5, isOk: true },
       { partId: 'PDR002', partName: 'Joint torique 50mm', location: 'Tiroir B2', warehouse: 'Magasin Principal', family: 'Joints', subFamily: 'Toriques', theoreticalQty: 25, actualQty: 23, isOk: false, justification: 'Pièces abimées jetées' },
@@ -87,20 +76,27 @@ const demoInventoryHistory: InventoryRecord[] = [
     ]
   },
   { 
-    id: 'INV002', date: '05/02/2026', status: 'en_cours', operator: 'A. Dupont', totalItems: 4, countedItems: 2, differences: 1, notes: 'Inventaire famille Filtres', scope: 'Filtres',
-    scopeType: 'family', scopeValue: 'Filtres',
+    id: 'INV002', date: '05/02/2026', status: 'en_cours', operator: 'A. Dupont', totalItems: 3, countedItems: 2, differences: 1, notes: 'Inventaire famille Filtres', scope: 'Filtres',
     lines: [
       { partId: 'PDR001', partName: 'Filtre à huile', location: 'Étagère A3', warehouse: 'Magasin Principal', family: 'Filtres', subFamily: 'Huile', theoreticalQty: 5, actualQty: 5, isOk: true },
       { partId: 'PDR004', partName: 'Filtre à air', location: 'Étagère A2', warehouse: 'Magasin Principal', family: 'Filtres', subFamily: 'Air', theoreticalQty: 12, actualQty: 10, isOk: false, justification: 'Écart constaté' },
       { partId: 'PDR006', partName: 'Filtre carburant', location: 'Étagère A4', warehouse: 'Magasin Principal', family: 'Filtres', subFamily: 'Carburant', theoreticalQty: 8, actualQty: null, isOk: null },
     ]
   },
-  { id: 'INV003', date: '15/10/2025', status: 'completed', operator: 'A. Dupont', totalItems: 42, countedItems: 42, differences: 5, notes: 'Inventaire trimestriel Q4', scope: 'Magasin Principal', scopeType: 'warehouse', scopeValue: 'Magasin Principal' },
-  { id: 'INV004', date: '12/07/2025', status: 'completed', operator: 'P. Bernard', totalItems: 40, countedItems: 40, differences: 2, notes: 'Inventaire semestriel', scope: 'Tous', scopeType: 'warehouse', scopeValue: 'Magasin Principal' },
+  { id: 'INV003', date: '15/10/2025', status: 'completed', operator: 'A. Dupont', totalItems: 42, countedItems: 42, differences: 5, notes: 'Inventaire trimestriel Q4', scope: 'Magasin Principal' },
+  { id: 'INV004', date: '12/07/2025', status: 'completed', operator: 'P. Bernard', totalItems: 40, countedItems: 40, differences: 2, notes: 'Inventaire semestriel', scope: 'Tous' },
 ];
 
 const families = ['Filtres', 'Joints', 'Hydraulique', 'Pompes', 'Électrique'];
+const subFamiliesMap: Record<string, string[]> = {
+  'Filtres': ['Huile', 'Air', 'Carburant', 'Hydraulique'],
+  'Joints': ['Toriques', 'Plats', 'SPI', 'Mécaniques'],
+  'Hydraulique': ['Tuyaux', 'Raccords', 'Valves'],
+  'Pompes': ['Kits réparation', 'Pistons', 'Joints'],
+  'Électrique': ['Contacteurs', 'Relais', 'Fusibles'],
+};
 const warehouses = ['Magasin Principal', 'Magasin Secondaire', 'Stock déporté'];
+const locations = [...new Set(demoParts.map(p => p.location))];
 
 const ECART_THRESHOLD = 10;
 
@@ -110,16 +106,10 @@ const InventoryCounts: React.FC = () => {
   const [inventoryRecords, setInventoryRecords] = useState<InventoryRecord[]>(demoInventoryHistory);
   const [viewingInventoryId, setViewingInventoryId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   
-  // New/edit inventory state
-  const [currentInventory, setCurrentInventory] = useState({
-    id: '',
-    scopeType: '' as 'family' | 'subFamily' | 'warehouse' | '',
-    scopeValue: '',
-    subFamilyValue: '',
-    date: new Date().toISOString().split('T')[0],
-    notes: '',
-  });
+  const [currentScope, setCurrentScope] = useState('');
+  const [currentNotes, setCurrentNotes] = useState('');
   const [inventoryLines, setInventoryLines] = useState<InventoryLine[]>([]);
   const [justifyingIndex, setJustifyingIndex] = useState<number | null>(null);
   const [tempJustification, setTempJustification] = useState('');
@@ -127,27 +117,28 @@ const InventoryCounts: React.FC = () => {
   const inProgressInventories = inventoryRecords.filter(inv => inv.status === 'en_cours');
   const completedInventories = inventoryRecords.filter(inv => inv.status === 'completed');
 
-  const getSubFamilies = (family: string) => {
-    const parts = demoParts.filter(p => p.family === family);
-    return [...new Set(parts.map(p => p.subFamily))];
-  };
-
-  const handleScopeTypeChange = (value: string) => {
-    setCurrentInventory({ ...currentInventory, scopeType: value as any, scopeValue: '', subFamilyValue: '' });
-    setInventoryLines([]);
-  };
-
-  const handleScopeValueChange = (value: string) => {
-    setCurrentInventory({ ...currentInventory, scopeValue: value, subFamilyValue: '' });
-    
+  const handleCreateInventory = (scope: InventoryScope) => {
+    // Filter parts based on selection
     let filtered = demoParts;
-    if (currentInventory.scopeType === 'family') {
-      filtered = demoParts.filter(p => p.family === value);
-    } else if (currentInventory.scopeType === 'warehouse') {
-      filtered = demoParts.filter(p => p.warehouse === value);
+    let scopeLabel = '';
+
+    if (scope.type === 'families') {
+      if (scope.subFamilies.length > 0) {
+        filtered = demoParts.filter(p => scope.subFamilies.includes(p.subFamily));
+        scopeLabel = scope.subFamilies.join(', ');
+      } else if (scope.families.length > 0) {
+        filtered = demoParts.filter(p => scope.families.includes(p.family));
+        scopeLabel = scope.families.join(', ');
+      }
+    } else if (scope.type === 'warehouses') {
+      filtered = demoParts.filter(p => scope.warehouses.includes(p.warehouse));
+      scopeLabel = scope.warehouses.join(', ');
+    } else if (scope.type === 'locations') {
+      filtered = demoParts.filter(p => scope.locations.includes(p.location));
+      scopeLabel = scope.locations.join(', ');
     }
-    
-    setInventoryLines(filtered.map(p => ({
+
+    const lines: InventoryLine[] = filtered.map(p => ({
       partId: p.id,
       partName: p.name,
       location: p.location,
@@ -157,24 +148,23 @@ const InventoryCounts: React.FC = () => {
       theoreticalQty: p.quantity,
       actualQty: null,
       isOk: null,
-    })));
+    }));
+
+    setCurrentScope(scopeLabel);
+    setCurrentNotes('');
+    setInventoryLines(lines);
+    setViewingInventoryId(null);
+    setIsEditing(true);
+    setActiveTab('edit');
   };
 
-  const handleSubFamilyChange = (value: string) => {
-    setCurrentInventory({ ...currentInventory, subFamilyValue: value });
-    
-    const filtered = demoParts.filter(p => p.family === currentInventory.scopeValue && p.subFamily === value);
-    setInventoryLines(filtered.map(p => ({
-      partId: p.id,
-      partName: p.name,
-      location: p.location,
-      warehouse: p.warehouse,
-      family: p.family,
-      subFamily: p.subFamily,
-      theoreticalQty: p.quantity,
-      actualQty: null,
-      isOk: null,
-    })));
+  const handleOpenInventory = (inv: InventoryRecord, editMode: boolean) => {
+    setViewingInventoryId(inv.id);
+    setIsEditing(editMode);
+    setCurrentScope(inv.scope);
+    setCurrentNotes(inv.notes);
+    setInventoryLines(inv.lines || []);
+    setActiveTab('edit');
   };
 
   const handleOkToggle = (index: number, isOk: boolean) => {
@@ -207,42 +197,17 @@ const InventoryCounts: React.FC = () => {
     setTempJustification('');
   };
 
-  const handleStartNewInventory = () => {
-    setActiveTab('edit');
-    setViewingInventoryId(null);
-    setIsEditing(true);
-    setCurrentInventory({ id: '', scopeType: '', scopeValue: '', subFamilyValue: '', date: new Date().toISOString().split('T')[0], notes: '' });
-    setInventoryLines([]);
-  };
-
-  const handleOpenInventory = (inv: InventoryRecord, editMode: boolean) => {
-    setViewingInventoryId(inv.id);
-    setIsEditing(editMode);
-    setCurrentInventory({
-      id: inv.id,
-      scopeType: inv.scopeType || '',
-      scopeValue: inv.scopeValue || '',
-      subFamilyValue: inv.subFamilyValue || '',
-      date: inv.date,
-      notes: inv.notes,
-    });
-    setInventoryLines(inv.lines || []);
-    setActiveTab('edit');
-  };
-
   const handlePauseInventory = () => {
     const countedItems = inventoryLines.filter(l => l.isOk !== null).length;
     const differences = inventoryLines.filter(l => l.isOk === false).length;
 
     if (viewingInventoryId) {
-      // Update existing
       setInventoryRecords(inventoryRecords.map(inv => 
         inv.id === viewingInventoryId 
-          ? { ...inv, status: 'en_cours' as const, countedItems, differences, notes: currentInventory.notes, lines: inventoryLines }
+          ? { ...inv, status: 'en_cours' as const, countedItems, differences, notes: currentNotes, lines: inventoryLines }
           : inv
       ));
     } else {
-      // Create new in-progress
       const newRecord: InventoryRecord = {
         id: `INV${String(inventoryRecords.length + 1).padStart(3, '0')}`,
         date: new Date().toLocaleDateString('fr-FR'),
@@ -251,11 +216,8 @@ const InventoryCounts: React.FC = () => {
         totalItems: inventoryLines.length,
         countedItems,
         differences,
-        notes: currentInventory.notes,
-        scope: currentInventory.scopeValue || 'Tous',
-        scopeType: currentInventory.scopeType,
-        scopeValue: currentInventory.scopeValue,
-        subFamilyValue: currentInventory.subFamilyValue,
+        notes: currentNotes,
+        scope: currentScope,
         lines: inventoryLines,
       };
       setInventoryRecords([newRecord, ...inventoryRecords]);
@@ -283,14 +245,12 @@ const InventoryCounts: React.FC = () => {
     const differences = inventoryLines.filter(l => !l.isOk).length;
 
     if (viewingInventoryId) {
-      // Update existing to completed
       setInventoryRecords(inventoryRecords.map(inv => 
         inv.id === viewingInventoryId 
-          ? { ...inv, status: 'completed' as const, countedItems: inventoryLines.length, differences, notes: currentInventory.notes, lines: inventoryLines }
+          ? { ...inv, status: 'completed' as const, countedItems: inventoryLines.length, differences, notes: currentNotes, lines: inventoryLines }
           : inv
       ));
     } else {
-      // Create new completed
       const newRecord: InventoryRecord = {
         id: `INV${String(inventoryRecords.length + 1).padStart(3, '0')}`,
         date: new Date().toLocaleDateString('fr-FR'),
@@ -299,11 +259,8 @@ const InventoryCounts: React.FC = () => {
         totalItems: inventoryLines.length,
         countedItems: inventoryLines.length,
         differences,
-        notes: currentInventory.notes,
-        scope: currentInventory.scopeValue || 'Tous',
-        scopeType: currentInventory.scopeType,
-        scopeValue: currentInventory.scopeValue,
-        subFamilyValue: currentInventory.subFamilyValue,
+        notes: currentNotes,
+        scope: currentScope,
         lines: inventoryLines,
       };
       setInventoryRecords([newRecord, ...inventoryRecords]);
@@ -547,7 +504,7 @@ const InventoryCounts: React.FC = () => {
         subtitle="Gestion des inventaires physiques"
         action={
           activeTab !== 'edit' && (
-            <Button className="btn-primary" onClick={handleStartNewInventory}>
+            <Button className="btn-primary" onClick={() => setCreateModalOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Nouvel inventaire
             </Button>
@@ -577,22 +534,18 @@ const InventoryCounts: React.FC = () => {
           )}
         </TabsList>
 
-        {/* All inventories */}
         <TabsContent value="list" className="mt-4">
           {renderInventoryTable(inventoryRecords)}
         </TabsContent>
 
-        {/* In progress */}
         <TabsContent value="in_progress" className="mt-4">
           {renderInventoryTable(inProgressInventories, false)}
         </TabsContent>
 
-        {/* Completed */}
         <TabsContent value="completed" className="mt-4">
           {renderInventoryTable(completedInventories, false)}
         </TabsContent>
 
-        {/* Edit/View inventory */}
         <TabsContent value="edit" className="mt-4 space-y-4">
           <Card className="p-4">
             <div className="flex items-center justify-between mb-4">
@@ -606,6 +559,7 @@ const InventoryCounts: React.FC = () => {
                     : "Nouvel inventaire"
                   }
                 </h3>
+                <Badge variant="outline">{currentScope}</Badge>
               </div>
               {viewingInventoryId && !isEditing && (
                 <Button variant="outline" onClick={() => setIsEditing(true)}>
@@ -614,93 +568,8 @@ const InventoryCounts: React.FC = () => {
                 </Button>
               )}
             </div>
-            
-            {/* Scope selection - only for new inventories */}
-            {!viewingInventoryId && (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <Label>Type de périmètre *</Label>
-                  <Select value={currentInventory.scopeType} onValueChange={handleScopeTypeChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="warehouse">Magasin</SelectItem>
-                      <SelectItem value="family">Famille</SelectItem>
-                      <SelectItem value="subFamily">Sous-famille</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {currentInventory.scopeType === 'warehouse' && (
-                  <div className="space-y-2">
-                    <Label>Magasin *</Label>
-                    <Select value={currentInventory.scopeValue} onValueChange={handleScopeValueChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {warehouses.map(w => <SelectItem key={w} value={w}>{w}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {(currentInventory.scopeType === 'family' || currentInventory.scopeType === 'subFamily') && (
-                  <div className="space-y-2">
-                    <Label>Famille *</Label>
-                    <Select value={currentInventory.scopeValue} onValueChange={handleScopeValueChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {families.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {currentInventory.scopeType === 'subFamily' && currentInventory.scopeValue && (
-                  <div className="space-y-2">
-                    <Label>Sous-famille *</Label>
-                    <Select value={currentInventory.subFamilyValue} onValueChange={handleSubFamilyChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getSubFamilies(currentInventory.scopeValue).map(sf => <SelectItem key={sf} value={sf}>{sf}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label>Date</Label>
-                  <Input
-                    type="date"
-                    value={currentInventory.date}
-                    onChange={(e) => setCurrentInventory({ ...currentInventory, date: e.target.value })}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Scope info for existing inventory */}
-            {viewingInventoryId && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Date :</span>
-                  <span className="ml-2 font-medium">{currentInventory.date}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Périmètre :</span>
-                  <span className="ml-2 font-medium">{currentInventory.scopeValue}</span>
-                </div>
-              </div>
-            )}
           </Card>
 
-          {/* Inventory lines */}
           {inventoryLines.length > 0 && (
             <Card className="p-4">
               <div className="flex items-center justify-between mb-4">
@@ -722,19 +591,17 @@ const InventoryCounts: React.FC = () => {
 
               {renderInventoryLinesTable(!isEditing)}
 
-              {/* Notes */}
               <div className="mt-4 space-y-2">
                 <Label>Remarques générales</Label>
                 <Textarea
-                  value={currentInventory.notes}
-                  onChange={(e) => setCurrentInventory({ ...currentInventory, notes: e.target.value })}
+                  value={currentNotes}
+                  onChange={(e) => setCurrentNotes(e.target.value)}
                   placeholder="Notes sur l'inventaire..."
                   className="min-h-[60px]"
                   disabled={!isEditing}
                 />
               </div>
 
-              {/* Actions */}
               {isEditing && (
                 <div className="mt-4 flex justify-end gap-2">
                   <Button variant="outline" onClick={handleBackToList}>Annuler</Button>
@@ -750,15 +617,18 @@ const InventoryCounts: React.FC = () => {
               )}
             </Card>
           )}
-
-          {!viewingInventoryId && !currentInventory.scopeType && (
-            <Card className="p-8 text-center border-dashed">
-              <ClipboardCheck className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-              <p className="text-muted-foreground">Sélectionnez un type de périmètre pour démarrer l'inventaire</p>
-            </Card>
-          )}
         </TabsContent>
       </Tabs>
+
+      <CreateInventoryModal
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        onConfirm={handleCreateInventory}
+        families={families}
+        subFamilies={subFamiliesMap}
+        warehouses={warehouses}
+        locations={locations}
+      />
     </div>
   );
 };
