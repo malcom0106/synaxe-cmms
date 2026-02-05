@@ -3,7 +3,6 @@ import { PageTitle } from '@/components/ui/PageTitle';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import {
   Sheet,
   SheetContent,
@@ -27,8 +26,7 @@ import {
   Search,
   TruckIcon,
   Edit,
-  History,
-  Calendar
+  History
 } from 'lucide-react';
 import { CreateEditPartModal, PartData } from '@/components/inventory/CreateEditPartModal';
 import { GoodsReceiptModal } from '@/components/inventory/GoodsReceiptModal';
@@ -201,26 +199,38 @@ const InventoryParts: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
-                <TableHead className="w-28">Réf. interne</TableHead>
-                <TableHead>Désignation</TableHead>
+                <TableHead>Libellé</TableHead>
+                <TableHead className="w-28 text-center">Quantité</TableHead>
+                <TableHead className="w-24">État</TableHead>
+                <TableHead className="w-24 text-center">Seuil</TableHead>
                 <TableHead className="w-32">Famille</TableHead>
                 <TableHead className="w-40">Emplacement</TableHead>
-                <TableHead className="w-36 text-center">Quantités</TableHead>
-                <TableHead className="w-24 text-right">Prix</TableHead>
-                <TableHead className="w-24">DLC</TableHead>
-                <TableHead className="w-24">Statut</TableHead>
                 <TableHead className="w-28 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredItems.map((item) => (
-                <TableRow key={item.id} className="hover:bg-muted/30">
-                  <TableCell>
-                    <Badge variant="outline" className="font-mono text-xs">{item.internalRef}</Badge>
-                  </TableCell>
+                <TableRow key={item.id} className="hover:bg-muted/30 cursor-pointer" onClick={() => handleEditPart(item)}>
                   <TableCell>
                     <div className="font-medium text-foreground">{item.name}</div>
-                    {item.externalRef && <div className="text-xs text-muted-foreground">{item.externalRef}</div>}
+                    <div className="text-xs text-muted-foreground">{item.internalRef}</div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className={item.quantity < item.minQuantity ? 'font-bold text-destructive' : item.quantity === item.minQuantity ? 'font-bold text-warning' : 'font-medium text-foreground'}>
+                      {item.quantity}
+                    </span>
+                    {item.reservedQuantity > 0 && (
+                      <div className="text-xs text-muted-foreground">({item.reservedQuantity} rés.)</div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge 
+                      status={item.stockStatus === 'ok' ? 'success' : item.stockStatus === 'low' ? 'warning' : 'danger'} 
+                      label={item.stockStatus === 'ok' ? 'OK' : item.stockStatus === 'low' ? 'Faible' : 'Critique'} 
+                    />
+                  </TableCell>
+                  <TableCell className="text-center text-sm text-muted-foreground">
+                    {item.minQuantity}
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">{item.family}</div>
@@ -231,45 +241,12 @@ const InventoryParts: React.FC = () => {
                     <div className="text-xs text-muted-foreground">{item.location}</div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col items-center gap-0.5">
-                      <span className={item.quantity < item.minQuantity ? 'font-bold text-destructive' : item.quantity === item.minQuantity ? 'font-bold text-warning' : 'font-medium text-foreground'}>
-                        {item.quantity}
-                      </span>
-                      <div className="flex gap-1 text-xs text-muted-foreground">
-                        <span>min {item.minQuantity}</span>
-                        <span>•</span>
-                        <span>max {item.maxQuantity}</span>
-                      </div>
-                      {item.reservedQuantity > 0 && (
-                        <Badge variant="secondary" className="text-xs">{item.reservedQuantity} réservé</Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right text-sm">{item.price.toFixed(2)} €</TableCell>
-                  <TableCell>
-                    {item.expirationDate ? (
-                      <div className="flex items-center gap-1 text-xs">
-                        <Calendar className="h-3 w-3 text-muted-foreground" />
-                        {new Date(item.expirationDate).toLocaleDateString('fr-FR')}
-                      </div>
-                    ) : <span className="text-xs text-muted-foreground">-</span>}
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge 
-                      status={item.stockStatus === 'ok' ? 'success' : item.stockStatus === 'low' ? 'warning' : 'danger'} 
-                      label={item.stockStatus === 'ok' ? 'OK' : item.stockStatus === 'low' ? 'Faible' : 'Critique'} 
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-end gap-1">
+                    <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleViewHistory(item)} title="Historique">
                         <History className="h-4 w-4 text-muted-foreground" />
                       </Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditPart(item)} title="Modifier">
                         <Edit className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" title="Commander">
-                        <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                       </Button>
                     </div>
                   </TableCell>
@@ -277,7 +254,7 @@ const InventoryParts: React.FC = () => {
               ))}
               {filteredItems.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     <Package className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
                     <p className="text-muted-foreground">Aucune pièce trouvée</p>
                   </TableCell>
