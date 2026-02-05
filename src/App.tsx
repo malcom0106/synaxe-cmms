@@ -22,6 +22,8 @@ import MaintenanceActions from "./pages/MaintenanceActions";
 import MaintenanceActionDetail from "./pages/MaintenanceActionDetail";
 import EquipmentFamilies from "./pages/EquipmentFamilies";
 import EquipmentSubFamilies from "./pages/EquipmentSubFamilies";
+import PartFamilies from "./pages/PartFamilies";
+import PartSubFamilies from "./pages/PartSubFamilies";
 import InterventionRequests from "./pages/InterventionRequests";
 import InterventionRequestDetail from "./pages/InterventionRequestDetail";
 import InterventionDetail from "./pages/InterventionDetail";
@@ -92,6 +94,9 @@ const App = () => (
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/settings/equipment-families" element={<EquipmentFamilies />} />
                     <Route path="/settings/equipment-subfamilies" element={<EquipmentSubFamilies />} />
+                    <Route path="/settings/part-families" element={<PartFamilies />} />
+                    <Route path="/settings/part-subfamilies" element={<PartSubFamilies />} />
+                    <Route path="/intervention-requests" element={<InterventionRequests />} />
                     <Route path="/intervention-requests" element={<InterventionRequests />} />
                     <Route path="/intervention-requests/:id" element={<InterventionRequestDetail />} />
                     <Route path="/calendar" element={<Calendar />} />
