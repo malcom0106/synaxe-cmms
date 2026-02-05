@@ -28,26 +28,31 @@ const initialInventoryItems: PartData[] = [
     id: 'PDR001', internalRef: 'PDR001', externalRef: 'SKF-FH2500', name: 'Filtre à huile', 
     family: 'Filtres', subFamily: 'Huile', quantity: 5, reservedQuantity: 2, minQuantity: 10, maxQuantity: 50,
     price: 75.50, warehouse: 'Magasin Principal', location: 'Étagère A3', stockStatus: 'low', expirationDate: '2026-06-15',
+    lastStockUpdate: '2026-01-20',
   },
   { 
     id: 'PDR002', internalRef: 'PDR002', externalRef: 'JT-50-VITON', name: 'Joint torique 50mm', 
     family: 'Joints', subFamily: 'Toriques', quantity: 25, reservedQuantity: 0, minQuantity: 15, maxQuantity: 100,
     price: 12.20, warehouse: 'Magasin Principal', location: 'Tiroir B2', stockStatus: 'ok',
+    lastStockUpdate: '2026-01-20',
   },
   { 
     id: 'PDR003', internalRef: 'PDR003', externalRef: 'PARKER-HYD-1M', name: 'Tuyau hydraulique 1m', 
     family: 'Hydraulique', subFamily: 'Tuyaux', quantity: 3, reservedQuantity: 1, minQuantity: 5, maxQuantity: 20,
     price: 95.30, warehouse: 'Magasin Principal', location: 'Étagère C1', stockStatus: 'low',
+    lastStockUpdate: '2025-10-15',
   },
   { 
     id: 'PDR004', internalRef: 'PDR004', externalRef: 'MANN-AF-500', name: 'Filtre à air', 
     family: 'Filtres', subFamily: 'Air', quantity: 12, reservedQuantity: 3, minQuantity: 8, maxQuantity: 40,
     price: 45.75, warehouse: 'Magasin Principal', location: 'Étagère A2', stockStatus: 'ok',
+    lastStockUpdate: '2026-01-20',
   },
   { 
     id: 'PDR005', internalRef: 'PDR005', externalRef: 'KIT-PUMP-R500', name: 'Kit de réparation pompe', 
     family: 'Pompes', subFamily: 'Kits réparation', quantity: 2, reservedQuantity: 0, minQuantity: 2, maxQuantity: 10,
     price: 185.00, warehouse: 'Magasin Secondaire', location: 'Tiroir D4', stockStatus: 'critical', expirationDate: '2025-12-01',
+    lastStockUpdate: '2025-07-12',
   },
 ];
 
