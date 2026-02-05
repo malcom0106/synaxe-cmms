@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -7,17 +7,19 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Layers, 
   Warehouse, 
   MapPin,
   Check,
-  X
+  X,
+  Search,
+  FolderTree
 } from 'lucide-react';
 
 interface CreateInventoryModalProps {
@@ -31,7 +33,7 @@ interface CreateInventoryModalProps {
 }
 
 export interface InventoryScope {
-  type: 'families' | 'warehouses' | 'locations';
+  type: 'combined';
   families: string[];
   subFamilies: string[];
   warehouses: string[];
@@ -47,17 +49,57 @@ export const CreateInventoryModal: React.FC<CreateInventoryModalProps> = ({
   warehouses,
   locations,
 }) => {
-  const [activeTab, setActiveTab] = useState<'families' | 'warehouses' | 'locations'>('families');
   const [selectedFamilies, setSelectedFamilies] = useState<string[]>([]);
   const [selectedSubFamilies, setSelectedSubFamilies] = useState<string[]>([]);
   const [selectedWarehouses, setSelectedWarehouses] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+
+  // Search states
+  const [familySearch, setFamilySearch] = useState('');
+  const [subFamilySearch, setSubFamilySearch] = useState('');
+  const [warehouseSearch, setWarehouseSearch] = useState('');
+  const [locationSearch, setLocationSearch] = useState('');
+
+  // Filtered lists based on search
+  const filteredFamilies = useMemo(() => 
+    families.filter(f => f.toLowerCase().includes(familySearch.toLowerCase())),
+    [families, familySearch]
+  );
+
+  const allSubFamilies = useMemo(() => {
+    const result: { subFamily: string; family: string }[] = [];
+    Object.entries(subFamilies).forEach(([family, subs]) => {
+      subs.forEach(sf => result.push({ subFamily: sf, family }));
+    });
+    return result;
+  }, [subFamilies]);
+
+  const filteredSubFamilies = useMemo(() => 
+    allSubFamilies.filter(sf => 
+      sf.subFamily.toLowerCase().includes(subFamilySearch.toLowerCase())
+    ),
+    [allSubFamilies, subFamilySearch]
+  );
+
+  const filteredWarehouses = useMemo(() => 
+    warehouses.filter(w => w.toLowerCase().includes(warehouseSearch.toLowerCase())),
+    [warehouses, warehouseSearch]
+  );
+
+  const filteredLocations = useMemo(() => 
+    locations.filter(l => l.toLowerCase().includes(locationSearch.toLowerCase())),
+    [locations, locationSearch]
+  );
 
   const handleReset = () => {
     setSelectedFamilies([]);
     setSelectedSubFamilies([]);
     setSelectedWarehouses([]);
     setSelectedLocations([]);
+    setFamilySearch('');
+    setSubFamilySearch('');
+    setWarehouseSearch('');
+    setLocationSearch('');
   };
 
   const handleClose = () => {
@@ -67,7 +109,7 @@ export const CreateInventoryModal: React.FC<CreateInventoryModalProps> = ({
 
   const handleConfirm = () => {
     onConfirm({
-      type: activeTab,
+      type: 'combined',
       families: selectedFamilies,
       subFamilies: selectedSubFamilies,
       warehouses: selectedWarehouses,
@@ -80,23 +122,16 @@ export const CreateInventoryModal: React.FC<CreateInventoryModalProps> = ({
   const toggleFamily = (family: string) => {
     if (selectedFamilies.includes(family)) {
       setSelectedFamilies(selectedFamilies.filter(f => f !== family));
-      // Remove sub-families of this family
-      const familySubFamilies = subFamilies[family] || [];
-      setSelectedSubFamilies(selectedSubFamilies.filter(sf => !familySubFamilies.includes(sf)));
     } else {
       setSelectedFamilies([...selectedFamilies, family]);
     }
   };
 
-  const toggleSubFamily = (subFamily: string, family: string) => {
+  const toggleSubFamily = (subFamily: string) => {
     if (selectedSubFamilies.includes(subFamily)) {
       setSelectedSubFamilies(selectedSubFamilies.filter(sf => sf !== subFamily));
     } else {
       setSelectedSubFamilies([...selectedSubFamilies, subFamily]);
-      // Auto-select parent family if not selected
-      if (!selectedFamilies.includes(family)) {
-        setSelectedFamilies([...selectedFamilies, family]);
-      }
     }
   };
 
@@ -117,161 +152,210 @@ export const CreateInventoryModal: React.FC<CreateInventoryModalProps> = ({
   };
 
   const getSelectionCount = () => {
-    switch (activeTab) {
-      case 'families':
-        return selectedFamilies.length + selectedSubFamilies.length;
-      case 'warehouses':
-        return selectedWarehouses.length;
-      case 'locations':
-        return selectedLocations.length;
-      default:
-        return 0;
-    }
+    return selectedFamilies.length + selectedSubFamilies.length + selectedWarehouses.length + selectedLocations.length;
   };
 
   const isValid = getSelectionCount() > 0;
 
+  const renderSearchableSection = (
+    title: string,
+    icon: React.ReactNode,
+    searchValue: string,
+    onSearchChange: (value: string) => void,
+    items: string[],
+    selectedItems: string[],
+    onToggle: (item: string) => void,
+    emptyMessage: string
+  ) => (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        {icon}
+        <Label className="text-sm font-medium">{title}</Label>
+      </div>
+      <div className="relative">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder={`Rechercher ${title.toLowerCase()}...`}
+          value={searchValue}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="pl-9 h-9"
+        />
+      </div>
+      <ScrollArea className="h-[100px] border rounded-md p-2">
+        {items.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-2">{emptyMessage}</p>
+        ) : (
+          <div className="space-y-1">
+            {items.map((item) => (
+              <div 
+                key={item} 
+                className="flex items-center space-x-2 p-1.5 rounded hover:bg-muted/50 cursor-pointer"
+                onClick={() => onToggle(item)}
+              >
+                <Checkbox
+                  id={`item-${item}`}
+                  checked={selectedItems.includes(item)}
+                  onCheckedChange={() => onToggle(item)}
+                />
+                <label
+                  htmlFor={`item-${item}`}
+                  className="text-sm cursor-pointer flex-1"
+                >
+                  {item}
+                </label>
+              </div>
+            ))}
+          </div>
+        )}
+      </ScrollArea>
+    </div>
+  );
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nouvel inventaire</DialogTitle>
         </DialogHeader>
 
         <div className="py-4">
           <Label className="text-sm text-muted-foreground mb-4 block">
-            Sélectionnez le périmètre de l'inventaire. Vous pouvez choisir plusieurs éléments.
+            Sélectionnez le périmètre de l'inventaire. Vous pouvez combiner plusieurs critères (familles, sous-familles, magasins, emplacements).
           </Label>
 
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
-            <TabsList className="w-full grid grid-cols-3">
-              <TabsTrigger value="families" className="gap-2">
-                <Layers className="h-4 w-4" />
-                Familles
-              </TabsTrigger>
-              <TabsTrigger value="warehouses" className="gap-2">
-                <Warehouse className="h-4 w-4" />
-                Magasins
-              </TabsTrigger>
-              <TabsTrigger value="locations" className="gap-2">
-                <MapPin className="h-4 w-4" />
-                Emplacements
-              </TabsTrigger>
-            </TabsList>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Families */}
+            {renderSearchableSection(
+              'Familles',
+              <Layers className="h-4 w-4 text-muted-foreground" />,
+              familySearch,
+              setFamilySearch,
+              filteredFamilies,
+              selectedFamilies,
+              toggleFamily,
+              'Aucune famille trouvée'
+            )}
 
-            {/* Families & Sub-families */}
-            <TabsContent value="families" className="mt-4">
-              <ScrollArea className="h-[300px] pr-4">
-                <div className="space-y-4">
-                  {families.map((family) => (
-                    <div key={family} className="space-y-2">
-                      <div className="flex items-center space-x-2">
+            {/* Sub-families */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <FolderTree className="h-4 w-4 text-muted-foreground" />
+                <Label className="text-sm font-medium">Sous-familles</Label>
+              </div>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher sous-familles..."
+                  value={subFamilySearch}
+                  onChange={(e) => setSubFamilySearch(e.target.value)}
+                  className="pl-9 h-9"
+                />
+              </div>
+              <ScrollArea className="h-[100px] border rounded-md p-2">
+                {filteredSubFamilies.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-2">Aucune sous-famille trouvée</p>
+                ) : (
+                  <div className="space-y-1">
+                    {filteredSubFamilies.map(({ subFamily, family }) => (
+                      <div 
+                        key={`${family}-${subFamily}`} 
+                        className="flex items-center space-x-2 p-1.5 rounded hover:bg-muted/50 cursor-pointer"
+                        onClick={() => toggleSubFamily(subFamily)}
+                      >
                         <Checkbox
-                          id={`family-${family}`}
-                          checked={selectedFamilies.includes(family)}
-                          onCheckedChange={() => toggleFamily(family)}
+                          id={`sf-${family}-${subFamily}`}
+                          checked={selectedSubFamilies.includes(subFamily)}
+                          onCheckedChange={() => toggleSubFamily(subFamily)}
                         />
                         <label
-                          htmlFor={`family-${family}`}
-                          className="text-sm font-medium cursor-pointer"
+                          htmlFor={`sf-${family}-${subFamily}`}
+                          className="text-sm cursor-pointer flex-1"
                         >
-                          {family}
+                          {subFamily}
+                          <span className="text-xs text-muted-foreground ml-1">({family})</span>
                         </label>
                       </div>
-                      {subFamilies[family] && subFamilies[family].length > 0 && (
-                        <div className="ml-6 grid grid-cols-2 gap-2">
-                          {subFamilies[family].map((sf) => (
-                            <div key={sf} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`sf-${family}-${sf}`}
-                                checked={selectedSubFamilies.includes(sf)}
-                                onCheckedChange={() => toggleSubFamily(sf, family)}
-                              />
-                              <label
-                                htmlFor={`sf-${family}-${sf}`}
-                                className="text-xs text-muted-foreground cursor-pointer"
-                              >
-                                {sf}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </ScrollArea>
-            </TabsContent>
+            </div>
 
             {/* Warehouses */}
-            <TabsContent value="warehouses" className="mt-4">
-              <ScrollArea className="h-[300px] pr-4">
-                <div className="space-y-2">
-                  {warehouses.map((warehouse) => (
-                    <div key={warehouse} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted/50">
-                      <Checkbox
-                        id={`warehouse-${warehouse}`}
-                        checked={selectedWarehouses.includes(warehouse)}
-                        onCheckedChange={() => toggleWarehouse(warehouse)}
-                      />
-                      <label
-                        htmlFor={`warehouse-${warehouse}`}
-                        className="text-sm font-medium cursor-pointer flex-1"
-                      >
-                        {warehouse}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </TabsContent>
+            {renderSearchableSection(
+              'Magasins',
+              <Warehouse className="h-4 w-4 text-muted-foreground" />,
+              warehouseSearch,
+              setWarehouseSearch,
+              filteredWarehouses,
+              selectedWarehouses,
+              toggleWarehouse,
+              'Aucun magasin trouvé'
+            )}
 
             {/* Locations */}
-            <TabsContent value="locations" className="mt-4">
-              <ScrollArea className="h-[300px] pr-4">
-                <div className="grid grid-cols-2 gap-2">
-                  {locations.map((location) => (
-                    <div key={location} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted/50">
-                      <Checkbox
-                        id={`location-${location}`}
-                        checked={selectedLocations.includes(location)}
-                        onCheckedChange={() => toggleLocation(location)}
-                      />
-                      <label
-                        htmlFor={`location-${location}`}
-                        className="text-sm cursor-pointer"
-                      >
-                        {location}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-          </Tabs>
+            {renderSearchableSection(
+              'Emplacements',
+              <MapPin className="h-4 w-4 text-muted-foreground" />,
+              locationSearch,
+              setLocationSearch,
+              filteredLocations,
+              selectedLocations,
+              toggleLocation,
+              'Aucun emplacement trouvé'
+            )}
+          </div>
 
           {/* Selection summary */}
           {getSelectionCount() > 0 && (
             <div className="mt-4 p-3 bg-muted/50 rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Sélection</span>
+                <span className="text-sm font-medium">Sélection ({getSelectionCount()} critère{getSelectionCount() > 1 ? 's' : ''})</span>
                 <Button variant="ghost" size="sm" onClick={handleReset} className="h-6 text-xs">
                   <X className="h-3 w-3 mr-1" />
-                  Effacer
+                  Effacer tout
                 </Button>
               </div>
               <div className="flex flex-wrap gap-1">
                 {selectedFamilies.map(f => (
-                  <Badge key={f} variant="secondary" className="text-xs">{f}</Badge>
+                  <Badge key={f} variant="secondary" className="text-xs gap-1">
+                    <Layers className="h-3 w-3" />
+                    {f}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => toggleFamily(f)}
+                    />
+                  </Badge>
                 ))}
                 {selectedSubFamilies.map(sf => (
-                  <Badge key={sf} variant="outline" className="text-xs">{sf}</Badge>
+                  <Badge key={sf} variant="outline" className="text-xs gap-1">
+                    <FolderTree className="h-3 w-3" />
+                    {sf}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => toggleSubFamily(sf)}
+                    />
+                  </Badge>
                 ))}
                 {selectedWarehouses.map(w => (
-                  <Badge key={w} variant="secondary" className="text-xs">{w}</Badge>
+                  <Badge key={w} variant="secondary" className="text-xs gap-1">
+                    <Warehouse className="h-3 w-3" />
+                    {w}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => toggleWarehouse(w)}
+                    />
+                  </Badge>
                 ))}
                 {selectedLocations.map(l => (
-                  <Badge key={l} variant="secondary" className="text-xs">{l}</Badge>
+                  <Badge key={l} variant="outline" className="text-xs gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {l}
+                    <X 
+                      className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                      onClick={() => toggleLocation(l)}
+                    />
+                  </Badge>
                 ))}
               </div>
             </div>

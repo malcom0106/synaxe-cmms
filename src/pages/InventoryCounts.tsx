@@ -128,25 +128,32 @@ const InventoryCounts: React.FC = () => {
   });
 
   const handleCreateInventory = (scope: InventoryScope) => {
-    // Filter parts based on selection
+    // Filter parts based on cumulative selection
     let filtered = demoParts;
-    let scopeLabel = '';
+    const scopeParts: string[] = [];
 
-    if (scope.type === 'families') {
-      if (scope.subFamilies.length > 0) {
-        filtered = demoParts.filter(p => scope.subFamilies.includes(p.subFamily));
-        scopeLabel = scope.subFamilies.join(', ');
-      } else if (scope.families.length > 0) {
-        filtered = demoParts.filter(p => scope.families.includes(p.family));
-        scopeLabel = scope.families.join(', ');
-      }
-    } else if (scope.type === 'warehouses') {
-      filtered = demoParts.filter(p => scope.warehouses.includes(p.warehouse));
-      scopeLabel = scope.warehouses.join(', ');
-    } else if (scope.type === 'locations') {
-      filtered = demoParts.filter(p => scope.locations.includes(p.location));
-      scopeLabel = scope.locations.join(', ');
+    // Apply cumulative filters (parts must match at least one criterion per category selected)
+    if (scope.families.length > 0 || scope.subFamilies.length > 0) {
+      filtered = filtered.filter(p => {
+        const matchesFamily = scope.families.length === 0 || scope.families.includes(p.family);
+        const matchesSubFamily = scope.subFamilies.length === 0 || scope.subFamilies.includes(p.subFamily);
+        return matchesFamily || matchesSubFamily;
+      });
+      if (scope.families.length > 0) scopeParts.push(...scope.families);
+      if (scope.subFamilies.length > 0) scopeParts.push(...scope.subFamilies);
     }
+
+    if (scope.warehouses.length > 0) {
+      filtered = filtered.filter(p => scope.warehouses.includes(p.warehouse));
+      scopeParts.push(...scope.warehouses);
+    }
+
+    if (scope.locations.length > 0) {
+      filtered = filtered.filter(p => scope.locations.includes(p.location));
+      scopeParts.push(...scope.locations);
+    }
+
+    const scopeLabel = scopeParts.join(', ');
 
     const lines: InventoryLine[] = filtered.map(p => ({
       partId: p.id,
