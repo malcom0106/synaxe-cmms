@@ -5,12 +5,6 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import {
   Table,
   TableBody,
   TableCell,
@@ -23,12 +17,10 @@ import {
   Package, 
   Filter,
   Search,
-  TruckIcon,
-  History
+  TruckIcon
 } from 'lucide-react';
 import { CreateEditPartModal, PartData } from '@/components/inventory/CreateEditPartModal';
 import { GoodsReceiptModal } from '@/components/inventory/GoodsReceiptModal';
-import { ConsumptionHistoryPanel } from '@/components/inventory/ConsumptionHistoryPanel';
 import { useToast } from '@/hooks/use-toast';
 
 const initialInventoryItems: PartData[] = [
@@ -59,13 +51,6 @@ const initialInventoryItems: PartData[] = [
   },
 ];
 
-const demoConsumptionHistory = [
-  { id: 'C001', date: '15/01/2026', type: 'consumption' as const, quantity: 2, interventionId: 'INT-2026-001', interventionTitle: 'Maintenance préventive compresseur', operator: 'J. Martin', notes: 'Remplacement filtres' },
-  { id: 'C002', date: '10/01/2026', type: 'entry' as const, quantity: 10, operator: 'A. Dupont', notes: 'Réception commande BL-2026-015' },
-  { id: 'C003', date: '05/01/2026', type: 'consumption' as const, quantity: 1, interventionId: 'INT-2025-089', interventionTitle: 'Dépannage pompe hydraulique', operator: 'P. Bernard' },
-  { id: 'C004', date: '20/12/2025', type: 'adjustment' as const, quantity: -3, operator: 'J. Martin', notes: 'Correction inventaire annuel' },
-];
-
 const InventoryParts: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -73,9 +58,8 @@ const InventoryParts: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [createEditModalOpen, setCreateEditModalOpen] = useState(false);
   const [goodsReceiptModalOpen, setGoodsReceiptModalOpen] = useState(false);
-  const [historySheetOpen, setHistorySheetOpen] = useState(false);
   const [editingPart, setEditingPart] = useState<PartData | null>(null);
-  const [selectedPartForHistory, setSelectedPartForHistory] = useState<PartData | null>(null);
+  const [selectedPartForReceipt, setSelectedPartForReceipt] = useState<PartData | null>(null);
 
   const filteredItems = items.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -96,9 +80,9 @@ const InventoryParts: React.FC = () => {
     navigate(`/inventory/parts/${part.id}`);
   };
 
-  const handleViewHistory = (part: PartData) => {
-    setSelectedPartForHistory(part);
-    setHistorySheetOpen(true);
+  const handleQuickReceipt = (part: PartData) => {
+    setSelectedPartForReceipt(part);
+    setGoodsReceiptModalOpen(true);
   };
 
   const handleGoodsReceipt = (data: { lines: Array<{ partId: string; receivedQty: number }> }) => {
@@ -204,8 +188,8 @@ const InventoryParts: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleViewHistory(item)} title="Historique">
-                        <History className="h-4 w-4 text-muted-foreground" />
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuickReceipt(item)} title="Entrée marchandise">
+                        <TruckIcon className="h-4 w-4 text-muted-foreground" />
                       </Button>
                     </div>
                   </TableCell>
@@ -228,17 +212,6 @@ const InventoryParts: React.FC = () => {
       {/* Modals */}
       <CreateEditPartModal open={createEditModalOpen} onOpenChange={setCreateEditModalOpen} part={editingPart} onSave={handleSavePart} />
       <GoodsReceiptModal open={goodsReceiptModalOpen} onOpenChange={setGoodsReceiptModalOpen} onConfirm={handleGoodsReceipt} availableParts={items.map(i => ({ id: i.id!, name: i.name, location: `${i.warehouse} - ${i.location}` }))} />
-
-      <Sheet open={historySheetOpen} onOpenChange={setHistorySheetOpen}>
-        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-          <SheetHeader className="mb-6">
-            <SheetTitle>Historique des mouvements</SheetTitle>
-          </SheetHeader>
-          {selectedPartForHistory && (
-            <ConsumptionHistoryPanel partId={selectedPartForHistory.id!} partName={selectedPartForHistory.name} records={demoConsumptionHistory} />
-          )}
-        </SheetContent>
-      </Sheet>
     </div>
   );
 };
