@@ -96,6 +96,7 @@ const RangeExecutionPanel: React.FC<RangeExecutionPanelProps> = ({
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [showSignature, setShowSignature] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [usedParts, setUsedParts] = useState<UsedPart[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
