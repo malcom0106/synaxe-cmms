@@ -568,6 +568,14 @@ const RangeExecutionPanel: React.FC<RangeExecutionPanelProps> = ({
               )}
             </Card>
 
+            {/* Pièces utilisées */}
+            <PartsConsumptionPanel
+              rangeParts={mockRangeParts}
+              usedParts={usedParts}
+              onUsedPartsChange={setUsedParts}
+              disabled={isLocked || currentStep.completed}
+            />
+
             {/* Bouton de validation de l'étape */}
             {!currentStep.completed && !isLocked && (
               <Button 
