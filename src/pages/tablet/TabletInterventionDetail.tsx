@@ -193,6 +193,7 @@ const TabletInterventionDetail: React.FC = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
   const [usedParts, setUsedParts] = useState<UsedPart[]>([]);
+  const [showPartsPanel, setShowPartsPanel] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Mock range parts pour l'intervention
