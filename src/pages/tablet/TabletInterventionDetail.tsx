@@ -783,7 +783,7 @@ const TabletInterventionDetail: React.FC = () => {
 
   // Vue active (en cours)
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
+    <div className="flex flex-col h-[calc(100vh-4rem)] relative overflow-hidden">
       {/* Header fixe */}
       <div className="p-4 border-b border-border bg-background">
         <div className="flex items-center gap-3 mb-3">
