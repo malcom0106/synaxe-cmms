@@ -979,6 +979,56 @@ const TabletInterventionDetail: React.FC = () => {
         </div>
       </div>
 
+      {/* Onglet "Pièces" fixé sur le bord droit */}
+      {!showPartsPanel && (
+        <button
+          onClick={() => setShowPartsPanel(true)}
+          className="fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-primary text-primary-foreground px-2 py-4 rounded-l-lg shadow-lg flex flex-col items-center gap-1 hover:bg-primary/90 transition-colors"
+        >
+          <Package className="h-5 w-5" />
+          <span className="text-xs font-semibold writing-mode-vertical [writing-mode:vertical-lr] rotate-180 tracking-wider">
+            PIÈCES
+          </span>
+          {usedParts.filter(p => p.usedQty > 0).length > 0 && (
+            <span className="mt-1 bg-background text-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {usedParts.filter(p => p.usedQty > 0).length}
+            </span>
+          )}
+        </button>
+      )}
+
+      {/* Panneau coulissant des pièces */}
+      <div className={cn(
+        "fixed top-0 right-0 h-full w-[400px] max-w-[85vw] bg-background border-l border-border shadow-2xl z-50 transition-transform duration-300 ease-in-out flex flex-col",
+        showPartsPanel ? "translate-x-0" : "translate-x-full"
+      )}>
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Package className="h-5 w-5 text-primary" />
+            <h3 className="font-semibold text-foreground">Pièces utilisées</h3>
+          </div>
+          <Button variant="ghost" size="icon" onClick={() => setShowPartsPanel(false)}>
+            <XIcon className="h-5 w-5" />
+          </Button>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          <PartsConsumptionPanel
+            rangeParts={mockRangeParts}
+            usedParts={usedParts}
+            onUsedPartsChange={setUsedParts}
+            disabled={isLocked}
+          />
+        </div>
+      </div>
+
+      {/* Overlay quand le panneau est ouvert */}
+      {showPartsPanel && (
+        <div 
+          className="fixed inset-0 bg-black/30 z-40"
+          onClick={() => setShowPartsPanel(false)}
+        />
+      )}
+
       {showSignature && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <Card className="w-full max-w-lg p-6 space-y-4">
