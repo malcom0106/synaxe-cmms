@@ -31,7 +31,9 @@ import {
   Check,
   Pen,
   Download,
-  Printer
+  Printer,
+  Package,
+  X as XIcon
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
