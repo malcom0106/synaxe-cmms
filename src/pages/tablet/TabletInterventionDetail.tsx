@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-
+import PartsConsumptionPanel, { RangePart, UsedPart } from '@/components/tablet/PartsConsumptionPanel';
 // Types pour les étapes
 type StepInputType = 'boolean' | 'numeric' | 'comment' | 'photo' | 'checkbox';
 
@@ -190,7 +190,15 @@ const TabletInterventionDetail: React.FC = () => {
   const [showSignature, setShowSignature] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
+  const [usedParts, setUsedParts] = useState<UsedPart[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Mock range parts pour l'intervention
+  const mockRangeParts: RangePart[] = [
+    { id: 'rp1', reference: 'COU-001', label: 'Courroie de distribution', expectedQty: 1, unit: 'pièce', stockAvailable: 8 },
+    { id: 'rp2', reference: 'PNE-001', label: 'Pneu avant 225/65R17', expectedQty: 2, unit: 'pièce', stockAvailable: 16 },
+    { id: 'rp3', reference: 'VIS-001', label: 'Vis M8x30 inox', expectedQty: 4, unit: 'pièce', stockAvailable: 200 },
+  ];
 
   // Lors du démarrage ou reprise, aller à la première étape non complétée
   useEffect(() => {
@@ -890,6 +898,14 @@ const TabletInterventionDetail: React.FC = () => {
                 </Button>
               )}
             </Card>
+
+            {/* Pièces utilisées */}
+            <PartsConsumptionPanel
+              rangeParts={mockRangeParts}
+              usedParts={usedParts}
+              onUsedPartsChange={setUsedParts}
+              disabled={isLocked || currentStep.completed}
+            />
 
             {/* Bouton de validation de l'étape */}
             {!currentStep.completed && !isLocked && (
