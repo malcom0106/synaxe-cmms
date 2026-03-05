@@ -190,7 +190,15 @@ const TabletInterventionDetail: React.FC = () => {
   const [showSignature, setShowSignature] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
+  const [usedParts, setUsedParts] = useState<UsedPart[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Mock range parts pour l'intervention
+  const mockRangeParts: RangePart[] = [
+    { id: 'rp1', reference: 'COU-001', label: 'Courroie de distribution', expectedQty: 1, unit: 'pièce', stockAvailable: 8 },
+    { id: 'rp2', reference: 'PNE-001', label: 'Pneu avant 225/65R17', expectedQty: 2, unit: 'pièce', stockAvailable: 16 },
+    { id: 'rp3', reference: 'VIS-001', label: 'Vis M8x30 inox', expectedQty: 4, unit: 'pièce', stockAvailable: 200 },
+  ];
 
   // Lors du démarrage ou reprise, aller à la première étape non complétée
   useEffect(() => {
