@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import PartsConsumptionPanel, { RangePart, UsedPart } from './PartsConsumptionPanel';
 
 type StepInputType = 'boolean' | 'numeric' | 'comment' | 'photo' | 'checkbox';
 
@@ -78,6 +79,13 @@ const getInputTypeIcon = (type: StepInputType) => {
   }
 };
 
+// Mock range parts (pièces prévues par la gamme)
+const mockRangeParts: RangePart[] = [
+  { id: 'rp1', reference: 'COU-001', label: 'Courroie de distribution', expectedQty: 1, unit: 'pièce', stockAvailable: 8 },
+  { id: 'rp2', reference: 'PNE-001', label: 'Pneu avant 225/65R17', expectedQty: 2, unit: 'pièce', stockAvailable: 16 },
+  { id: 'rp3', reference: 'VIS-001', label: 'Vis M8x30 inox', expectedQty: 4, unit: 'pièce', stockAvailable: 200 },
+];
+
 const RangeExecutionPanel: React.FC<RangeExecutionPanelProps> = ({ 
   range, 
   onComplete, 
@@ -88,6 +96,7 @@ const RangeExecutionPanel: React.FC<RangeExecutionPanelProps> = ({
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [showSignature, setShowSignature] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [usedParts, setUsedParts] = useState<UsedPart[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -558,6 +567,14 @@ const RangeExecutionPanel: React.FC<RangeExecutionPanelProps> = ({
                 </Button>
               )}
             </Card>
+
+            {/* Pièces utilisées */}
+            <PartsConsumptionPanel
+              rangeParts={mockRangeParts}
+              usedParts={usedParts}
+              onUsedPartsChange={setUsedParts}
+              disabled={isLocked || currentStep.completed}
+            />
 
             {/* Bouton de validation de l'étape */}
             {!currentStep.completed && !isLocked && (
