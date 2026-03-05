@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-
+import PartsConsumptionPanel, { RangePart, UsedPart } from '@/components/tablet/PartsConsumptionPanel';
 // Types pour les étapes
 type StepInputType = 'boolean' | 'numeric' | 'comment' | 'photo' | 'checkbox';
 
